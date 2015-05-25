@@ -1,53 +1,60 @@
-function getprop(mf, name) {
-    if (mf.properties[name] !== undefined &&
-            mf.properties[name][0] !== undefined)
-        return mf.properties[name][0];
-    return null;
+function prop(mf, name) {
+    if (mf.properties[name] !== undefined)
+        return mf.properties[name];
+    return [];
 }
 
-function Entry() {
-    this.name = null;
-    this.published = null;
-    this.contentHtml = null;
-    this.contentValue = null;
-    this.photo = null;
-    this.url = null;
-    this.author = null;
-    this.syndication = [];
-    this.replyTo = [];
-    this.likeOf = [];
-    this.repostOf = [];
-    this.children = [];
+function children(mf) {
+    if (mf.children !== undefined)
+        return mf.children;
+    return [];
 }
 
-function Cite() {
-    this.p = [];    // parent mf properties: p-in-reply-to, etc
+function Entry(mf) {
+    this.name = prop(mf, 'name');
+    this.published = prop(mf, 'published');
+    this.content = prop(mf, 'content');
+    this.photo = prop(mf, 'photo');
+    this.url = prop(mf, 'url');
+    this.author = prop(mf, 'author').
+        map(function(a) {
+            return new Card(a);
+        });
+    this.syndication = prop(mf, 'syndication');
+    this.replyto = prop(mf, 'in-reply-to').
+        map(function(r) {
+            return new Cite(r, ['in-reply-to']);
+        });
+    this.likeof = prop(mf, 'like-of').
+        map(function(r) {
+            return new Cite(r, ['like-of']);
+        });
+    this.repostof = prop(mf, 'repost-of').
+        map(function(r) {
+            return new Cite(r, ['repost-of']);
+        });
+    this.children = children(mf).
+        map(function(c) {
+            return new Cite(c, []);
+        });
 }
 
-function Card() {
-    this.name = null;
-    this.photo = null;
-    this.url = null;
+function Cite(mf, p) {
+    if (typeof(mf) === 'string') {
+        var url = mf;
+        mf = {properties:{url:url}};
+    }
+    Entry.call(this, mf);
+    this.p = p;    // parent mf properties: p-in-reply-to, etc
+}
+
+function Card(mf) {
+    this.name = prop(mf, 'name');
+    this.photo = prop(mf, 'photo');
+    this.url = prop(mf, 'url');
 };
 
 Entry.prototype = {
-    loadFromMf: function(mf) {
-                    this.name = getprop(mf, 'name');
-                    this.published = getprop(mf, 'published');
-                    var content = getprop(mf, 'content');
-                    if (content !== null) {
-                        this.contentHtml = content.html;
-                        this.contentValue = content.value;
-                    }
-                    this.photo = getprop(mf, 'photo');
-                    this.url = getprop(mf, 'url');
-                    var author = getprop(mf, 'author');
-                    if (author !== null) {
-                        this.author = new Card();
-                        card.loadFromMf(author);
-                    }
-                    this.syndication = getprop(mf, 'syndication');
-                },
     getRootClass: function() {
                       return 'h-entry';
                   }
@@ -63,12 +70,8 @@ Cite.prototype = Object.create(Entry.prototype, {
 });
 
 Card.prototype = {
-    loadFromMf: function(mf) {
-                    this.name = getprop(mf, 'name');
-                    this.photo = getprop(mf, 'photo');
-                    this.url = getprop(mf, 'url');
-                }
 };
 
 exports.Entry = Entry;
+exports.Cite = Cite;
 exports.Card = Card;
