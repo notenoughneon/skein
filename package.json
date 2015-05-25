@@ -1,0 +1,18 @@
+{
+  "name": "skein",
+  "version": "0.1.0",
+  "description": "Indieweb microblog",
+  "main": "skein.js",
+  "dependencies": {
+    "microformat-node": "^0.2.15"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/notenoughneon/skein.git"
+  },
+  "author": "Emma Kuo",
+  "bugs": {
+    "url": "https://github.com/notenoughneon/skein/issues"
+  },
+  "homepage": "https://github.com/notenoughneon/skein"
+}
