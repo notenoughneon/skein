@@ -42,7 +42,7 @@ function Entry(mf) {
 function Cite(mf, p) {
     if (typeof(mf) === 'string') {
         var url = mf;
-        mf = {properties:{url:url}};
+        mf = {properties:{url:[url]}};
     }
     Entry.call(this, mf);
     this.p = p;    // parent mf properties: p-in-reply-to, etc
