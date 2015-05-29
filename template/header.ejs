@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title><%= title %></title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/blog.css" rel="stylesheet">
+
+    <link href="<%= site.webmentionUrl %>" rel="webmention">
+    <link href="<%= site.authUrl %>" rel="authorization_endpoint">
+    <link href="<%= site.tokenUrl %>" rel="token_endpoint">
+    <link href="<%= site.micropubUrl %>" rel="micropub">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><%= site.title %></a>
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/?t=article">Articles</a></li>
+                    <li><a href="/?t=note">Notes</a></li>
+                    <li><a href="/?t=photo">Photos</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+      <div class="row">
+
+        <div class="col-sm-8 blog-main">
+
