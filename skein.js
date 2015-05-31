@@ -5,7 +5,7 @@ var fs = require('fs');
 var microformat = require('./microformat');
 
 var url = process.argv[2];
-var options = {filters: ['h-entry']};
+
 var site = {
     title: 'Dummy Site Title',
     url: 'http://dummy.site',
@@ -23,9 +23,26 @@ var site = {
     micropubUrl: 'http://api.dummy.site/micropub'
 };
 
-parser.parseUrl(url, options, function(err, data) {
-    var entry = new microformat.Entry(data.items[0]);
-    //console.log(util.inspect(entry, {depth: null}));
-    var template = fs.readFileSync('template/entrypage.ejs', 'utf8');
-    console.log(ejs.render(template, {site: site, entry: entry}, {filename: 'template/entrypage.ejs'}));
-});
+function dump(data) {
+    console.log(util.inspect(data, {depth: null}));
+}
+
+//parser.parseUrl(url, {filters: ['h-card']}, function(err, data) {
+//    dump(data);
+//});
+
+microformat.getRepHCard(url).
+    done(function(data) {
+        dump(data);
+    });
+
+//microformat.getHEntry(url).
+//    done(function(data) {
+//        dump(data);
+//    });
+
+//parser.parseUrl(url, options, function(err, data) {
+//    var entry = new microformat.Entry(data.items[0]);
+//    var template = fs.readFileSync('template/entrypage.ejs', 'utf8');
+//    console.log(ejs.render(template, {site: site, entry: entry}, {filename: 'template/entrypage.ejs'}));
+//});
