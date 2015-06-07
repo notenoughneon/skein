@@ -1,5 +1,7 @@
 var parser = require('microformat-node');
 var ejs = require('ejs');
+var nodefn = require('when/node');
+var request = require('request');
 var util = require('util');
 var fs = require('fs');
 var microformat = require('./microformat');
@@ -31,10 +33,10 @@ function dump(data) {
 //    dump(data);
 //});
 
-microformat.getRepHCard(url).
-    done(function(data) {
-        dump(data);
-    });
+//microformat.getRepHCard(url).
+//    done(function(data) {
+//        dump(data);
+//    });
 
 //microformat.getHEntry(url).
 //    done(function(data) {
@@ -46,3 +48,14 @@ microformat.getRepHCard(url).
 //    var template = fs.readFileSync('template/entrypage.ejs', 'utf8');
 //    console.log(ejs.render(template, {site: site, entry: entry}, {filename: 'template/entrypage.ejs'}));
 //});
+
+nodefn.call(request, url).
+    then(function(response) {
+        return microformat.getHEntryWithCard(response[1], url);
+    }).
+    then(function(entry) {
+        dump(entry);
+    }).
+    catch(function(e) {
+        dump(e);
+    });

@@ -1,18 +1,45 @@
 var parser = require('microformat-node');
+var when = require('when');
 var nodefn = require('when/node');
 var url = require('url');
+var parseHtml = nodefn.lift(parser.parseHtml);
 
-function getHEntry(url) {
-    return nodefn.call(parser.parseUrl, url, {filters: ['h-entry']}).
-        then(function(data) {
-            return new Entry(data.items[0]);
+//function getHEntryWithCard(html, url) {
+//    return when.all([getHEntry(html, url), getRepHCard(html, url)]).
+//        then(function(result) {
+//            var entry = result[0];
+//            var card = result[1];
+//            if (entry.author.length == 0 && card !== null) {
+//                entry.author = [card];
+//            }
+//            return entry;
+//        });
+//}
+function getHEntryWithCard(html, url) {
+    return getHEntry(html, url).
+        then(function(entry) {
+            if (entry.author.length == 0) {
+                return getRepHCard(html, url).
+                    then(function(card) {
+                        if (card !== null) entry.author = [card];
+                        return entry;
+                    });
+            }
+            else return entry;
         });
 }
 
-function getRepHCard(url) {
-    return nodefn.call(parser.parseUrl, url, {filters: ['h-card']}).
-        then(function(data) {
-            var cards = data.items.map(function(h) {
+function getHEntry(html, url) {
+    return parseHtml(html, {filters: ['h-entry'], baseUrl: url}).
+        then(function(mf) {
+            return new Entry(mf.items[0]);
+        });
+}
+
+function getRepHCard(html, url) {
+    return parseHtml(html, {filters: ['h-card'], baseUrl: url}).
+        then(function(mf) {
+            var cards = mf.items.map(function(h) {
                 return new Card(h);
             });
             // 1. uid and url match page url
@@ -24,9 +51,9 @@ function getRepHCard(url) {
             });
             if (match.length > 0) return match[0];
             // 2. url has rel=me
-            if (data.rels.me !== undefined) {
+            if (mf.rels.me !== undefined) {
                 var match = cards.filter(function(c) {
-                    return data.rels.me.some(function(r) {
+                    return mf.rels.me.some(function(r) {
                         return c.url.length > 0 &&
                         urlsEqual(c.url[0], r);
                     });
@@ -95,19 +122,6 @@ function Card(mf) {
 }
 
 Entry.prototype = {
-    getPostType: function() {
-                     if (this.isReply())
-                         return 'reply';
-                     if (this.isRepost())
-                         return 'repost';
-                     if (this.isLike())
-                         return 'like';
-                     if (this.isArticle())
-                         return 'article';
-                     if (this.isPhoto())
-                         return 'photo';
-                     return 'note';
-                 },
     references: function() {
                     return this.replyTo.
                         concat(this.repostOf).
@@ -137,6 +151,7 @@ Entry.prototype = {
 
 };
 
+exports.getHEntryWithCard = getHEntryWithCard;
 exports.getHEntry = getHEntry;
 exports.getRepHCard = getRepHCard;
 exports.Entry = Entry;

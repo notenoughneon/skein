@@ -6,6 +6,8 @@
   "dependencies": {
     "ejs": "^2.3.1",
     "microformat-node": "^0.2.15",
+    "request": "^2.57.0",
+    "sqlite3": "^3.0.8",
     "when": "^3.7.3"
   },
   "repository": {
