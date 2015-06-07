@@ -111,6 +111,7 @@ function Entry(mf) {
     this.repostOf = prop(mf, 'repost-of').
         map(function(r) { return new Entry(r); });
     this.children = children(mf).
+        concat(prop(mf, 'comment')).
         map(function(c) { return new Entry(c); });
 }
 
