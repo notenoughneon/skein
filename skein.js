@@ -29,26 +29,6 @@ function dump(data) {
     console.log(util.inspect(data, {depth: null}));
 }
 
-//parser.parseUrl(url, {filters: ['h-card']}, function(err, data) {
-//    dump(data);
-//});
-
-//microformat.getRepHCard(url).
-//    done(function(data) {
-//        dump(data);
-//    });
-
-//microformat.getHEntry(url).
-//    done(function(data) {
-//        dump(data);
-//    });
-
-//parser.parseUrl(url, options, function(err, data) {
-//    var entry = new microformat.Entry(data.items[0]);
-//    var template = fs.readFileSync('template/entrypage.ejs', 'utf8');
-//    console.log(ejs.render(template, {site: site, entry: entry}, {filename: 'template/entrypage.ejs'}));
-//});
-
 nodefn.call(request, url).
     then(function(response) {
         return microformat.getHEntryWithCard(response[1], url);

@@ -4,17 +4,6 @@ var nodefn = require('when/node');
 var url = require('url');
 var parseHtml = nodefn.lift(parser.parseHtml);
 
-//function getHEntryWithCard(html, url) {
-//    return when.all([getHEntry(html, url), getRepHCard(html, url)]).
-//        then(function(result) {
-//            var entry = result[0];
-//            var card = result[1];
-//            if (entry.author.length == 0 && card !== null) {
-//                entry.author = [card];
-//            }
-//            return entry;
-//        });
-//}
 function getHEntryWithCard(html, url) {
     return getHEntry(html, url).
         then(function(entry) {
