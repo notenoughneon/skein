@@ -35,10 +35,10 @@ nodefn.call(request, url).
         return microformat.getHEntryWithCard(response[1], url);
     }).
     then(db.store).
-//    then(function() {return db.get(url); }).
-//    then(function(row) {
-//        dump(row);
-//    }).
+    then(function() {return db.getAllByAuthor('http://notenoughneon.com'); }).
+    then(function(row) {
+        dump(row);
+    }).
     catch(function(e) {
         dump(e);
     });

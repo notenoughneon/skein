@@ -12,16 +12,17 @@ db.run(
     'isReply INTEGER,' +
     'isRepost INTEGER,' +
     'isLike INTEGER,' +
-    'isPhoto INTEGER' +
+    'isPhoto INTEGER,' +
+    'json TEXT' +
     ')'
 );
 
 
 function store(entry) {
-    return nodefn.call(db.run.bind(db), 'INSERT INTO entries ' +
+    return nodefn.call(db.run.bind(db), 'INSERT OR REPLACE INTO entries ' +
         '(url, author, date, isArticle, isReply, isRepost, ' +
-        'isLike, isPhoto) '+
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        'isLike, isPhoto, json) '+
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         entry.url[0],
         entry.author[0].url[0],
         entry.published[0],
@@ -29,17 +30,19 @@ function store(entry) {
         entry.isReply(),
         entry.isRepost(),
         entry.isLike(),
-        entry.isPhoto()
+        entry.isPhoto(),
+        JSON.stringify(entry)
     );
 }
 
-var url = 'http://foo.bar/1';
+function get(url) {
+    return nodefn.call(db.get.bind(db), 'SELECT * FROM entries WHERE url=?', url);
+}
 
-nodefn.call(db.get.bind(db), 'SELECT * FROM entries WHERE url=?', url).
-then(function(row) {
-    console.log(row);
-}).
-catch(function (e) {
-    throw e;
-});
+function getAllByAuthor(author) {
+    return nodefn.call(db.all.bind(db), 'SELECT * FROM entries WHERE author=? ORDER BY date DESC', author);
+}
 
+exports.store = store;
+exports.get = get;
+exports.getAllByAuthor = getAllByAuthor;
