@@ -5,6 +5,7 @@ var request = require('request');
 var util = require('util');
 var fs = require('fs');
 var microformat = require('./microformat');
+var db = require('./db');
 
 var url = process.argv[2];
 
@@ -33,9 +34,11 @@ nodefn.call(request, url).
     then(function(response) {
         return microformat.getHEntryWithCard(response[1], url);
     }).
-    then(function(entry) {
-        dump(entry);
-    }).
+    then(db.store).
+//    then(function() {return db.get(url); }).
+//    then(function(row) {
+//        dump(row);
+//    }).
     catch(function(e) {
         dump(e);
     });
