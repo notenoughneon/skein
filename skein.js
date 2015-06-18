@@ -14,7 +14,8 @@ nodefn.call(request, url).
     then(function(response) {
         return microformat.getHEntryWithCard(response[1], url);
     }).
-    then(site.generateIndex).
+    //then(site.generateIndex).
+    then(site.store).
     then(function(elt) {
         dump(elt);
     }).

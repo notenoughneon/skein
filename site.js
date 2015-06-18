@@ -26,12 +26,14 @@ function getPathForUrl(u) {
     return __dirname + url.parse(u).pathname + '.html';
 }
 
+function getPathForIndex(page) {
+    return 'index' + (page == 1 ? '' : page) + '.html';
+}
+
 function store(entry) {
     return db.store(entry).
         then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: config, entry: entry})).
-        then(function (html) {
-            return util.writeFileP(getPathForUrl(entry.url[0]), html);
-        });
+        then(nodefn.lift(util.writeFile, getPathForUrl(entry.url[0])));
 }
 
 function generateIndex() {
@@ -44,9 +46,7 @@ function generateIndex() {
             then(function(entries) {
                 if (!entries) return null;
                 return nodefn.call(ejs.renderFile, 'template/indexpage.ejs', {site: config, entries: entries, page: page}).
-                    then(function (html) {
-                        return util.writeFileP('index' + page + '.html', html);
-                    }).
+                    then(nodefn.lift(util.writeFile, getPathForIndex(page))).
                     then(function() {
                         offset += limit;
                         page += 1;

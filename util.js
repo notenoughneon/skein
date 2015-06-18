@@ -32,4 +32,3 @@ function writeFile(filename, data, options, callback) {
 }
 
 exports.writeFile = writeFile;
-exports.writeFileP = nodefn.lift(writeFile);

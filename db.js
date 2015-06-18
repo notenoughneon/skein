@@ -36,19 +36,19 @@ function store(entry) {
     );
 }
 
-function unmarshallEntry(record) {
+function unmarshall(record) {
     return new microformat.Entry(JSON.parse(record.json));
 }
 
 function get(url) {
     return nodefn.call(db.get.bind(db), 'SELECT * FROM entries WHERE url=?', url).
-        then(unmarshallEntry);
+        then(unmarshall);
 }
 
 function getAllByAuthor(author, limit, offset) {
     return nodefn.call(db.all.bind(db),
         'SELECT * FROM entries WHERE author=? ORDER BY date DESC LIMIT ? OFFSET ?', author, limit, offset).
-        then(function (records) { return records.map(unmarshallEntry); });
+        then(function (records) { return records.map(unmarshall); });
 }
 
 exports.store = store;
