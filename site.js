@@ -1,5 +1,4 @@
 var ejs = require('ejs');
-var fs = require('fs');
 var url = require('url');
 var nodefn = require('when/node');
 var util = require('./util');
@@ -7,7 +6,7 @@ var db = require('./db');
 
 var config = {
     title: 'Dummy Site Title',
-    url: 'http://dummy.site',
+    url: 'http://notenoughneon.com',
     author: {
         name: 'My Name',
         photo: 'http://dummy.site/photo.jpg',
@@ -16,6 +15,7 @@ var config = {
             {name: 'Twitter', url: 'https://twitter.com/test'}
         ]
     },
+    entriesPerPage: 10,
     webmentionUrl: 'http://api.dummy.site/webmention',
     authUrl: 'http://api.dummy.site/auth',
     tokenUrl: 'http://api.dummy.site/token',
@@ -27,10 +27,35 @@ function getPathForUrl(u) {
 }
 
 function store(entry) {
-    return nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {site: config, entry: entry}).
+    return db.store(entry).
+        then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: config, entry: entry})).
         then(function (html) {
             return util.writeFileP(getPathForUrl(entry.url[0]), html);
         });
 }
 
+function generateIndex() {
+    var limit = config.entriesPerPage;
+    var offset = 0;
+    var page = 1;
+
+    function chain() {
+        return db.getAllByAuthor(config.url, limit, offset).
+            then(function(entries) {
+                if (!entries) return null;
+                return nodefn.call(ejs.renderFile, 'template/indexpage.ejs', {site: config, entries: entries, page: page}).
+                    then(function (html) {
+                        return util.writeFileP('index' + page + '.html', html);
+                    }).
+                    then(function() {
+                        offset += limit;
+                        page += 1;
+                    }).
+                    then(chain);
+            });
+    }
+    return chain();
+}
+
 exports.store = store;
+exports.generateIndex = generateIndex;

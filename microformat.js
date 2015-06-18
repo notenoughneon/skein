@@ -69,8 +69,16 @@ function urlsEqual(u1, u2) {
 }
 
 function prop(mf, name) {
-    if (mf.properties[name] !== undefined)
-        return mf.properties[name];
+    if (mf.properties !== undefined) {
+        // assume mf is microformats array from parser
+        if (mf.properties[name] !== undefined)
+            return mf.properties[name];
+        return [];
+    }
+    if (mf[name] !== undefined) {
+        // assume mf is deserialized from json
+        return mf[name];
+    }
     return [];
 }
 

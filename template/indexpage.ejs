@@ -1,0 +1,5 @@
+<%- include('header', {site: site, title: site.title}); %>
+<% entries.forEach(function (e) { %>
+    <%- include('entry', {entry: e}); %>
+<% }); %>
+<%- include('footer', {site: site}); %>

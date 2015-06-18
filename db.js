@@ -1,5 +1,6 @@
 var sqlite3 = require('sqlite3').verbose();
 var nodefn = require('when/node');
+var microformat = require('./microformat');
 
 var db = new sqlite3.Database('index.db');
 
@@ -35,12 +36,19 @@ function store(entry) {
     );
 }
 
-function get(url) {
-    return nodefn.call(db.get.bind(db), 'SELECT * FROM entries WHERE url=?', url);
+function unmarshallEntry(record) {
+    return new microformat.Entry(JSON.parse(record.json));
 }
 
-function getAllByAuthor(author) {
-    return nodefn.call(db.all.bind(db), 'SELECT * FROM entries WHERE author=? ORDER BY date DESC', author);
+function get(url) {
+    return nodefn.call(db.get.bind(db), 'SELECT * FROM entries WHERE url=?', url).
+        then(unmarshallEntry);
+}
+
+function getAllByAuthor(author, limit, offset) {
+    return nodefn.call(db.all.bind(db),
+        'SELECT * FROM entries WHERE author=? ORDER BY date DESC LIMIT ? OFFSET ?', author, limit, offset).
+        then(function (records) { return records.map(unmarshallEntry); });
 }
 
 exports.store = store;
