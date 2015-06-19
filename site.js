@@ -4,7 +4,7 @@ var nodefn = require('when/node');
 var util = require('./util');
 var db = require('./db');
 
-var config = {
+var site = {
     title: 'Dummy Site Title',
     url: 'http://notenoughneon.com',
     author: {
@@ -32,20 +32,20 @@ function getPathForIndex(page) {
 
 function store(entry) {
     return db.store(entry).
-        then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: config, entry: entry})).
+        then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry})).
         then(nodefn.lift(util.writeFile, getPathForUrl(entry.url[0])));
 }
 
 function generateIndex() {
-    var limit = config.entriesPerPage;
+    var limit = site.entriesPerPage;
     var offset = 0;
     var page = 1;
 
     function chain() {
-        return db.getAllByAuthor(config.url, limit, offset).
+        return db.getAllByAuthor(site.url, limit, offset).
             then(function(entries) {
                 if (!entries) return null;
-                return nodefn.call(ejs.renderFile, 'template/indexpage.ejs', {site: config, entries: entries, page: page}).
+                return nodefn.call(ejs.renderFile, 'template/indexpage.ejs', {site: site, entries: entries, page: page}).
                     then(nodefn.lift(util.writeFile, getPathForIndex(page))).
                     then(function() {
                         offset += limit;
@@ -57,5 +57,6 @@ function generateIndex() {
     return chain();
 }
 
-exports.store = store;
-exports.generateIndex = generateIndex;
+site.store = store;
+site.generateIndex = generateIndex;
+module.exports = site;
