@@ -69,16 +69,8 @@ function urlsEqual(u1, u2) {
 }
 
 function prop(mf, name) {
-    if (mf.properties !== undefined) {
-        // assume mf is microformats array from parser
-        if (mf.properties[name] !== undefined)
-            return mf.properties[name];
-        return [];
-    }
-    if (mf[name] !== undefined) {
-        // assume mf is deserialized from json
-        return mf[name];
-    }
+    if (mf.properties[name] !== undefined)
+        return mf.properties[name];
     return [];
 }
 
@@ -89,34 +81,94 @@ function children(mf) {
 }
 
 function Entry(mf) {
+    this.name = [];
+    this.published = [];
+    this.content = [];
+    this.photo = [];
+    this.url = [];
+    this.author = [];
+    this.syndication = [];
+    this.replyTo = [];
+    this.likeOf = [];
+    this.repostOf = [];
+    this.children = [];
+
     if (typeof(mf) === 'string') {
-        var url = mf;
-        mf = { properties: { url: [url] } };
+        this.url = [mf];
+    } else if (mf.properties !== undefined) {
+        this.name = prop(mf, 'name');
+        this.published = prop(mf, 'published');
+        this.content = prop(mf, 'content');
+        this.photo = prop(mf, 'photo');
+        this.url = prop(mf, 'url');
+        this.author = prop(mf, 'author').
+            map(function (a) {
+                return new Card(a);
+            });
+        this.syndication = prop(mf, 'syndication');
+        this.replyTo = prop(mf, 'in-reply-to').
+            map(function (r) {
+                return new Entry(r);
+            });
+        this.likeOf = prop(mf, 'like-of').
+            map(function (r) {
+                return new Entry(r);
+            });
+        this.repostOf = prop(mf, 'repost-of').
+            map(function (r) {
+                return new Entry(r);
+            });
+        this.children = children(mf).
+            concat(prop(mf, 'comment')).
+            map(function (c) {
+                return new Entry(c);
+            });
+    } else {
+        this.name = mf.name;
+        this.published = mf.published;
+        this.content = mf.content;
+        this.photo = mf.photo;
+        this.url = mf.url;
+        this.author = mf.author.
+            map(function (a) {
+                return new Card(a);
+            });
+        this.syndication = mf.syndication;
+        this.replyTo = mf.replyTo.
+            map(function (r) {
+                return new Entry(r);
+            });
+        this.likeOf = mf.likeOf.
+            map(function (r) {
+                return new Entry(r);
+            });
+        this.repostOf = mf.repostOf.
+            map(function (r) {
+                return new Entry(r);
+            });
+        this.children = mf.children.
+            map(function (c) {
+                return new Entry(c);
+            });
     }
-    this.name = prop(mf, 'name');
-    this.published = prop(mf, 'published');
-    this.content = prop(mf, 'content');
-    this.photo = prop(mf, 'photo');
-    this.url = prop(mf, 'url');
-    this.author = prop(mf, 'author').
-        map(function(a) { return new Card(a); });
-    this.syndication = prop(mf, 'syndication');
-    this.replyTo = prop(mf, 'in-reply-to').
-        map(function(r) { return new Entry(r); });
-    this.likeOf = prop(mf, 'like-of').
-        map(function(r) { return new Entry(r); });
-    this.repostOf = prop(mf, 'repost-of').
-        map(function(r) { return new Entry(r); });
-    this.children = children(mf).
-        concat(prop(mf, 'comment')).
-        map(function(c) { return new Entry(c); });
 }
 
 function Card(mf) {
-    this.name = prop(mf, 'name');
-    this.photo = prop(mf, 'photo');
-    this.url = prop(mf, 'url');
-    this.uid = prop(mf, 'uid');
+    this.name = [];
+    this.photo = [];
+    this.url = [];
+    this.uid = [];
+    if (mf.properties !== undefined) {
+        this.name = prop(mf, 'name');
+        this.photo = prop(mf, 'photo');
+        this.url = prop(mf, 'url');
+        this.uid = prop(mf, 'uid');
+    } else {
+        this.name = mf.name;
+        this.photo = mf.photo;
+        this.url = mf.url;
+        this.uid = mf.uid;
+    }
 }
 
 Entry.prototype = {
