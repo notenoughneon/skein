@@ -23,11 +23,11 @@ var site = {
 };
 
 function getPathForUrl(u) {
-    return __dirname + url.parse(u).pathname + '.html';
+    return __dirname + '/static/' + url.parse(u).pathname + '.html';
 }
 
 function getPathForIndex(page) {
-    return 'index' + (page == 1 ? '' : page) + '.html';
+    return __dirname + '/static/' + 'index' + (page == 1 ? '' : page) + '.html';
 }
 
 function store(entry) {
@@ -57,6 +57,7 @@ function generateIndex() {
     return chain();
 }
 
+site.getPathForIndex = getPathForIndex;
 site.store = store;
 site.generateIndex = generateIndex;
 module.exports = site;

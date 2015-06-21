@@ -5,6 +5,7 @@
   "main": "skein.js",
   "dependencies": {
     "ejs": "^2.3.1",
+    "express": "^4.12.4",
     "microformat-node": "^0.2.15",
     "request": "^2.57.0",
     "sqlite3": "^3.0.8",
