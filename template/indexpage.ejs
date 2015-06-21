@@ -1,7 +1,7 @@
-<%- include('header', {site: site, title: site.title}); %>
+<%- include('header', {title: site.title}); %>
 <div class="h-feed">
 <% entries.forEach(function (e) { %>
-    <%- include('streamentry', {entry: e, utils: utils}); %>
+    <%- include('streamentry', {entry: e}); %>
 <% }); %>
 
     <ul class="pager">
@@ -9,4 +9,4 @@
     </ul>
 
 </div>
-<%- include('footer', {site: site}); %>
+<%- include('footer'); %>
