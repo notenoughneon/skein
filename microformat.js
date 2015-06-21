@@ -1,5 +1,4 @@
 var parser = require('microformat-node');
-var when = require('when');
 var nodefn = require('when/node');
 var url = require('url');
 var parseHtml = nodefn.lift(parser.parseHtml);

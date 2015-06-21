@@ -1,6 +1,5 @@
 var fs = require('fs');
 var path = require('path');
-var nodefn = require('when/node');
 
 function mkdirRecursive(dir, callback) {
     fs.stat(dir, function (err, stats) {
