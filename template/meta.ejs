@@ -1,22 +1,16 @@
-<% var hasAuthor = false; %>
         <p class="blog-post-meta">
-<% entry.author.forEach(function(author) {
-       hasAuthor = true; %>
+<% entry.author.forEach(function(author) { %>
             <a class="p-author h-card" href="<%= author.url[0] %>">
                 <img src="<%= author.photo[0] %>">
                 <%= author.name[0] %>
             </a>
 <% }); %>
-<% if (hasAuthor && entry.published.length > 0) { %>
+<% if (entry.author.length > 0 && entry.published.length > 0) { %>
             -
 <% } %>
-            <a class="u-url" href="<%= entry.url[0] %>">
-<% if (entry.published.length > 0) { 
+<% if (entry.published.length > 0) {
        var dateString = new Date(entry.published[0]).toLocaleString(); %>
                 <time class="dt-published" datetime="<%= entry.published[0] %>" title="<%= dateString %>"><%= dateString %></time>
-<% } else { %>
-                <%= entry.url[0] %>
 <% } %>
-            </a>
         </p>
 

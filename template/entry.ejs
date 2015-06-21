@@ -1,6 +1,8 @@
 <div class="h-entry">
 
     <% entry.replyTo.forEach(function(r) { %>
+        <i class="fa fa-reply"></i>
+        In reply to:
         <%- include('cite', {entry: r, rootClass: ' p-reply-to'}); %>
     <% }); %>
 
