@@ -7,12 +7,12 @@
 
     <% entry.likeOf.forEach(function(r) { %>
     <i class="fa fa-star"></i>
-    <a href="<%- r.author[0].url[0] %>" class="p-author h-card"><%- r.author[0].name[0] %></a> liked this.
+    <a href="<%= r.author[0].url[0] %>" class="p-author h-card"><%= r.author[0].name[0] %></a> liked this.
     <% }); %>
 
     <% entry.repostOf.forEach(function(r) { %>
     <i class="fa fa-retweet"></i>
-    <a href="<%- r.author[0].url[0] %>" class="p-author h-card"><%- r.author[0].name[0] %></a> reposted this.
+    <a href="<%= r.author[0].url[0] %>" class="p-author h-card"><%= r.author[0].name[0] %></a> reposted this.
     <% }); %>
 
     <% if (!entry.isLike() && !entry.isRepost()) { %>
