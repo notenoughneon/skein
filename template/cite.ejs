@@ -13,7 +13,7 @@
         <h2 class="blog-post-title p-name"><%= entry.name[0] %></h2>
 <% } %>
 <%- include('meta'); %>
-        <div class="e-content<%= entry.isArticle() ? ' p-name note-content' : '' %>"><%= entry.content[0].value %></div>
+        <div class="e-content<%= entry.isArticle() ? '' : ' p-name note-content' %>"><%= entry.content[0].value %></div>
 <%- include('actions'); %>
     </div>
 </div>

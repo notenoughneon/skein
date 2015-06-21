@@ -40,14 +40,28 @@ function truncate(s, len) {
     return s;
 }
 
+function formatDate(datestring) {
+    var month = ["Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"];
+    var d = new Date(datestring);
+    var minutes = d.getMinutes();
+    if (minutes < 10) minutes = '0' + minutes;
+    return d.getDate() + ' ' +
+        month[d.getMonth()] + ' ' +
+        d.getFullYear() + ' ' +
+        d.getHours() + ':' +
+        minutes;
+}
+
 var templateUtils = {
-  getUrlForIndex: getUrlForIndex,
-  truncate: truncate
+    formatDate: formatDate,
+    getUrlForIndex: getUrlForIndex,
+    truncate: truncate
 };
 
 function store(entry) {
     return db.store(entry).
-        then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry})).
+        then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry, utils: templateUtils})).
         then(nodefn.lift(util.writeFile, getPathForUrl(entry.url[0])));
 }
 
