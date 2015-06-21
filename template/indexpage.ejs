@@ -1,11 +1,11 @@
 <%- include('header', {site: site, title: site.title}); %>
 <div class="h-feed">
 <% entries.forEach(function (e) { %>
-    <%- include('entry', {entry: e}); %>
+    <%- include('streamentry', {entry: e, utils: utils}); %>
 <% }); %>
 
     <ul class="pager">
-        <li><a href="<%= site.getPathForIndex(page + 1) %>">More</a></li>
+        <li><a href="<%= utils.getUrlForIndex(page + 1) %>">Older</a></li>
     </ul>
 
 </div>

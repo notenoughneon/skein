@@ -26,9 +26,24 @@ function getPathForUrl(u) {
     return __dirname + '/static/' + url.parse(u).pathname + '.html';
 }
 
-function getPathForIndex(page) {
-    return __dirname + '/static/' + 'index' + (page == 1 ? '' : page) + '.html';
+function getUrlForIndex(page) {
+    return 'index' + (page == 1 ? '' : page) + '.html';
 }
+
+function getPathForIndex(page) {
+    return __dirname + '/static/' + getUrlForIndex(page);
+}
+
+function truncate(s, len) {
+    if (s.length > len)
+        return s.substr(0, len) + '...';
+    return s;
+}
+
+var templateUtils = {
+  getUrlForIndex: getUrlForIndex,
+  truncate: truncate
+};
 
 function store(entry) {
     return db.store(entry).
@@ -45,7 +60,8 @@ function generateIndex() {
         return db.getAllByAuthor(site.url, limit, offset).
             then(function(entries) {
                 if (!entries) return null;
-                return nodefn.call(ejs.renderFile, 'template/indexpage.ejs', {site: site, entries: entries, page: page}).
+                return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
+                    {site: site, entries: entries, page: page, utils: templateUtils}).
                     then(nodefn.lift(util.writeFile, getPathForIndex(page))).
                     then(function() {
                         offset += limit;
@@ -57,7 +73,6 @@ function generateIndex() {
     return chain();
 }
 
-site.getPathForIndex = getPathForIndex;
 site.store = store;
 site.generateIndex = generateIndex;
 module.exports = site;
