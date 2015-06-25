@@ -5,14 +5,14 @@ var util = require('./util');
 var db = require('./db');
 
 var site = {
-    title: 'Dummy Site Title',
+    title: 'Not Enough Neon',
     url: 'http://notenoughneon.com',
     author: {
-        name: 'My Name',
-        photo: 'http://dummy.site/photo.jpg',
+        name: 'Emma Kuo',
+        photo: '/m/emma-tw-73.jpeg',
         note: 'Here is my bio',
         elsewhere: [
-            {name: 'Twitter', url: 'https://twitter.com/test'}
+            {name: 'Twitter', url: 'https://twitter.com/notenoughneon'}
         ]
     },
     entriesPerPage: 10,
@@ -62,7 +62,7 @@ var templateUtils = {
 function store(entry) {
     return db.store(entry).
         then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry, utils: templateUtils})).
-        then(nodefn.lift(util.writeFile, getPathForUrl(entry.url[0])));
+        then(util.writeFile.bind(null, getPathForUrl(entry.url[0])));
 }
 
 function generateIndex() {
@@ -73,10 +73,10 @@ function generateIndex() {
     function chain() {
         return db.getAllByAuthor(site.url, limit, offset).
             then(function(entries) {
-                if (!entries) return null;
+                if (entries.length == 0) return null;
                 return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
                     {site: site, entries: entries, page: page, utils: templateUtils}).
-                    then(nodefn.lift(util.writeFile, getPathForIndex(page))).
+                    then(util.writeFile.bind(null, getPathForIndex(page))).
                     then(function() {
                         offset += limit;
                         page += 1;
