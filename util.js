@@ -40,23 +40,28 @@ function flatten(arrarr) {
 }
 
 /* walk directory recursively and return list of files */
-function walkDir(path) {
-    return stat(path).
+function walkDir(d) {
+    return stat(d).
         then(function(stats){
             if (stats.isDirectory())
-                return readdir(path).
+                return readdir(d).
                     then(function (files) {
                         return when.map(files, function (file) {
-                            return walkDir(path + '/' + file);
+                            return walkDir(path.join(d, file));
                         }).
                             then(flatten);
                     });
             else
-                return [path];
+                return [d];
         });
 }
 
+function copy(src, dst) {
+    return fs.createReadStream(src).pipe(fs.createWriteStream(dst));
+}
+
 exports.dump = dump;
+exports.flatten = flatten;
 exports.writeFile = writeFile;
 exports.walkDir = walkDir;
-exports.flatten = flatten;
+exports.copy = copy;
