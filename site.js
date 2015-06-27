@@ -7,16 +7,16 @@ var db = require('./db');
 
 var site = JSON.parse(fs.readFileSync('config.json'));
 
-function getPathForUrl(u) {
-    return __dirname + '/static/' + url.parse(u).pathname + '.html';
+if (site.publisherConfig.type == "s3") {
+    site.publisher = require('./s3publisher').config(site.publisherConfig.region, site.publisherConfig.bucket);
 }
 
-function getUrlForIndex(page) {
-    return 'index' + (page == 1 ? '' : page) + '.html';
+function getPathForUrl(u) {
+    return url.parse(u).pathname;
 }
 
 function getPathForIndex(page) {
-    return __dirname + '/static/' + getUrlForIndex(page);
+    return 'index' + (page == 1 ? '' : page);
 }
 
 function truncate(s, len) {
@@ -40,14 +40,16 @@ function formatDate(datestring) {
 
 var templateUtils = {
     formatDate: formatDate,
-    getUrlForIndex: getUrlForIndex,
+    getPathForIndex: getPathForIndex,
     truncate: truncate
 };
 
 function store(entry) {
     return db.store(entry).
         then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry, utils: templateUtils})).
-        then(util.writeFile.bind(null, getPathForUrl(entry.url[0])));
+        then(function (html) {
+            return site.publisher.put(getPathForUrl(entry.url[0]), html, 'text/html');
+        });
 }
 
 function generateIndex() {
@@ -61,7 +63,9 @@ function generateIndex() {
                 if (entries.length == 0) return null;
                 return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
                     {site: site, entries: entries, page: page, utils: templateUtils}).
-                    then(util.writeFile.bind(null, getPathForIndex(page))).
+                    then(function (html) {
+                        return site.publisher.put(getPathForIndex(page), html, 'text/html');
+                    }).
                     then(function() {
                         offset += limit;
                         page += 1;

@@ -15,5 +15,10 @@
       {"name": "LinkedIn", "url": "http://www.linkedin.com/pub/emma-kuo/25/15a/586"}
     ]
   },
-  "entriesPerPage": 10
+  "entriesPerPage": 10,
+  "publisherConfig": {
+    "type": "s3",
+    "region": "us-west-2",
+    "bucket": "notenoughneon.com"
+  }
 }

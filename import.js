@@ -29,13 +29,13 @@ util.walkDir('..\\notenoughneon.com\\2015').
     });
 
 // copy photos
+
 util.walkDir('..\\notenoughneon.com\\2015').
     then(regexFilter.bind(null, '\.(jpg|png)$')).
     then(function(files) {
         return files.map(function(file){
-            //hack
-            var dst = ['static'].concat(file.split(path.sep).slice(2)).join(path.sep);
-            util.copy(file, dst);
+            var dst = file.split(path.sep).slice(2).join('/');
+            site.publisher.put(dst, fs.createReadStream(file));
         });
     }).
     catch(function(e) {
