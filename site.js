@@ -1,22 +1,11 @@
+var fs = require('fs');
 var ejs = require('ejs');
 var url = require('url');
 var nodefn = require('when/node');
 var util = require('./util');
 var db = require('./db');
 
-var site = {
-    title: 'Not Enough Neon',
-    url: 'http://notenoughneon.com',
-    author: {
-        name: 'Emma Kuo',
-        photo: '/m/emma-tw-73.jpeg',
-        note: 'Here is my bio',
-        elsewhere: [
-            {name: 'Twitter', url: 'https://twitter.com/notenoughneon'}
-        ]
-    },
-    entriesPerPage: 10
-};
+var site = JSON.parse(fs.readFileSync('config.json'));
 
 function getPathForUrl(u) {
     return __dirname + '/static/' + url.parse(u).pathname + '.html';

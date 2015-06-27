@@ -1,0 +1,19 @@
+{
+  "title": "Not Enough Neon",
+  "url": "http://notenoughneon.com",
+  "author": {
+    "name": "Emma Kuo",
+    "photo": "/m/emma-tw-73.jpeg",
+    "note": "Software engineer, amateur musician, house music fan. Portland, OR",
+    "elsewhere": [
+      {"name": "Twitter", "url": "https://twitter.com/notenoughneon"},
+      {"name": "Instagram", "url": "http://instagram.com/emmackuo"},
+      {"name": "SoundCloud", "url": "https://soundcloud.com/notenoughneon"},
+      {"name": "Tumblr", "url": "http://notenoughneon.tumblr.com"},
+      {"name": "Facebook", "url": "https://www.facebook.com/emma.kuo.5209"},
+      {"name": "Github", "url": "https://github.com/notenoughneon"},
+      {"name": "LinkedIn", "url": "http://www.linkedin.com/pub/emma-kuo/25/15a/586"}
+    ]
+  },
+  "entriesPerPage": 10
+}
