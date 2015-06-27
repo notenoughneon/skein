@@ -1,11 +1,12 @@
         <p class="blog-post-meta">
-<% entry.author.forEach(function(author) { %>
+            <% var authorsToDisplay = entry.author.filter(function(a) {return a.url[0] != site.url;}); %>
+<% authorsToDisplay.forEach(function(author) { %>
             <a class="p-author h-card" href="<%= author.url[0] %>">
                 <img src="<%= author.photo[0] %>">
                 <%= author.name[0] %>
             </a>
 <% }); %>
-<% if (entry.author.length > 0 && entry.published.length > 0) { %>
+<% if (authorsToDisplay.length > 0 && entry.published.length > 0) { %>
             -
 <% } %>
             <a class="u-url" href="<%= entry.url[0] %>">
