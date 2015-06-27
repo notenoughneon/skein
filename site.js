@@ -15,11 +15,7 @@ var site = {
             {name: 'Twitter', url: 'https://twitter.com/notenoughneon'}
         ]
     },
-    entriesPerPage: 10,
-    webmentionUrl: 'http://api.dummy.site/webmention',
-    authUrl: 'http://api.dummy.site/auth',
-    tokenUrl: 'http://api.dummy.site/token',
-    micropubUrl: 'http://api.dummy.site/micropub'
+    entriesPerPage: 10
 };
 
 function getPathForUrl(u) {
