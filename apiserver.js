@@ -43,7 +43,6 @@ app.post('/auth', parsePost, function(req, res) {
                     res.redirect(req.post.redirect_uri + '?' +
                         querystring.stringify({code: code, state: req.post.state, me: req.post.me}));
                 });
-
         } else {
             res.status(403).send('Incorrect password');
         }

@@ -16,6 +16,8 @@
     ]
   },
   "entriesPerPage": 10,
+  "authUrl": "http://api.notenoughneon.com/auth",
+  "micropubUrl": "http://api.notenoughneon.com/micropub",
   "publisherConfig": {
     "type": "s3",
     "region": "us-west-2",
