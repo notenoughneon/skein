@@ -5,24 +5,38 @@ var app = express();
 var ejs = require('ejs');
 var nodefn = require('when/node');
 var site = require('./site');
+var util = require('util');
 
 app.set('views', './template');
 app.set('view engine', 'ejs');
 
 function parsePost(req, res, next) {
-    var busboy = new Busboy({headers: req.headers});
-    req.post = {};
-    busboy.on('field', function(fieldname, val) {
-        req.post[fieldname] = val;
-    });
-    busboy.on('finish', function() {
+    if (req.method === 'POST') {
+        var busboy = new Busboy({headers: req.headers});
+        req.post = {};
+        busboy.on('field', function (fieldname, val) {
+            req.post[fieldname] = val;
+        });
+        busboy.on('finish', function () {
+            next();
+        });
+        req.pipe(busboy);
+    } else {
         next();
-    });
-    req.pipe(busboy);
+    }
 }
 
+function logger(req, res, next) {
+    util.log(util.format('%s %s\n%s', req.method, req.url,
+        util.inspect(req.method == 'POST' ? req.post : req.query)));
+    next();
+}
+
+app.use(parsePost);
+app.use(logger);
+
 app.get('/test', function(req, res) {
-    res.send(req.query.toString());
+    res.end();
 });
 
 app.get('/auth', function(req, res) {
@@ -34,7 +48,7 @@ app.get('/auth', function(req, res) {
         scope: req.query.scope});
 });
 
-app.post('/auth', parsePost, function(req, res) {
+app.post('/auth', function(req, res) {
     if (req.post.password !== undefined) {
         // post target for auth form
         if (req.post.password === site.password) {
