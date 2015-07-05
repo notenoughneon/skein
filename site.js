@@ -4,10 +4,9 @@ var url = require('url');
 var crypto = require('crypto');
 var nodefn = require('when/node');
 var util = require('./util');
-var db = require('./db');
 
 var site = JSON.parse(fs.readFileSync('config.json'));
-
+var db = require('./db').init('index.db');
 if (site.publisherConfig.type == "s3") {
     site.publisher = require('./s3publisher').config(site.publisherConfig.region, site.publisherConfig.bucket);
 }
@@ -98,10 +97,14 @@ function listTokens() {
     return db.listTokens();
 }
 
+function getToken(token) {
+    return db.getToken(token);
+}
 
 site.store = store;
 site.generateIndex = generateIndex;
 site.generateToken = generateToken;
 site.verifyToken = verifyToken;
 site.listTokens = listTokens;
+site.getToken = getToken;
 module.exports = site;

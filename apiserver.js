@@ -78,6 +78,10 @@ app.get('/tokens', function(req, res) {
    site.listTokens().then(res.json.bind(res));
 });
 
+app.get('/tokens/:id', function(req, res) {
+   site.getToken(req.params.id).then(res.json.bind(res));
+});
+
 var server = app.listen(80, function (){
     var address = server.address();
     console.log('Listening on %s:%s', address.address, address.port);
