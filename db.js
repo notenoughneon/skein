@@ -18,6 +18,14 @@ db.run(
     ')'
 );
 
+db.run(
+    'CREATE TABLE IF NOT EXISTS tokens (' +
+    'token TEXT PRIMARY KEY,' +
+    'client_id TEXT,' +
+    'scope TEXT,' +
+    'date_issued TEXT' +
+    ')'
+);
 
 function store(entry) {
     return nodefn.call(db.run.bind(db), 'INSERT OR REPLACE INTO entries ' +
@@ -51,6 +59,28 @@ function getAllByAuthor(author, limit, offset) {
         then(function (records) { return records.map(unmarshall); });
 }
 
+function storeToken(token, client_id, scope) {
+    return nodefn.call(db.run.bind(db), 'INSERT INTO tokens ' +
+        '(token, client_id, scope, date_issued) ' +
+        'VALUES (?, ?, ?, ?)',
+        token,
+        client_id,
+        scope,
+        (new Date).toISOString()
+    ).then(function () { return token; });
+}
+
+function getToken(token) {
+    return nodefn.call(db.get.bind(db), 'SELECT * FROM tokens WHERE token=?', token);
+}
+
+function listTokens() {
+    return nodefn.call(db.all.bind(db), 'SELECT * FROM tokens ORDER BY date_issued DESC');
+}
+
 exports.store = store;
 exports.get = get;
 exports.getAllByAuthor = getAllByAuthor;
+exports.storeToken = storeToken;
+exports.getToken = getToken;
+exports.listTokens = listTokens;

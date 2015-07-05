@@ -1,0 +1,18 @@
+<html>
+<head>
+</head>
+<body>
+<h1>Authorization request</h1>
+    <form method="post" target="/auth" enctype="application/x-www-form-urlencoded">
+        <h2><%= client_id %></h2>
+        <p>is requesting <b><%= scope %></b> access to <b><%= me %></b>.</p>
+        <input type="hidden" name="me" value="<%= me %>">
+        <input type="hidden" name="client_id" value="<%= client_id %>">
+        <input type="hidden" name="redirect_uri" value="<%= redirect_uri %>">
+        <input type="hidden" name="state" value="<%= state %>">
+        <input type="hidden" name="scope" value="<%= scope %>">
+        Password: <input type="password" name="password">
+        <input type="submit" value="Authorize">
+    </form>
+</body>
+</html>

@@ -1,6 +1,7 @@
 var fs = require('fs');
 var ejs = require('ejs');
 var url = require('url');
+var crypto = require('crypto');
 var nodefn = require('when/node');
 var util = require('./util');
 var db = require('./db');
@@ -76,6 +77,31 @@ function generateIndex() {
     return chain();
 }
 
+function generateToken(client_id, scope) {
+    return nodefn.call(crypto.randomBytes, 18).
+        then(function (buf) {
+            var token = buf.toString('base64');
+            return db.storeToken(token, client_id, scope);
+        });
+}
+
+function verifyToken(code, redirect_uri, client_id, state) {
+    return db.getToken(code).
+        then(function (data) {
+            if (data === undefined)
+                return null;
+            return {me: site.url, scope: data.scope};
+        })
+}
+
+function listTokens() {
+    return db.listTokens();
+}
+
+
 site.store = store;
 site.generateIndex = generateIndex;
+site.generateToken = generateToken;
+site.verifyToken = verifyToken;
+site.listTokens = listTokens;
 module.exports = site;

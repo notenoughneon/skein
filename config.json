@@ -20,5 +20,6 @@
     "type": "s3",
     "region": "us-west-2",
     "bucket": "notenoughneon.com"
-  }
+  },
+  "password": "cactus123"
 }
