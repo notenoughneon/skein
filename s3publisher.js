@@ -7,7 +7,7 @@ function normalizePath(p) {
     return p.split('/').filter(function(elt) { return elt != ''; }).join('/');
 }
 
-function config(region, bucket) {
+function init(region, bucket) {
     var s3 = new AWS.S3({region: region});
     var putObject = nodefn.lift(s3.putObject.bind(s3));
     var getObject = nodefn.lift(s3.getObject.bind(s3));
@@ -58,4 +58,4 @@ function config(region, bucket) {
     };
 }
 
-exports.config = config;
+exports.init = init;

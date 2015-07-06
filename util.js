@@ -4,6 +4,10 @@ var util = require('util');
 var when = require('when');
 var nodefn = require('when/node');
 
+var readFile = nodefn.lift(fs.readFile);
+var readdir = nodefn.lift(fs.readdir);
+var stat = nodefn.lift(fs.stat);
+
 function dump(data) {
     console.log(util.inspect(data, {depth: null}));
 }
@@ -29,9 +33,6 @@ function writeFile(filename, data, options) {
         then(nodefn.lift(fs.writeFile, filename, data, options));
 }
 
-var readdir = nodefn.lift(fs.readdir);
-var stat = nodefn.lift(fs.stat);
-
 /* flatten an array of arrays */
 function flatten(arrarr) {
     if (arrarr.length == 0)
@@ -56,6 +57,12 @@ function walkDir(d) {
         });
 }
 
+function readWithFallback(filepath, extensions) {
+    return when.any(extensions.map(function (ext) {
+        return readFile(filepath + ext);
+    }));
+}
+
 function copy(src, dst) {
     return fs.createReadStream(src).pipe(fs.createWriteStream(dst));
 }
@@ -64,4 +71,5 @@ exports.dump = dump;
 exports.flatten = flatten;
 exports.writeFile = writeFile;
 exports.walkDir = walkDir;
+exports.readWithFallback = readWithFallback;
 exports.copy = copy;

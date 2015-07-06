@@ -7,8 +7,10 @@ var util = require('./util');
 
 var site = JSON.parse(fs.readFileSync('config.json'));
 var db = require('./db').init('index.db');
-if (site.publisherConfig.type == "s3") {
-    site.publisher = require('./s3publisher').config(site.publisherConfig.region, site.publisherConfig.bucket);
+if (site.publisherConfig.type == 's3') {
+    site.publisher = require('./s3publisher').init(site.publisherConfig.region, site.publisherConfig.bucket);
+} else if (site.publisherConfig.type == 'file') {
+    site.publisher = require('./filepublisher').init(site.publisherConfig.root);
 }
 
 function getPathForUrl(u) {
