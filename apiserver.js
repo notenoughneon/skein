@@ -3,6 +3,7 @@ var express = require('express');
 var Busboy = require('busboy');
 var app = express();
 var ejs = require('ejs');
+var crypto = require('crypto');
 var nodefn = require('when/node');
 var site = require('./site');
 var util = require('util');
