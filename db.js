@@ -76,7 +76,7 @@ function init(dbfile) {
                 scope,
                 (new Date).toISOString()
             ).then(function () {
-                    return token;
+                    return {token: token, client_id: client_id, scope: scope};
                 });
         },
 
