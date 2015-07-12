@@ -46,6 +46,28 @@ var templateUtils = {
     truncate: truncate
 };
 
+function getSlug(title) {
+    var now = new Date();
+    var datepart = '/' + now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate();
+    if (title !== null) {
+        throw new Error('Not implemented');
+    } else {
+        var n = 1;
+        function chain() {
+            return site.publisher.exists(datepart + '/' + n).
+                then(function (exists) {
+                    if (exists) {
+                        n++;
+                        return chain();
+                    } else {
+                        return datepart + '/' + n;
+                    }
+                })
+        }
+        return chain();
+    }
+}
+
 function store(entry) {
     return db.store(entry).
         then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry, utils: templateUtils})).
@@ -86,17 +108,28 @@ function generateToken(client_id, scope) {
         });
 }
 
+function hasAuthorization(req, scope) {
+    if (req.headers.Authorization !== undefined) {
+        var token = /^Bearer (.+)/.exec(req.headers.Authorization)[1];
+    } else if (req.post.access_token !== undefined) {
+        var token = req.post.access_token;
+    } else {
+        return false;
+    }
+    return db.getToken(token).
+        then(function (row) {
+            return row.scope === scope;
+        });
+}
+
 function listTokens() {
     return db.listTokens();
 }
 
-function getToken(token) {
-    return db.getToken(token);
-}
-
+site.getSlug = getSlug;
 site.store = store;
 site.generateIndex = generateIndex;
 site.generateToken = generateToken;
+site.hasAuthorization = hasAuthorization;
 site.listTokens = listTokens;
-site.getToken = getToken;
 module.exports = site;

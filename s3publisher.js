@@ -11,6 +11,7 @@ function init(region, bucket) {
     var s3 = new AWS.S3({region: region});
     var putObject = nodefn.lift(s3.putObject.bind(s3));
     var getObject = nodefn.lift(s3.getObject.bind(s3));
+    var headObject = nodefn.lift(s3.headObject.bind(s3));
     var listObjects = nodefn.lift(s3.listObjects.bind(s3));
     return {
         put: function(path, obj, contentType) {
@@ -44,6 +45,15 @@ function init(region, bucket) {
             return getObject({Bucket: bucket, Key: normalizePath(path)}).
                 then(function(data) {
                     return data.Body;
+                });
+        },
+        exists: function(path) {
+            return headObject({Bucket: bucket, Key: normalizePath(path)}).
+                then(function() {
+                    return true;
+                }).
+                catch(function() {
+                    return false;
                 });
         },
         list: function() {

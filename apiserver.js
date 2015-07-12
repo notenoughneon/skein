@@ -7,6 +7,7 @@ var crypto = require('crypto');
 var nodefn = require('when/node');
 var site = require('./site');
 var util = require('util');
+var microformat = require('./microformat');
 
 app.set('views', './template');
 app.set('view engine', 'ejs');
@@ -87,15 +88,35 @@ app.post('/token', function(req, res) {
 });
 
 app.post('/micropub', function(req, res) {
-    res.status(500).send('Not implemented');
+    site.hasAuthorization(req, 'post').
+        then(function(authorized) {
+            if (!authorized)
+                return res.status(401);
+            site.getSlug(null).
+                then(function (slug) {
+                    var entry = new microformat.Entry(slug);
+                    entry.published[0] = new Date().toISOString();
+                    entry.author[0] = {
+                        url: [site.url]
+                    };
+                    entry.content[0] = {
+                        value: req.post.content,
+                        html: req.post.content
+                    };
+                    return entry;
+                }).
+                then(site.store).
+                then(site.generateIndex).
+                then(res.status(200).send('Created'));
+        });
 });
 
 app.get('/tokens', function(req, res) {
-   site.listTokens().then(res.json.bind(res));
+    site.listTokens().then(res.json.bind(res));
 });
 
 app.get('/tokens/:id', function(req, res) {
-   site.getToken(req.params.id).then(res.json.bind(res));
+    site.getToken(req.params.id).then(res.json.bind(res));
 });
 
 var server = app.listen(80, function (){
