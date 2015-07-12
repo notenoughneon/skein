@@ -10,6 +10,9 @@ var util = require('util');
 app.set('views', './template');
 app.set('view engine', 'ejs');
 
+// store the last code issued by the auth endpoint in memory
+var lastIssuedCode = null;
+
 function parsePost(req, res, next) {
     if (req.method === 'POST') {
         var busboy = new Busboy({headers: req.headers});
@@ -35,10 +38,6 @@ function logger(req, res, next) {
 app.use(parsePost);
 app.use(logger);
 
-app.get('/test', function(req, res) {
-    res.end();
-});
-
 app.get('/auth', function(req, res) {
     res.render('authform', {me: req.query.me,
         client_id: req.query.client_id,
@@ -49,29 +48,45 @@ app.get('/auth', function(req, res) {
 });
 
 app.post('/auth', function(req, res) {
-    if (req.post.password !== undefined) {
-        // post target for auth form
-        if (req.post.password === site.password) {
-            site.generateToken(req.post.client_id, req.post.scope).
-                then(function (code) {
-                    res.redirect(req.post.redirect_uri + '?' +
-                        querystring.stringify({code: code, state: req.post.state, me: req.post.me}));
-                });
-        } else {
-            res.status(403).send('Incorrect password');
-        }
+    if (req.post.password === site.password) {
+        nodefn.call(crypto.randomBytes, 18).
+            then(function (buf) {
+                var code = buf.toString('base64');
+                lastIssuedCode = {
+                    code: code,
+                    client_id: req.post.client_id,
+                    scope: req.post.scope,
+                    date: new Date()
+                };
+                res.redirect(req.post.redirect_uri + '?' +
+                querystring.stringify({code: code, state: req.post.state, me: site.url}));
+            });
     } else {
-        // verification callback from remote web app
-        site.verifyToken(req.post.code, req.post.redirect_uri, req.post.client_id, req.post.state).
+        res.status(403).send('Incorrect password');
+    }
+});
+
+app.post('/token', function(req, res) {
+    if (lastIssuedCode !== null &&
+        lastIssuedCode.code === req.post.code &&
+        ((new Date() - lastIssuedCode.date) < 60 * 1000)) {
+        site.generateToken(lastIssuedCode.client_id, lastIssuedCode.scope).
             then(function (result) {
+                lastIssuedCode = null;
                 if (result === undefined) {
-                    res.status(404).send('Not found');
+                    res.status(500);
                 } else {
                     res.type('application/x-www-form-urlencoded');
-                    res.send(querystring.stringify(result));
+                    res.send(querystring.stringify({access_token: result.token, scope: result.scope, me: site.url}));
                 }
-    });
+            });
+    } else {
+        res.status(401);
     }
+});
+
+app.post('/micropub', function(req, res) {
+    res.status(500).send('Not implemented');
 });
 
 app.get('/tokens', function(req, res) {

@@ -17,6 +17,7 @@
   },
   "entriesPerPage": 10,
   "authUrl": "http://api.notenoughneon.com/auth",
+  "tokenUrl": "http://api.notenoughneon.com/token",
   "micropubUrl": "http://api.notenoughneon.com/micropub",
   "publisherConfig": {
     "type": "s3",

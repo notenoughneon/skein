@@ -86,15 +86,6 @@ function generateToken(client_id, scope) {
         });
 }
 
-function verifyToken(code, redirect_uri, client_id, state) {
-    return db.getToken(code).
-        then(function (data) {
-            if (data === undefined)
-                return null;
-            return {me: site.url, scope: data.scope};
-        })
-}
-
 function listTokens() {
     return db.listTokens();
 }
@@ -106,7 +97,6 @@ function getToken(token) {
 site.store = store;
 site.generateIndex = generateIndex;
 site.generateToken = generateToken;
-site.verifyToken = verifyToken;
 site.listTokens = listTokens;
 site.getToken = getToken;
 module.exports = site;

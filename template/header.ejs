@@ -13,8 +13,9 @@
     <!-- Custom styles for this template -->
     <link href="/css/blog.css" rel="stylesheet">
     <!-- indieweb api endpoints -->
-    <link href="<%= site.authUrl %>" rel="authorization_endpoint">
-    <link href="<%= site.micropubUrl %>" rel="micropub">
+    <link rel="authorization_endpoint" href="<%= site.authUrl %>">
+    <link rel="token_endpoint" href="<%= site.tokenUrl %>">
+    <link rel="micropub" href="<%= site.micropubUrl %>">
 
   </head>
 
