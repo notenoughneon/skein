@@ -2,6 +2,7 @@ var fs = require('fs');
 var ejs = require('ejs');
 var url = require('url');
 var crypto = require('crypto');
+var when = require('when');
 var nodefn = require('when/node');
 var util = require('./util');
 
@@ -114,7 +115,7 @@ function hasAuthorization(req, scope) {
     } else if (req.post.access_token !== undefined) {
         var token = req.post.access_token;
     } else {
-        return false;
+        return when.resolve(false);
     }
     return db.getToken(token).
         then(function (row) {
