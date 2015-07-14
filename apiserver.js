@@ -41,12 +41,7 @@ app.use(parsePost);
 app.use(logger);
 
 app.get('/auth', function(req, res) {
-    res.render('authform', {me: req.query.me,
-        client_id: req.query.client_id,
-        redirect_uri: req.query.redirect_uri,
-        state: req.query.state,
-        response_type: req.query.response_type,
-        scope: req.query.scope});
+    res.render('authform', req.query);
 });
 
 app.post('/auth', function(req, res) {
