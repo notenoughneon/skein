@@ -63,6 +63,14 @@ function readWithFallback(filepath, extensions) {
     }));
 }
 
+function existsWithFallback(filepath, extensions) {
+    return when.any(extensions.map(function (ext) {
+        return stat(filepath + ext);
+    })).
+        then(function() { return true; }).
+        catch(function() { return false; });
+}
+
 function copy(src, dst) {
     return fs.createReadStream(src).pipe(fs.createWriteStream(dst));
 }
@@ -72,4 +80,5 @@ exports.flatten = flatten;
 exports.writeFile = writeFile;
 exports.walkDir = walkDir;
 exports.readWithFallback = readWithFallback;
+exports.existsWithFallback = existsWithFallback;
 exports.copy = copy;
