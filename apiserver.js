@@ -86,7 +86,7 @@ app.post('/micropub', function(req, res) {
     site.hasAuthorization(req, 'post').
         then(function(authorized) {
             if (!authorized)
-                return res.status(401);
+                return res.status(401).send('Unauthorized');
             site.getSlug(null).
                 then(function (slug) {
                     var entry = new microformat.Entry(slug);

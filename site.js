@@ -110,16 +110,21 @@ function generateToken(client_id, scope) {
 }
 
 function hasAuthorization(req, scope) {
-    if (req.headers.Authorization !== undefined) {
-        var token = /^Bearer (.+)/.exec(req.headers.Authorization)[1];
+    var token;
+    if (req.headers.authorization !== undefined) {
+        var re = /^bearer (.+)/i;
+        var match = re.exec(req.headers.authorization);
+        if (match === null || match[1] === undefined)
+            return when.resolve(false);
+        token = match[1];
     } else if (req.post.access_token !== undefined) {
-        var token = req.post.access_token;
+        token = req.post.access_token;
     } else {
         return when.resolve(false);
     }
     return db.getToken(token).
         then(function (row) {
-            return row.scope === scope;
+            return row !== undefined && row.scope === scope;
         });
 }
 
