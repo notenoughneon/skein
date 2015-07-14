@@ -59,7 +59,7 @@ app.post('/auth', function(req, res) {
                 querystring.stringify({code: code, state: req.post.state, me: site.url}));
             });
     } else {
-        res.status(403).send('Incorrect password');
+        res.sendStatus(401);
     }
 });
 
@@ -71,14 +71,14 @@ app.post('/token', function(req, res) {
             then(function (result) {
                 lastIssuedCode = null;
                 if (result === undefined) {
-                    res.status(500);
+                    res.sendStatus(500);
                 } else {
                     res.type('application/x-www-form-urlencoded');
                     res.send(querystring.stringify({access_token: result.token, scope: result.scope, me: site.url}));
                 }
             });
     } else {
-        res.status(401);
+        res.sendStatus(401);
     }
 });
 
@@ -86,7 +86,7 @@ app.post('/micropub', function(req, res) {
     site.hasAuthorization(req, 'post').
         then(function(authorized) {
             if (!authorized)
-                return res.status(401).send('Unauthorized');
+                return res.sendStatus(401);
             site.getSlug(null).
                 then(function (slug) {
                     var entry = new microformat.Entry(slug);
@@ -102,7 +102,9 @@ app.post('/micropub', function(req, res) {
                 }).
                 then(site.store).
                 then(site.generateIndex).
-                then(res.status(200).send('Created'));
+                then(function() {
+                    res.sendStatus(201);
+                });
         });
 });
 
@@ -114,7 +116,7 @@ app.get('/tokens/:id', function(req, res) {
     site.getToken(req.params.id).then(res.json.bind(res));
 });
 
-var server = app.listen(80, function (){
+var server = app.listen(process.argv[2], function (){
     var address = server.address();
     console.log('Listening on %s:%s', address.address, address.port);
 });
