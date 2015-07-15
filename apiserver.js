@@ -32,8 +32,10 @@ function parsePost(req, res, next) {
 }
 
 function logger(req, res, next) {
-    util.log(util.format('%s %s\n%s', req.method, req.url,
-        util.inspect(req.method == 'POST' ? req.post : req.query)));
+    var parms = (req.method == 'POST' ? req.post : req.query);
+    util.log(util.format('%s %s %s', req.ip, req.method, req.url));
+    if (Object.keys(parms).length > 0)
+        console.log(util.format('%s', util.inspect(req.method == 'POST' ? req.post : req.query)));
     next();
 }
 
@@ -59,6 +61,7 @@ app.post('/auth', function(req, res) {
                 querystring.stringify({code: code, state: req.post.state, me: site.url}));
             });
     } else {
+        util.log('Failed password authentication from ' + req.ip);
         res.sendStatus(401);
     }
 });
@@ -78,6 +81,7 @@ app.post('/token', function(req, res) {
                 }
             });
     } else {
+        util.log('Failed token request from ' + req.ip);
         res.sendStatus(401);
     }
 });
@@ -85,35 +89,34 @@ app.post('/token', function(req, res) {
 app.post('/micropub', function(req, res) {
     site.hasAuthorization(req, 'post').
         then(function(authorized) {
-            if (!authorized)
-                return res.sendStatus(401);
-            site.getSlug(null).
-                then(function (slug) {
-                    var entry = new microformat.Entry(slug);
-                    entry.published[0] = new Date().toISOString();
-                    entry.author[0] = {
-                        url: [site.url]
-                    };
-                    entry.content[0] = {
-                        value: req.post.content,
-                        html: req.post.content
-                    };
-                    return entry;
-                }).
-                then(site.store).
-                then(site.generateIndex).
-                then(function() {
-                    res.sendStatus(201);
-                });
+            if (!authorized) {
+                util.log('Failed micropub post from ' + req.ip);
+                res.sendStatus(401);
+            } else {
+                site.getSlug(null).
+                    then(function (slug) {
+                        var entry = new microformat.Entry(slug);
+                        entry.published[0] = new Date().toISOString();
+                        entry.author[0] = {
+                            url: [site.url]
+                        };
+                        entry.content[0] = {
+                            value: req.post.content,
+                            html: req.post.content
+                        };
+                        return entry;
+                    }).
+                    then(site.store).
+                    then(site.generateIndex).
+                    then(function () {
+                        res.sendStatus(201);
+                    });
+            }
         });
 });
 
 app.get('/tokens', function(req, res) {
     site.listTokens().then(res.json.bind(res));
-});
-
-app.get('/tokens/:id', function(req, res) {
-    site.getToken(req.params.id).then(res.json.bind(res));
 });
 
 var server = app.listen(process.argv[2], function (){
