@@ -109,33 +109,10 @@ function generateToken(client_id, scope) {
         });
 }
 
-function hasAuthorization(req, scope) {
-    var token;
-    if (req.headers.authorization !== undefined) {
-        var re = /^bearer (.+)/i;
-        var match = re.exec(req.headers.authorization);
-        if (match === null || match[1] === undefined)
-            return when.resolve(false);
-        token = match[1];
-    } else if (req.post.access_token !== undefined) {
-        token = req.post.access_token;
-    } else {
-        return when.resolve(false);
-    }
-    return db.getToken(token).
-        then(function (row) {
-            return row !== undefined && row.scope === scope;
-        });
-}
-
-function listTokens() {
-    return db.listTokens();
-}
-
 site.getSlug = getSlug;
 site.store = store;
 site.generateIndex = generateIndex;
 site.generateToken = generateToken;
-site.hasAuthorization = hasAuthorization;
-site.listTokens = listTokens;
+site.getToken = db.getToken;
+site.listTokens = db.listTokens;
 module.exports = site;

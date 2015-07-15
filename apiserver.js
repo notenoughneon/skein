@@ -31,6 +31,35 @@ function parsePost(req, res, next) {
     }
 }
 
+function denyAccess(req, res) {
+    util.log('Access denied');
+    res.sendStatus(401);
+}
+
+function requireAuth(scope) {
+    return function(req, res, next) {
+        var token;
+        if (req.headers.authorization !== undefined) {
+            var re = /^bearer (.+)/i;
+            var match = re.exec(req.headers.authorization);
+            if (match === null || match[1] === undefined)
+                return denyAccess(req, res);
+            token = match[1];
+        } else if (req.post.access_token !== undefined) {
+            token = req.post.access_token;
+        } else {
+            return denyAccess(req, res);
+        }
+        site.getToken(token).
+            then(function (row) {
+                if (row === undefined || row.scope !== scope)
+                    return denyAccess(req, res);
+                next();
+            });
+
+    };
+}
+
 function rateLimit(count, cooldown) {
     var lastreq = new Date();
     var capacity = count;
@@ -101,32 +130,24 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
     }
 });
 
-app.post('/micropub', function(req, res) {
-    site.hasAuthorization(req, 'post').
-        then(function(authorized) {
-            if (!authorized) {
-                util.log('Failed micropub post from ' + req.ip);
-                res.sendStatus(401);
-            } else {
-                site.getSlug(null).
-                    then(function (slug) {
-                        var entry = new microformat.Entry(slug);
-                        entry.published[0] = new Date().toISOString();
-                        entry.author[0] = {
-                            url: [site.url]
-                        };
-                        entry.content[0] = {
-                            value: req.post.content,
-                            html: req.post.content
-                        };
-                        return entry;
-                    }).
-                    then(site.store).
-                    then(site.generateIndex).
-                    then(function () {
-                        res.sendStatus(201);
-                    });
-            }
+app.post('/micropub', requireAuth('post'), function(req, res) {
+    site.getSlug(null).
+        then(function (slug) {
+            var entry = new microformat.Entry(slug);
+            entry.published[0] = new Date().toISOString();
+            entry.author[0] = {
+                url: [site.url]
+            };
+            entry.content[0] = {
+                value: req.post.content,
+                html: req.post.content
+            };
+            return entry;
+        }).
+        then(site.store).
+        then(site.generateIndex).
+        then(function () {
+            res.sendStatus(201);
         });
 });
 
