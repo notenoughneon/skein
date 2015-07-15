@@ -31,6 +31,21 @@ function parsePost(req, res, next) {
     }
 }
 
+function rateLimit(count, cooldown) {
+    var lastreq = new Date();
+    var capacity = count;
+    return function(req, res, next) {
+        capacity = Math.min(capacity + (new Date() - lastreq) * (count / cooldown), count);
+        if (capacity >= 1) {
+            capacity--;
+            lastreq = new Date();
+            next();
+        } else {
+            res.sendStatus(429);
+        }
+    };
+}
+
 function logger(req, res, next) {
     var parms = (req.method == 'POST' ? req.post : req.query);
     util.log(util.format('%s %s %s', req.ip, req.method, req.url));
@@ -46,7 +61,7 @@ app.get('/auth', function(req, res) {
     res.render('authform', req.query);
 });
 
-app.post('/auth', function(req, res) {
+app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
     if (req.post.password === site.password) {
         nodefn.call(crypto.randomBytes, 18).
             then(function (buf) {
@@ -66,7 +81,7 @@ app.post('/auth', function(req, res) {
     }
 });
 
-app.post('/token', function(req, res) {
+app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
     if (lastIssuedCode !== null &&
         lastIssuedCode.code === req.post.code &&
         ((new Date() - lastIssuedCode.date) < 60 * 1000)) {
