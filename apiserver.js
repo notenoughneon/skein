@@ -151,9 +151,9 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         });
 });
 
-app.get('/tokens', function(req, res) {
-    site.listTokens().then(res.json.bind(res));
-});
+//app.get('/tokens', function(req, res) {
+//    site.listTokens().then(res.json.bind(res));
+//});
 
 var server = app.listen(process.argv[2], function (){
     var address = server.address();
