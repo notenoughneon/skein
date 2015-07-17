@@ -47,25 +47,33 @@ var templateUtils = {
     truncate: truncate
 };
 
-function getSlug(title) {
+function getNextAvailable(seed, prefix) {
+    var n = seed;
+    function chain() {
+        return site.publisher.exists(prefix + n).
+            then(function (exists) {
+                if (exists) {
+                    n++;
+                    return chain();
+                } else {
+                    return prefix + n;
+                }
+            })
+    }
+    return chain();
+
+}
+
+function getSlug(name) {
     var now = new Date();
     var datepart = '/' + now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate();
-    if (title !== null) {
-        throw new Error('Not implemented');
+    if (name !== undefined) {
+        var namepart = name.toLowerCase();
+        namepart = namepart.replace(/[]^a-z0-9 /,'');
+        namepart = namepart.replace(/ +/, '-');
+        return getNextAvailable("", datepart + '/' + namepart);
     } else {
-        var n = 1;
-        function chain() {
-            return site.publisher.exists(datepart + '/' + n).
-                then(function (exists) {
-                    if (exists) {
-                        n++;
-                        return chain();
-                    } else {
-                        return datepart + '/' + n;
-                    }
-                })
-        }
-        return chain();
+        return getNextAvailable(1, datepart + '/');
     }
 }
 

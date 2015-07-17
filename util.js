@@ -75,6 +75,12 @@ function copy(src, dst) {
     return fs.createReadStream(src).pipe(fs.createWriteStream(dst));
 }
 
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').
+        replace(/</g, '&lt;').
+        replace(/>/g, '&gt;');
+}
+
 exports.dump = dump;
 exports.flatten = flatten;
 exports.writeFile = writeFile;
@@ -82,3 +88,4 @@ exports.walkDir = walkDir;
 exports.readWithFallback = readWithFallback;
 exports.existsWithFallback = existsWithFallback;
 exports.copy = copy;
+exports.escapeHtml = escapeHtml;
