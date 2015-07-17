@@ -133,16 +133,14 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
 app.post('/micropub', requireAuth('post'), function(req, res) {
     site.getSlug(req.post.name).
         then(function (slug) {
-            var entry = new microformat.Entry(slug);
-            entry.published[0] = new Date().toISOString();
-            entry.author[0] = {
-                url: [site.url]
-            };
-            entry.content[0] = {
-                value: req.post.content,
-                html: req.post.content
-            };
-            entry.name[0] = req.post.name === undefined ? req.post.content : req.post.name;
+            if (req.post.slug === undefined)
+                req.post.slug = slug;
+            var entry = new microformat.Entry(req.post);
+            entry.author = [{
+                url: [site.url],
+                name: [site.author.name],
+                photo: [site.author.photo]
+            }];
             return entry;
         }).
         then(site.store).

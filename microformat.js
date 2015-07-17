@@ -1,5 +1,6 @@
 var parser = require('microformat-node');
 var nodefn = require('when/node');
+var util = require('./util');
 var url = require('url');
 var parseHtml = nodefn.lift(parser.parseHtml);
 
@@ -93,8 +94,29 @@ function Entry(mf) {
     this.children = [];
 
     if (typeof(mf) === 'string') {
+        // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
         this.url = [mf];
+    } else if (mf.h !== undefined && mf.h === 'entry') {
+        // micropub object
+        if (mf.slug === undefined)
+            throw new Exception("slug is required");
+        this.url = [mf.slug];
+        if (mf.published !== undefined)
+            this.published = [mf.published];
+        else
+            this.published = [new Date().toISOString()];
+        if (mf.content === undefined)
+            throw new Exception("content is required");
+        this.content = [{
+            value: mf.content,
+            html: util.escapeHtml(mf.content)
+        }];
+        if (mf.name !== undefined)
+            this.name = [mf.name];
+        else
+            this.name = [this.content[0].value];
     } else if (mf.properties !== undefined) {
+        // mf parser output
         this.name = prop(mf, 'name');
         this.published = prop(mf, 'published');
         this.content = prop(mf, 'content');
@@ -123,6 +145,7 @@ function Entry(mf) {
                 return new Entry(c);
             });
     } else {
+        // deserialized json
         this.name = mf.name;
         this.published = mf.published;
         this.content = mf.content;
@@ -158,11 +181,13 @@ function Card(mf) {
     this.url = [];
     this.uid = [];
     if (mf.properties !== undefined) {
+        // mf parser output
         this.name = prop(mf, 'name');
         this.photo = prop(mf, 'photo');
         this.url = prop(mf, 'url');
         this.uid = prop(mf, 'uid');
     } else {
+        // deserialized json
         this.name = mf.name;
         this.photo = mf.photo;
         this.url = mf.url;
