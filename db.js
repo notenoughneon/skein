@@ -84,6 +84,10 @@ function init(dbfile) {
             return get('SELECT * FROM tokens WHERE token=?', token);
         },
 
+        deleteToken: function(token) {
+            return run('DELETE FROM tokens WHERE token=?', token);
+        },
+
         listTokens: function() {
             return all('SELECT * FROM tokens ORDER BY date_issued DESC');
         }

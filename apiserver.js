@@ -45,7 +45,7 @@ function requireAuth(scope) {
             if (match === null || match[1] === undefined)
                 return denyAccess(req, res);
             token = match[1];
-        } else if (req.post.access_token !== undefined) {
+        } else if (req.post !== undefined && req.post.access_token !== undefined) {
             token = req.post.access_token;
         } else {
             return denyAccess(req, res);
@@ -150,9 +150,13 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         });
 });
 
-//app.get('/tokens', function(req, res) {
-//    site.listTokens().then(res.json.bind(res));
-//});
+app.get('/tokens', requireAuth('admin'), function(req, res) {
+    site.listTokens().then(res.json.bind(res));
+});
+
+app.delete('/tokens/*', requireAuth('admin'), function(req, res) {
+    site.deleteToken(req.params[0]).then(res.json.bind(res));
+});
 
 var server = app.listen(process.argv[2], function (){
     var address = server.address();

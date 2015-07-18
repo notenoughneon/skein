@@ -122,5 +122,6 @@ site.store = store;
 site.generateIndex = generateIndex;
 site.generateToken = generateToken;
 site.getToken = db.getToken;
+site.deleteToken = db.deleteToken;
 site.listTokens = db.listTokens;
 module.exports = site;
