@@ -52,7 +52,7 @@ function requireAuth(scope) {
         }
         site.getToken(token).
             then(function (row) {
-                if (row === undefined || row.scope !== scope)
+                if (row === undefined || !row.scope.split(' ').some(function(s) {return s === scope;}))
                     return denyAccess(req, res);
                 next();
             });
