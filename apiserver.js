@@ -146,6 +146,7 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         then(site.store).
         then(site.generateIndex).
         then(function () {
+            res.location(req.post.slug);
             res.sendStatus(201);
         });
 });
