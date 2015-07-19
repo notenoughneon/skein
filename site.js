@@ -69,8 +69,8 @@ function getSlug(name) {
     var datepart = '/' + now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate();
     if (name !== undefined) {
         var namepart = name.toLowerCase();
-        namepart = namepart.replace(/[]^a-z0-9 /,'');
-        namepart = namepart.replace(/ +/, '-');
+        namepart = namepart.replace(/[^a-z0-9 ]/g,'');
+        namepart = namepart.replace(/ +/g, '-');
         return getNextAvailable("", datepart + '/' + namepart);
     } else {
         return getNextAvailable(1, datepart + '/');
