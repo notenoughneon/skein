@@ -3,6 +3,9 @@ var path = require('path');
 var util = require('util');
 var when = require('when');
 var nodefn = require('when/node');
+var cheerio = require('cheerio');
+var request = require('request');
+var parser = require('microformat-node');
 
 var readFile = nodefn.lift(fs.readFile);
 var readdir = nodefn.lift(fs.readdir);
@@ -93,6 +96,40 @@ function autoLink(str) {
     return str.replace(urlRe, replacer);
 }
 
+function getLinks(html) {
+    var $ = cheerio.load(html);
+    return $('a').toArray().map(function(a){return a.attribs.href;});
+}
+
+function getEndpoint(target) {
+    return nodefn.call(request, target).
+        then(function (res) {
+            return nodefn.call(parser.parseHtml, res[1], {baseUrl: target});
+        }).
+        then(function (mf) {
+            if (mf.rels['webmention'] !== undefined)
+                return mf.rels['webmention'][0];
+            else if (mf.rels['http://webmention.org/'] !== undefined)
+                return mf.rels['http://webmention.org/'][0];
+            else
+                throw new Error('No webmention endpoint');
+        });
+}
+
+function webmention(source, target) {
+    return getEndpoint(target).
+        then(function (endpoint) {
+            return nodefn.call(request, {uri:endpoint, method:'POST', form:{source:source, target:target}}).
+                then(function (res) {
+                    var status = res[0].statusCode;
+                    if (status !== 200 && status !== 202)
+                        throw new Error('Webmention endpoint returned status ' + status);
+                    return;
+                });
+        });
+}
+
+
 exports.dump = dump;
 exports.flatten = flatten;
 exports.writeFile = writeFile;
@@ -102,3 +139,5 @@ exports.existsWithFallback = existsWithFallback;
 exports.copy = copy;
 exports.escapeHtml = escapeHtml;
 exports.autoLink = autoLink;
+exports.getLinks = getLinks;
+exports.webmention = webmention;
