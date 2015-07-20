@@ -109,7 +109,7 @@ function Entry(mf) {
             throw new Exception("content is required");
         this.content = [{
             value: mf.content,
-            html: util.escapeHtml(mf.content)
+            html: util.autoLink(util.escapeHtml(mf.content))
         }];
         if (mf.name !== undefined)
             this.name = [mf.name];

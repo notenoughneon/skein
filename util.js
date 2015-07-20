@@ -81,6 +81,18 @@ function escapeHtml(str) {
         replace(/>/g, '&gt;');
 }
 
+var urlRe = /(https?:\/\/[\w-]+(\.[\w-]+)*(:[0-9]+)?(\/[\w\.\/%+?=&,;@#~()-]*)?)/ig;
+
+function replacer(match, p1) {
+    // un-html-escape &'s in url
+    var fixedUrl = p1.replace('&amp;', '&');
+    return '<a href="' + fixedUrl + '">' + p1 + '</a>';
+}
+
+function autoLink(str) {
+    return str.replace(urlRe, replacer);
+}
+
 exports.dump = dump;
 exports.flatten = flatten;
 exports.writeFile = writeFile;
@@ -89,3 +101,4 @@ exports.readWithFallback = readWithFallback;
 exports.existsWithFallback = existsWithFallback;
 exports.copy = copy;
 exports.escapeHtml = escapeHtml;
+exports.autoLink = autoLink;
