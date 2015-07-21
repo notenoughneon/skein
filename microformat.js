@@ -202,6 +202,19 @@ Entry.prototype = {
                         concat(this.likeOf).
                         map(function(r) { return r.url[0]; });
                 },
+    sendWebmentions: function() {
+        var allLinks = this.references();
+        if (this.content.length > 0)
+            allLinks = allLinks.concat(util.getLinks(this.content[0].html));
+        return when.map(allLinks, function(link) {
+            try {
+                util.webmention(this.url[0], link);
+                console.log('Sent webmention to ' + link)
+            } catch (err) {
+                console.log('Failed webmention to ' + link)
+            }
+        });
+    },
     isReply: function() {
                  return this.replyTo.length > 0;
              },

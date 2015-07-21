@@ -131,11 +131,12 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
 });
 
 app.post('/micropub', requireAuth('post'), function(req, res) {
+    var entry;
     site.getSlug(req.post.name).
         then(function (slug) {
             if (req.post.slug === undefined)
                 req.post.slug = slug;
-            var entry = new microformat.Entry(req.post);
+            entry = new microformat.Entry(req.post);
             entry.author = [{
                 url: [site.url],
                 name: [site.author.name],
@@ -145,6 +146,7 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         }).
         then(site.store).
         then(site.generateIndex).
+        then(entry.sendWentions.bind(entry)).
         then(function () {
             res.location(req.post.slug);
             res.sendStatus(201);
