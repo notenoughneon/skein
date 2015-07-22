@@ -109,6 +109,24 @@ function generateIndex() {
     return chain();
 }
 
+function resolve(permalink) {
+    if (url.parse(permalink).protocol !== null)
+        return permalink;
+    return url.resolve(site.url, permalink);
+}
+
+function sendWebmentionsFor(entry) {
+    return when.map(entry.allLinks(), function(link) {
+        try {
+            util.webmention(resolve(entry.url[0]), link);
+            console.log('Sent webmention to ' + link);
+        } catch (err) {
+            console.log('Failed to send webmention to ' + link);
+            console.log(err.stack);
+        }
+    });
+}
+
 function generateToken(client_id, scope) {
     return nodefn.call(crypto.randomBytes, 18).
         then(function (buf) {
@@ -120,6 +138,7 @@ function generateToken(client_id, scope) {
 site.getSlug = getSlug;
 site.store = store;
 site.generateIndex = generateIndex;
+site.sendWebmentionsFor = sendWebmentionsFor;
 site.generateToken = generateToken;
 site.getToken = db.getToken;
 site.deleteToken = db.deleteToken;
