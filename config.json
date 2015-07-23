@@ -20,9 +20,8 @@
   "tokenUrl": "http://api.notenoughneon.com/token",
   "micropubUrl": "http://api.notenoughneon.com/micropub",
   "publisherConfig": {
-    "type": "s3",
-    "region": "us-west-2",
-    "bucket": "notenoughneon.com"
+    "type": "file",
+    "root": "static"
   },
   "password": "cactus123"
 }

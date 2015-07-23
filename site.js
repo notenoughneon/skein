@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var when = require('when');
 var nodefn = require('when/node');
 var util = require('./util');
+var microformat = require('./microformat');
 
 var site = JSON.parse(fs.readFileSync('config.json'));
 var db = require('./db').init('index.db');
@@ -77,6 +78,10 @@ function getSlug(name) {
     }
 }
 
+function get(url) {
+    return db.get(getPathForUrl(url));
+}
+
 function store(entry) {
     return db.store(entry).
         then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry, utils: templateUtils})).
@@ -118,13 +123,35 @@ function resolve(permalink) {
 function sendWebmentionsFor(entry) {
     return when.map(entry.allLinks(), function(link) {
         try {
-            util.webmention(resolve(entry.url[0]), link);
+            util.sendWebmention(resolve(entry.url[0]), link);
             console.log('Sent webmention to ' + link);
         } catch (err) {
             console.log('Failed to send webmention to ' + link);
             console.log(err.stack);
         }
     });
+}
+
+function receiveWebmention(source, target) {
+    return util.getPage(source).
+        then(function (html) {
+            if (!util.isMentionOf(html, target)) {
+                throw new Error('Didn\'t find mention on source page');
+            } else {
+                var targetEntry;
+                return get(target).
+                    then(function (entry) {
+                        if (entry === undefined)
+                            throw new Error('Target ' + target + ' not found');
+                        targetEntry = entry;
+                        return microformat.getHEntryWithCard(html, source);
+                    }).
+                    then(function (sourceEntry) {
+                        targetEntry.children.push(sourceEntry);
+                        return site.store(targetEntry);
+                    });
+            }
+        });
 }
 
 function generateToken(client_id, scope) {
@@ -139,6 +166,7 @@ site.getSlug = getSlug;
 site.store = store;
 site.generateIndex = generateIndex;
 site.sendWebmentionsFor = sendWebmentionsFor;
+site.receiveWebmention = receiveWebmention;
 site.generateToken = generateToken;
 site.getToken = db.getToken;
 site.deleteToken = db.deleteToken;

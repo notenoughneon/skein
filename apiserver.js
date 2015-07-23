@@ -153,6 +153,18 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         });
 });
 
+app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
+    if (req.post.source === undefined || req.post.target === undefined)
+        return res.status(400).send('"source" and "target" parameters are required');
+    site.receiveWebmention(req.post.source, req.post.target).
+        then(function () {
+            res.sendStatus(200);
+        }).
+        catch(function (e) {
+            res.status(400).send(e.stack);
+        });
+});
+
 app.get('/tokens', requireAuth('admin'), function(req, res) {
     site.listTokens().then(res.json.bind(res));
 });

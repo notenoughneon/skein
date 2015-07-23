@@ -101,7 +101,11 @@ function getLinks(html) {
     return $('a').toArray().map(function(a){return a.attribs.href;});
 }
 
-function getEndpoint(target) {
+function isMentionOf(html, permalink) {
+    return getLinks(html).some(function(l){return l === permalink;});
+}
+
+function getWebmentionEndpoint(target) {
     return nodefn.call(request, target).
         then(function (res) {
             return nodefn.call(parser.parseHtml, res[1], {baseUrl: target});
@@ -116,8 +120,8 @@ function getEndpoint(target) {
         });
 }
 
-function webmention(source, target) {
-    return getEndpoint(target).
+function sendWebmention(source, target) {
+    return getWebmentionEndpoint(target).
         then(function (endpoint) {
             return nodefn.call(request, {uri:endpoint, method:'POST', form:{source:source, target:target}}).
                 then(function (res) {
@@ -127,6 +131,16 @@ function webmention(source, target) {
                     return;
                 });
         });
+}
+
+function getPage(permalink) {
+    return nodefn.call(request, {uri: permalink}).
+        then(function (res) {
+            var status = res[0].statusCode;
+            if (status >= 200 && status <= 299)
+                return res[1];
+            throw new Error('Got statusCode ' + status);
+        })
 }
 
 
@@ -140,4 +154,6 @@ exports.copy = copy;
 exports.escapeHtml = escapeHtml;
 exports.autoLink = autoLink;
 exports.getLinks = getLinks;
-exports.webmention = webmention;
+exports.isMentionOf = isMentionOf;
+exports.sendWebmention = sendWebmention;
+exports.getPage = getPage;
