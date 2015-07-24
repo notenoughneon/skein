@@ -82,6 +82,17 @@ function get(url) {
     return db.get(getPathForUrl(url));
 }
 
+function reIndex() {
+    return site.publisher.list().
+        then(function (keys) {
+            return when.map(keys, function (key) {
+                return site.publisher.get(key).
+                    then(microformat.getHEntryWithCard).
+                    then(db.store);
+            });
+        });
+}
+
 function store(entry) {
     return db.store(entry).
         then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry, utils: templateUtils})).
