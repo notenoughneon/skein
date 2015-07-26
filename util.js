@@ -63,6 +63,37 @@ function copy(src, dst) {
     return fs.createReadStream(src).pipe(fs.createWriteStream(dst));
 }
 
+function inferMimetype(filename) {
+    switch (path.extname(filename).toLowerCase()) {
+        case '.html':
+            return 'text/html';
+        case '.css':
+            return 'text/css';
+        case '.js':
+            return 'application/javascript';
+        case '.jpg':
+        case '.jpeg':
+            return 'image/jpeg';
+            break;
+        case '.gif':
+            return 'image/gif';
+            break;
+        case '.png':
+            return 'image/png';
+            break;
+        case '.mp3':
+            return 'audio/mpeg';
+            break;
+        case '.ogg':
+            return 'audio/ogg';
+            break;
+
+        default:
+            return 'application/octet-stream';
+    }
+}
+
+
 function escapeHtml(str) {
     return str.replace(/&/g, '&amp;').
         replace(/</g, '&lt;').
@@ -136,6 +167,7 @@ exports.walkDir = walkDir;
 exports.readWithFallback = readWithFallback;
 exports.existsWithFallback = existsWithFallback;
 exports.copy = copy;
+exports.inferMimetype = inferMimetype;
 exports.escapeHtml = escapeHtml;
 exports.autoLink = autoLink;
 exports.getLinks = getLinks;

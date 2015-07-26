@@ -1,6 +1,5 @@
 var AWS = require('aws-sdk');
 var nodefn = require('when/node');
-var pathlib = require('path');
 
 // S3 doesn't like leading slashes
 function normalizePath(p) {
@@ -16,29 +15,7 @@ function init(config) {
     return {
         put: function(path, obj, contentType) {
             var params = {Bucket: config.bucket, Key: normalizePath(path), Body: obj};
-            if (contentType !== undefined)
-                params.ContentType = contentType;
-            else {
-                //try to guess from file extension
-                switch (pathlib.extname(path).toLowerCase()) {
-                    case '.jpg':
-                    case '.jpeg':
-                        params.ContentType = 'image/jpeg';
-                        break;
-                    case '.gif':
-                        params.ContentType = 'image/gif';
-                        break;
-                    case '.png':
-                        params.ContentType = 'image/png';
-                        break;
-                    case '.mp3':
-                        params.ContentType = 'audio/mpeg';
-                        break;
-                    case '.ogg':
-                        params.ContentType = 'audio/ogg';
-                        break;
-                }
-            }
+            params.ContentType = contentType !== undefined ? contentType : inferMimetype(path);
             return putObject(params);
         },
         get: function(path) {

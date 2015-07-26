@@ -3,20 +3,12 @@ var pathlib = require('path');
 var nodefn = require('when/node');
 var util = require('./util');
 
-function inferMimetype(filename) {
-    switch (pathlib.extname(filename)) {
-        case '.html':
-            return 'text/html';
-        default:
-            return 'application/octet-stream';
-    }
-}
 
 function readWithFallback(filepath, extensions) {
     return when.any(extensions.map(function (ext) {
         return nodefn.call(fs.readFile, filepath + ext).
             then(function(data) {
-                return {Body: data, ContentType: inferMimetype(filepath + ext)};
+                return {Body: data, ContentType: util.inferMimetype(filepath + ext)};
             });
     }));
 }
