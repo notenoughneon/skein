@@ -7,15 +7,15 @@ function normalizePath(p) {
     return p.split('/').filter(function(elt) { return elt != ''; }).join('/');
 }
 
-function init(region, bucket) {
-    var s3 = new AWS.S3({region: region});
+function init(config) {
+    var s3 = new AWS.S3({region: config.region});
     var putObject = nodefn.lift(s3.putObject.bind(s3));
     var getObject = nodefn.lift(s3.getObject.bind(s3));
     var headObject = nodefn.lift(s3.headObject.bind(s3));
     var listObjects = nodefn.lift(s3.listObjects.bind(s3));
     return {
         put: function(path, obj, contentType) {
-            var params = {Bucket: bucket, Key: normalizePath(path), Body: obj};
+            var params = {Bucket: config.bucket, Key: normalizePath(path), Body: obj};
             if (contentType !== undefined)
                 params.ContentType = contentType;
             else {
@@ -42,10 +42,10 @@ function init(region, bucket) {
             return putObject(params);
         },
         get: function(path) {
-            return getObject({Bucket: bucket, Key: normalizePath(path)});
+            return getObject({Bucket: config.bucket, Key: normalizePath(path)});
         },
         exists: function(path) {
-            return headObject({Bucket: bucket, Key: normalizePath(path)}).
+            return headObject({Bucket: config.bucket, Key: normalizePath(path)}).
                 then(function() {
                     return true;
                 }).
@@ -55,7 +55,7 @@ function init(region, bucket) {
         },
         list: function() {
             // FIXME: handle truncated results
-            return listObjects({Bucket: bucket}).
+            return listObjects({Bucket: config.bucket}).
                 then(function(data) {
                     return data.Contents.map(function(o) {
                        return o.Key;

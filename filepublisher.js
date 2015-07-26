@@ -29,18 +29,18 @@ function existsWithFallback(filepath, extensions) {
         catch(function() { return false; });
 }
 
-function init(root) {
+function init(config) {
     return {
         put: function(path, obj, contentType) {
             if (contentType === 'text/html')
                 path = path + '.html';
-            return util.writeFile(pathlib.join(root, path), obj);
+            return util.writeFile(pathlib.join(config.root, path), obj);
         },
         get: function(path) {
-            return readWithFallback(pathlib.join(root, path), ['', '.html']);
+            return readWithFallback(pathlib.join(config.root, path), ['', '.html']);
         },
         exists: function(path) {
-            return existsWithFallback(pathlib.join(root, path), ['', '.html'])
+            return existsWithFallback(pathlib.join(config.root, path), ['', '.html'])
         },
         list: function() {
             return util.walkDir(root);

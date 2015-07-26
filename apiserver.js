@@ -1,3 +1,4 @@
+var fs = require('fs');
 var querystring = require('querystring');
 var express = require('express');
 var Busboy = require('busboy');
@@ -5,7 +6,7 @@ var app = express();
 var ejs = require('ejs');
 var crypto = require('crypto');
 var nodefn = require('when/node');
-var site = require('./site');
+var site = require('./site').init(fs.readFileSync('config.json'));
 var util = require('util');
 var microformat = require('./microformat');
 

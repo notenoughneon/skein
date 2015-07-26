@@ -19,7 +19,7 @@
   "authUrl": "http://api.notenoughneon.com/auth",
   "tokenUrl": "http://api.notenoughneon.com/token",
   "micropubUrl": "http://api.notenoughneon.com/micropub",
-  "publisherConfig": {
+  "publisher": {
     "type": "file",
     "root": "static"
   },
