@@ -42,10 +42,7 @@ function init(region, bucket) {
             return putObject(params);
         },
         get: function(path) {
-            return getObject({Bucket: bucket, Key: normalizePath(path)}).
-                then(function(data) {
-                    return data;
-                });
+            return getObject({Bucket: bucket, Key: normalizePath(path)});
         },
         exists: function(path) {
             return headObject({Bucket: bucket, Key: normalizePath(path)}).
