@@ -44,7 +44,7 @@ function init(region, bucket) {
         get: function(path) {
             return getObject({Bucket: bucket, Key: normalizePath(path)}).
                 then(function(data) {
-                    return data.Body;
+                    return data;
                 });
         },
         exists: function(path) {

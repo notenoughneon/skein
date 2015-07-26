@@ -3,6 +3,32 @@ var pathlib = require('path');
 var nodefn = require('when/node');
 var util = require('./util');
 
+function inferMimetype(filename) {
+    switch (pathlib.extname(filename)) {
+        case '.html':
+            return 'text/html';
+        default:
+            return 'application/octet-stream';
+    }
+}
+
+function readWithFallback(filepath, extensions) {
+    return when.any(extensions.map(function (ext) {
+        return nodefn.call(fs.readFile, filepath + ext).
+            then(function(data) {
+                return {Body: data, ContentType: inferMimetype(filepath + ext)};
+            });
+    }));
+}
+
+function existsWithFallback(filepath, extensions) {
+    return when.any(extensions.map(function (ext) {
+        return nodefn.call(fs.stat, filepath + ext);
+    })).
+        then(function() { return true; }).
+        catch(function() { return false; });
+}
+
 function init(root) {
     return {
         put: function(path, obj, contentType) {
@@ -11,10 +37,10 @@ function init(root) {
             return util.writeFile(pathlib.join(root, path), obj);
         },
         get: function(path) {
-            return util.readWithFallback(pathlib.join(root, path), ['', '.html']);
+            return readWithFallback(pathlib.join(root, path), ['', '.html']);
         },
         exists: function(path) {
-            return util.existsWithFallback(pathlib.join(root, path), ['', '.html'])
+            return existsWithFallback(pathlib.join(root, path), ['', '.html'])
         },
         list: function() {
             return util.walkDir(root);

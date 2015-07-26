@@ -7,7 +7,6 @@ var cheerio = require('cheerio');
 var request = require('request');
 var parser = require('microformat-node');
 
-var readFile = nodefn.lift(fs.readFile);
 var readdir = nodefn.lift(fs.readdir);
 var stat = nodefn.lift(fs.stat);
 
@@ -58,20 +57,6 @@ function walkDir(d) {
             else
                 return [d];
         });
-}
-
-function readWithFallback(filepath, extensions) {
-    return when.any(extensions.map(function (ext) {
-        return readFile(filepath + ext);
-    }));
-}
-
-function existsWithFallback(filepath, extensions) {
-    return when.any(extensions.map(function (ext) {
-        return stat(filepath + ext);
-    })).
-        then(function() { return true; }).
-        catch(function() { return false; });
 }
 
 function copy(src, dst) {
