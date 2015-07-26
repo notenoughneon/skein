@@ -6,7 +6,7 @@ var app = express();
 var ejs = require('ejs');
 var crypto = require('crypto');
 var nodefn = require('when/node');
-var site = require('./site').init(fs.readFileSync('config.json'));
+var site = require('./site').init(JSON.parse(fs.readFileSync('config.json')));
 var util = require('util');
 var microformat = require('./microformat');
 
@@ -92,7 +92,7 @@ app.get('/auth', function(req, res) {
 });
 
 app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
-    if (req.post.password === site.password) {
+    if (req.post.password === site.config.password) {
         nodefn.call(crypto.randomBytes, 18).
             then(function (buf) {
                 var code = buf.toString('base64');
@@ -103,7 +103,7 @@ app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
                     date: new Date()
                 };
                 res.redirect(req.post.redirect_uri + '?' +
-                querystring.stringify({code: code, state: req.post.state, me: site.url}));
+                querystring.stringify({code: code, state: req.post.state, me: site.config.url}));
             });
     } else {
         util.log('Failed password authentication from ' + req.ip);
@@ -122,7 +122,7 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
                     res.sendStatus(500);
                 } else {
                     res.type('application/x-www-form-urlencoded');
-                    res.send(querystring.stringify({access_token: result.token, scope: result.scope, me: site.url}));
+                    res.send(querystring.stringify({access_token: result.token, scope: result.scope, me: site.config.url}));
                 }
             });
     } else {
@@ -139,15 +139,17 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
                 req.post.slug = slug;
             entry = new microformat.Entry(req.post);
             entry.author = [{
-                url: [site.url],
-                name: [site.author.name],
-                photo: [site.author.photo]
+                url: [site.config.url],
+                name: [site.config.author.name],
+                photo: [site.config.author.photo]
             }];
             return entry;
         }).
         then(site.publish).
         then(site.generateIndex).
-        then(site.sendWentionsFor.bind(site, entry)).
+        then(function() {
+            return site.sendWebmentionsFor(entry);
+        }).
         then(function () {
             res.location(req.post.slug);
             res.sendStatus(201);

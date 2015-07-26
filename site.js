@@ -73,6 +73,7 @@ function init(config) {
     }
 
     return {
+        config: config,
         getToken: db.getToken,
         deleteToken: db.deleteToken,
         listTokens: db.listTokens,
@@ -123,7 +124,7 @@ function init(config) {
                     then(function (entries) {
                         if (entries.length == 0) return null;
                         return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
-                            {site: site, entries: entries, page: page, utils: templateUtils}).
+                            {site: config, entries: entries, page: page, utils: templateUtils}).
                             then(function (html) {
                                 return publisher.put(getPathForIndex(page), html, 'text/html');
                             }).

@@ -1,5 +1,6 @@
 var fs = require('fs');
 var pathlib = require('path');
+var when = require('when');
 var nodefn = require('when/node');
 var util = require('./util');
 
