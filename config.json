@@ -21,6 +21,7 @@
   "micropubUrl": "http://api.notenoughneon.com/micropub",
   "publisher": {
     "type": "file",
+    "postRegex": "20[0-9][0-9]/.*",
     "root": "static"
   },
   "password": "cactus123"
