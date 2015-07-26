@@ -36,7 +36,7 @@ function init(config) {
             return existsWithFallback(pathlib.join(config.root, path), ['', '.html'])
         },
         list: function() {
-            return util.walkDir(root);
+            return util.walkDir(config.root);
         }
     };
 }
