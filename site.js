@@ -93,7 +93,7 @@ function reIndex() {
         });
 }
 
-function store(entry) {
+function publish(entry) {
     return db.store(entry).
         then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {site: site, entry: entry, utils: templateUtils})).
         then(function (html) {
@@ -174,7 +174,7 @@ function generateToken(client_id, scope) {
 }
 
 site.getSlug = getSlug;
-site.store = store;
+site.publish = publish;
 site.generateIndex = generateIndex;
 site.sendWebmentionsFor = sendWebmentionsFor;
 site.receiveWebmention = receiveWebmention;

@@ -144,7 +144,7 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             }];
             return entry;
         }).
-        then(site.store).
+        then(site.publish).
         then(site.generateIndex).
         then(site.sendWentionsFor.bind(site, entry)).
         then(function () {
