@@ -225,10 +225,14 @@ Entry.prototype = {
                    return this.references().indexOf(url) !== -1;
                },
     isArticle: function() {
-                   return this.name.length > 0 &&
-                       this.content.length > 0 &&
-                       this.name[0] !== this.content[0].value;
-               }
+        return !this.isReply() &&
+            !this.isRepost() &&
+            !this.isLike() &&
+            !this.isPhoto() &&
+            this.name.length > 0 &&
+            this.content.length > 0 &&
+            this.name[0] !== this.content[0].value;
+    }
 
 };
 
