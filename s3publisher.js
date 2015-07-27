@@ -13,6 +13,7 @@ function init(config) {
     var headObject = nodefn.lift(s3.headObject.bind(s3));
     var listObjects = nodefn.lift(s3.listObjects.bind(s3));
     return {
+        config: config,
         put: function(path, obj, contentType) {
             var params = {Bucket: config.bucket, Key: normalizePath(path), Body: obj};
             params.ContentType = contentType !== undefined ? contentType : inferMimetype(path);

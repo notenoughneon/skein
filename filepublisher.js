@@ -24,6 +24,7 @@ function existsWithFallback(filepath, extensions) {
 
 function init(config) {
     return {
+        config: config,
         put: function(path, obj, contentType) {
             if (contentType === 'text/html')
                 path = path + '.html';

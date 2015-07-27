@@ -72,6 +72,43 @@ function init(config) {
         return url.resolve(config.url, permalink);
     }
 
+    function publish(entry) {
+        return db.store(entry).
+            then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {
+                site: config,
+                entry: entry,
+                utils: templateUtils
+            })).
+            then(function (html) {
+                return publisher.put(getPathForUrl(entry.url[0]), html, 'text/html');
+            });
+    }
+
+    function generateIndex() {
+        var limit = config.entriesPerPage;
+        var offset = 0;
+        var page = 1;
+
+        function chain() {
+            return db.getAllByAuthor(config.url, limit, offset).
+                then(function (entries) {
+                    if (entries.length == 0) return null;
+                    return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
+                        {site: config, entries: entries, page: page, utils: templateUtils}).
+                        then(function (html) {
+                            return publisher.put(getPathForIndex(page), html, 'text/html');
+                        }).
+                        then(function () {
+                            offset += limit;
+                            page += 1;
+                        }).
+                        then(chain);
+                });
+        }
+
+        return chain();
+    }
+
     return {
         config: config,
         getToken: db.getToken,
@@ -91,8 +128,41 @@ function init(config) {
             }
         },
 
+        import: function(from) {
+            var postRe = new RegExp(from.config.postRegex);
+            return from.list().
+                then(function(files) {
+                    return when.map(files, function (file) {
+                        if (postRe.test(file)) {
+                            return from.get(file).
+                                then(function (obj) {
+                                    return obj.Body;
+                                }).
+                                then(function (html) {
+                                    return microformat.getHEntryWithCard(html, config.url);
+                                }).
+                                then(function(entry) {
+                                    return publish(entry);
+                                });
+                        } else {
+                            return from.get(file).
+                                then(function (obj) {
+                                    return publisher.put(file, obj.Body, obj.ContentType);
+                                })
+                        }
+                    });
+                }).
+                then(generateIndex);
+        },
+
         reIndex: function() {
+            var postRe = new RegExp(from.config.postRegex);
             return publisher.list().
+                then(function (keys) {
+                    return keys.filter(function (key) {
+                        return postRe.test(key);
+                    });
+                }).
                 then(function (keys) {
                     return when.map(keys, function (key) {
                         return publisher.get(key).
@@ -102,42 +172,9 @@ function init(config) {
                 });
         },
 
-        publish: function(entry) {
-            return db.store(entry).
-                then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {
-                    site: config,
-                    entry: entry,
-                    utils: templateUtils
-                })).
-                then(function (html) {
-                    return publisher.put(getPathForUrl(entry.url[0]), html, 'text/html');
-                });
-        },
+        publish: publish,
 
-        generateIndex: function() {
-            var limit = config.entriesPerPage;
-            var offset = 0;
-            var page = 1;
-
-            function chain() {
-                return db.getAllByAuthor(config.url, limit, offset).
-                    then(function (entries) {
-                        if (entries.length == 0) return null;
-                        return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
-                            {site: config, entries: entries, page: page, utils: templateUtils}).
-                            then(function (html) {
-                                return publisher.put(getPathForIndex(page), html, 'text/html');
-                            }).
-                            then(function () {
-                                offset += limit;
-                                page += 1;
-                            }).
-                            then(chain);
-                    });
-            }
-
-            return chain();
-        },
+        generateIndex: generateIndex,
 
         sendWebmentionsFor: function(entry) {
             return when.map(entry.allLinks(), function (link) {
