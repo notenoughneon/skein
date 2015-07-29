@@ -19,10 +19,12 @@
   "authUrl": "http://api.notenoughneon.com/auth",
   "tokenUrl": "http://api.notenoughneon.com/token",
   "micropubUrl": "http://api.notenoughneon.com/micropub",
+  "webmentionUrl": "http://api.notenoughneon.com/webmention",
   "publisher": {
-    "type": "file",
+    "type": "s3",
     "postRegex": "^20[0-9][0-9]/.*\\.html$",
-    "root": "static"
+    "region": "us-west-2",
+    "bucket": "notenoughneon.com"
   },
-  "password": "cactus123"
+  "password": "xxxxxxxx"
 }
