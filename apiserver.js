@@ -6,9 +6,14 @@ var app = express();
 var ejs = require('ejs');
 var crypto = require('crypto');
 var nodefn = require('when/node');
-var site = require('./site').init(JSON.parse(fs.readFileSync('config.json')));
 var util = require('util');
 var microformat = require('./microformat');
+
+if (process.argv[3] === undefined)
+    var configFile = 'config.json';
+else
+    configFile = process.argv[3];
+var site = require('./site').init(JSON.parse(fs.readFileSync(configFile)));
 
 app.set('views', './template');
 app.set('view engine', 'ejs');
