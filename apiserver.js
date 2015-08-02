@@ -7,6 +7,7 @@ var ejs = require('ejs');
 var crypto = require('crypto');
 var nodefn = require('when/node');
 var util = require('util');
+var debug = require('debug')('api');
 var microformat = require('./microformat');
 
 if (process.argv[3] === undefined)
@@ -38,7 +39,7 @@ function parsePost(req, res, next) {
 }
 
 function denyAccess(req, res) {
-    util.log('Access denied');
+    debug('Access denied');
     res.sendStatus(401);
 }
 
@@ -83,9 +84,9 @@ function rateLimit(count, cooldown) {
 
 function logger(req, res, next) {
     var parms = (req.method == 'POST' ? req.post : req.query);
-    util.log(util.format('%s %s %s', req.ip, req.method, req.url));
+    debug('%s %s %s', req.ip, req.method, req.url);
     if (Object.keys(parms).length > 0)
-        console.log(util.format('%s', util.inspect(req.method == 'POST' ? req.post : req.query)));
+        debug(util.inspect(req.method == 'POST' ? req.post : req.query));
     next();
 }
 
@@ -111,7 +112,7 @@ app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
                 querystring.stringify({code: code, state: req.post.state, me: site.config.url}));
             });
     } else {
-        util.log('Failed password authentication from ' + req.ip);
+        debug('Failed password authentication from ' + req.ip);
         res.sendStatus(401);
     }
 });
@@ -131,7 +132,7 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
                 }
             });
     } else {
-        util.log('Failed token request from ' + req.ip);
+        debug('Failed token request from ' + req.ip);
         res.sendStatus(401);
     }
 });
@@ -183,5 +184,5 @@ app.delete('/tokens/*', requireAuth('admin'), function(req, res) {
 
 var server = app.listen(process.argv[2], function (){
     var address = server.address();
-    console.log('Listening on %s:%s', address.address, address.port);
+    debug('Listening on %s:%s', address.address, address.port);
 });

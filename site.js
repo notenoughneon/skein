@@ -1,9 +1,9 @@
-var fs = require('fs');
 var ejs = require('ejs');
 var url = require('url');
 var crypto = require('crypto');
 var when = require('when');
 var nodefn = require('when/node');
+var debug = require('debug')('site');
 var util = require('./util');
 var microformat = require('./microformat');
 
@@ -180,10 +180,10 @@ function init(config) {
             return when.map(entry.allLinks(), function (link) {
                 try {
                     util.sendWebmention(resolve(entry.url[0]), link);
-                    console.log('Sent webmention to ' + link);
+                    debug('Sent webmention to ' + link);
                 } catch (err) {
-                    console.log('Failed to send webmention to ' + link);
-                    console.log(err.stack);
+                    debug('Failed to send webmention to ' + link);
+                    debug(err.stack);
                 }
             });
         },
