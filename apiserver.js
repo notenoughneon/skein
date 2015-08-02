@@ -90,6 +90,11 @@ function logger(req, res, next) {
     next();
 }
 
+function handleError(res, error) {
+    debug(error.stack);
+    res.sendStatus(500);
+}
+
 app.use(parsePost);
 app.use(logger);
 
@@ -110,6 +115,9 @@ app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
                 };
                 res.redirect(req.post.redirect_uri + '?' +
                 querystring.stringify({code: code, state: req.post.state, me: site.config.url}));
+            }).
+            catch(function (e) {
+                handleError(res, e);
             });
     } else {
         debug('Failed password authentication from ' + req.ip);
@@ -130,6 +138,9 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
                     res.type('application/x-www-form-urlencoded');
                     res.send(querystring.stringify({access_token: result.token, scope: result.scope, me: site.config.url}));
                 }
+            }).
+            catch(function (e) {
+                handleError(res, e);
             });
     } else {
         debug('Failed token request from ' + req.ip);
@@ -160,6 +171,9 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         then(function () {
             res.location(req.post.slug);
             res.sendStatus(201);
+        }).
+        catch(function (e) {
+            handleError(res, e);
         });
 });
 
@@ -171,16 +185,24 @@ app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
             res.sendStatus(200);
         }).
         catch(function (e) {
-            res.status(400).send(e.stack);
+            handleError(res, e);
         });
 });
 
 app.get('/tokens', requireAuth('admin'), function(req, res) {
-    site.listTokens().then(res.json.bind(res));
+    site.listTokens().
+        then(res.json.bind(res)).
+        catch(function (e) {
+            handleError(res, e);
+        });
 });
 
 app.delete('/tokens/*', requireAuth('admin'), function(req, res) {
-    site.deleteToken(req.params[0]).then(res.json.bind(res));
+    site.deleteToken(req.params[0]).
+        then(res.json.bind(res)).
+        catch(function (e) {
+            handleError(res, e);
+        });
 });
 
 var server = app.listen(process.argv[2], function (){
