@@ -143,6 +143,7 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         then(function (slug) {
             if (req.post.slug === undefined)
                 req.post.slug = slug;
+            req.post.url = site.config.url + req.post.slug;
             entry = new microformat.Entry(req.post);
             entry.author = [{
                 url: [site.config.url],

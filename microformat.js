@@ -98,9 +98,9 @@ function Entry(mf) {
         this.url = [mf];
     } else if (mf.h !== undefined && mf.h === 'entry') {
         // micropub object
-        if (mf.slug === undefined)
-            throw new Exception("slug is required");
-        this.url = [mf.slug];
+        if (mf.url === undefined)
+            throw new Exception("url is required");
+        this.url = [mf.url];
         if (mf.published !== undefined)
             this.published = [mf.published];
         else

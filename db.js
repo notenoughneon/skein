@@ -56,6 +56,10 @@ function init(dbfile) {
 
         get: function(url) {
             return get('SELECT * FROM entries WHERE url=?', url).
+                then(function (data) {
+                    if (data === undefined) throw new Error(url + ' not found');
+                    return data;
+                }).
                 then(unmarshall);
         },
 

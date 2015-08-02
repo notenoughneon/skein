@@ -178,13 +178,14 @@ function init(config) {
 
         sendWebmentionsFor: function(entry) {
             return when.map(entry.allLinks(), function (link) {
-                try {
-                    util.sendWebmention(resolve(entry.url[0]), link);
-                    debug('Sent webmention to ' + link);
-                } catch (err) {
-                    debug('Failed to send webmention to ' + link);
-                    debug(err.stack);
-                }
+                return util.sendWebmention(resolve(entry.url[0]), link).
+                    then(function () {
+                        debug('Sent webmention to ' + link);
+                    }).
+                    catch(function (err) {
+                        debug('Failed to send webmention to ' + link);
+                        debug(err.stack);
+                    });
             });
         },
 
@@ -192,13 +193,16 @@ function init(config) {
             return util.getPage(source).
                 then(function (html) {
                     if (!util.isMentionOf(html, target)) {
+                        debug('Didn\'t find mention on source page');
                         throw new Error('Didn\'t find mention on source page');
                     } else {
                         var targetEntry;
-                        return get(target).
+                        return db.get(target).
                             then(function (entry) {
-                                if (entry === undefined)
+                                if (entry === undefined) {
+                                    debug('Target %s not found', target);
                                     throw new Error('Target ' + target + ' not found');
+                                }
                                 targetEntry = entry;
                                 return microformat.getHEntryWithCard(html, source);
                             }).
