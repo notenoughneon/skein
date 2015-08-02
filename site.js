@@ -193,16 +193,17 @@ function init(config) {
             return util.getPage(source).
                 then(function (html) {
                     if (!util.isMentionOf(html, target)) {
-                        debug('Didn\'t find mention on source page');
                         throw new Error('Didn\'t find mention on source page');
                     } else {
                         var targetEntry;
-                        return db.get(target).
+                        return db.existsByAuthor(config.url, target).
+                            then(function (exists) {
+                                if (!exists)
+                                    throw new Error(target + ' isn\'t a valid target');
+                                return target;
+                            }).
+                            then(db.get).
                             then(function (entry) {
-                                if (entry === undefined) {
-                                    debug('Target %s not found', target);
-                                    throw new Error('Target ' + target + ' not found');
-                                }
                                 targetEntry = entry;
                                 return microformat.getHEntryWithCard(html, source);
                             }).

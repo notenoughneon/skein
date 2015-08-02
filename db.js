@@ -54,6 +54,13 @@ function init(dbfile) {
             );
         },
 
+        existsByAuthor: function(author, url) {
+            return get('SELECT * FROM entries WHERE author=? AND url=?', author, url).
+                then(function(data) {
+                    return data !== undefined;
+                });
+        },
+
         get: function(url) {
             return get('SELECT * FROM entries WHERE url=?', url).
                 then(function (data) {
