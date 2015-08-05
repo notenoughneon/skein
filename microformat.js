@@ -106,7 +106,7 @@ function Entry(mf) {
         else
             this.published = [new Date().toISOString()];
         if (mf.content === undefined)
-            throw new Exception("content is required");
+            mf.content = '';
         this.content = [{
             value: mf.content,
             html: util.autoLink(util.escapeHtml(mf.content))

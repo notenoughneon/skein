@@ -93,6 +93,12 @@ function inferMimetype(filename) {
     }
 }
 
+function kebabCase(str) {
+    str = str.toLowerCase();
+    str = str.replace(/[^a-z0-9 ]/g, ' ');
+    str = str.replace(/ +/g, '-');
+    return str;
+}
 
 function escapeHtml(str) {
     return str.replace(/&/g, '&amp;').
@@ -166,6 +172,7 @@ exports.writeFile = writeFile;
 exports.walkDir = walkDir;
 exports.copy = copy;
 exports.inferMimetype = inferMimetype;
+exports.kebabCase = kebabCase;
 exports.escapeHtml = escapeHtml;
 exports.autoLink = autoLink;
 exports.getLinks = getLinks;

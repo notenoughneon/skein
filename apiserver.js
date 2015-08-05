@@ -1,4 +1,6 @@
 var fs = require('fs');
+var os = require('os');
+var path = require('path');
 var querystring = require('querystring');
 var express = require('express');
 var Busboy = require('busboy');
@@ -26,8 +28,14 @@ function parsePost(req, res, next) {
     if (req.method === 'POST') {
         var busboy = new Busboy({headers: req.headers});
         req.post = {};
+        req.files = {};
         busboy.on('field', function (fieldname, val) {
             req.post[fieldname] = val;
+        });
+        busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
+            var tmpfile = path.join(os.tmpdir(), path.basename(filename));
+            req.files[fieldname] = {tmpfile: tmpfile, filename: filename, mimetype: mimetype};
+            file.pipe(fs.createWriteStream(tmpfile));
         });
         busboy.on('finish', function () {
             next();
@@ -150,7 +158,7 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
 
 app.post('/micropub', requireAuth('post'), function(req, res) {
     var entry;
-    site.getSlug(req.post.name).
+    site.getSlug(req.post.name, true).
         then(function (slug) {
             if (req.post.slug === undefined)
                 req.post.slug = slug;
@@ -163,7 +171,24 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             }];
             return entry;
         }).
-        then(site.publish).
+        then(function () {
+            var key;
+            if (req.files.photo !== undefined) {
+                return site.getSlug(req.files.photo.filename).
+                    then(function (slug) {
+                        key = slug;
+                        entry.content[0].html = '<img class="u-photo" src="' + slug + '">' +
+                        '<p>' + entry.content[0].html;
+                        return nodefn.call(fs.readFile, req.files.photo.tmpfile);
+                    }).
+                    then(function (fstream) {
+                        return site.publisher.put(key, fstream, req.files.photo.mimetype);
+                    });
+            }
+        }).
+        then(function () {
+            return site.publish(entry);
+        }).
         then(site.generateIndex).
         then(function() {
             return site.sendWebmentionsFor(entry);

@@ -111,18 +111,17 @@ function init(config) {
 
     return {
         config: config,
+        publisher: publisher,
         getToken: db.getToken,
         deleteToken: db.deleteToken,
         listTokens: db.listTokens,
 
-        getSlug: function (name) {
+        getSlug: function (name, kebabCase) {
             var now = new Date();
             var datepart = '/' + now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate();
             if (name !== undefined) {
-                var namepart = name.toLowerCase();
-                namepart = namepart.replace(/[^a-z0-9 ]/g, '');
-                namepart = namepart.replace(/ +/g, '-');
-                return getNextAvailable("", datepart + '/' + namepart);
+                if (kebabCase) name = util.kebabCase(name);
+                return getNextAvailable("", datepart + '/' + name);
             } else {
                 return getNextAvailable(1, datepart + '/');
             }
