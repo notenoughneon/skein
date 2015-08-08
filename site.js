@@ -155,7 +155,7 @@ function init(config) {
         },
 
         reIndex: function() {
-            var postRe = new RegExp(from.config.postRegex);
+            var postRe = new RegExp(publisher.config.postRegex);
             return publisher.list().
                 then(function (keys) {
                     return keys.filter(function (key) {
@@ -164,8 +164,14 @@ function init(config) {
                 }).
                 then(function (keys) {
                     return when.map(keys, function (key) {
+                        debug(key);
                         return publisher.get(key).
-                            then(microformat.getHEntryWithCard).
+                            then(function (obj) {
+                                return microformat.getHEntryWithCard(obj.Body, config.url).
+                                    catch(function(e) {
+
+                                    });
+                            }).
                             then(db.store);
                     });
                 });
