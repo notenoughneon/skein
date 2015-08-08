@@ -17,7 +17,13 @@ function init(config) {
         put: function(path, obj, contentType) {
             var params = {Bucket: config.bucket, Key: normalizePath(path), Body: obj};
             params.ContentType = contentType !== undefined ? contentType : inferMimetype(path);
-            return putObject(params);
+            return putObject(params).
+                then(function() {
+                    if (params.ContentType === 'text/html' && !/\.html$/.test(params.Key)) {
+                        params.Key = params.Key + '.html';
+                        return putObject(params);
+                    }
+                });
         },
         get: function(path) {
             return getObject({Bucket: config.bucket, Key: normalizePath(path)});
