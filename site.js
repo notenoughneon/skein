@@ -92,7 +92,6 @@ function init(config) {
         function chain() {
             return db.getAllByAuthor(config.url, limit, offset).
                 then(function (entries) {
-                    if (entries.length == 0) return null;
                     return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
                         {site: config, entries: entries, page: page, utils: templateUtils}).
                         then(function (html) {
