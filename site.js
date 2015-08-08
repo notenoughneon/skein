@@ -167,10 +167,7 @@ function init(config) {
                         debug(key);
                         return publisher.get(key).
                             then(function (obj) {
-                                return microformat.getHEntryWithCard(obj.Body, config.url).
-                                    catch(function(e) {
-
-                                    });
+                                return microformat.getHEntryWithCard(obj.Body, config.url);
                             }).
                             then(db.store);
                     });
