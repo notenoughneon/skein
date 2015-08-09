@@ -164,6 +164,19 @@ function init(config) {
                 });
         },
 
+        reGenerate: function() {
+            return db.getAllByAuthor(config.url).
+                then(function(entries) {
+                    return when.map(entries, function (entry) {
+                        return nodefn.call(ejs.renderFile, 'template/entrypage.ejs',
+                            {site: config, entry: entry, utils: templateUtils}).
+                            then(function (html) {
+                                return publisher.put(getPathForUrl(entry.url[0]), html, 'text/html');
+                            });
+                    });
+                });
+        },
+
         publish: publish,
 
         generateIndex: generateIndex,
