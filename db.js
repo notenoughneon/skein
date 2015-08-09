@@ -70,9 +70,8 @@ function init(dbfile) {
                 then(unmarshall);
         },
 
-        getAllByAuthor: function(author, limit, offset) {
-            return all('SELECT * FROM entries WHERE author=? ORDER BY date DESC LIMIT ? OFFSET ?',
-                author, limit, offset).
+        getAllByAuthor: function(author) {
+            return all('SELECT * FROM entries WHERE author=? ORDER BY date DESC', author).
                 then(function (records) {
                     return records.map(unmarshall);
                 });

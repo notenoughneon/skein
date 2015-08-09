@@ -86,26 +86,17 @@ function init(config) {
 
     function generateIndex() {
         var limit = config.entriesPerPage;
-        var offset = 0;
-        var page = 1;
-
-        function chain() {
-            return db.getAllByAuthor(config.url, limit, offset).
-                then(function (entries) {
+        return db.getAllByAuthor(config.url).
+            then(util.chunk.bind(null, limit)).
+            then(function(chunks) {
+                return when.map(chunks, function (chunk, index) {
                     return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
-                        {site: config, entries: entries, page: page, utils: templateUtils}).
+                        {site: config, entries: chunk, page: index + 1, totalPages: chunks.length, utils: templateUtils}).
                         then(function (html) {
-                            return publisher.put(getPathForIndex(page), html, 'text/html');
-                        }).
-                        then(function () {
-                            offset += limit;
-                            page += 1;
-                        }).
-                        then(chain);
+                            return publisher.put(getPathForIndex(index + 1), html, 'text/html');
+                        });
                 });
-        }
-
-        return chain();
+            });
     }
 
     return {

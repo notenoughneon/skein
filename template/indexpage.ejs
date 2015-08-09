@@ -5,7 +5,9 @@
 <% }); %>
 
     <ul class="pager">
+        <% if (page < totalPages) { %>
         <li><a href="<%= utils.getPathForIndex(page + 1) %>">Older</a></li>
+        <% } %>
     </ul>
 
 </div>
