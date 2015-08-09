@@ -42,6 +42,19 @@ function flatten(arrarr) {
     return arrarr.reduce(function(a, b) { return a.concat(b); });
 }
 
+function chunk(size, arr) {
+    var chunks = [];
+    var b = 0;
+    var c = arr.slice(b, b + size);
+    while (c.length > 0)
+    {
+        chunks.push(c);
+        b += size;
+        c = arr.slice(b, b + size);
+    }
+    return chunks;
+}
+
 /* walk directory recursively and return list of files */
 function walkDir(d) {
     return stat(d).
@@ -168,6 +181,7 @@ function getPage(permalink) {
 
 exports.dump = dump;
 exports.flatten = flatten;
+exports.chunk = chunk;
 exports.writeFile = writeFile;
 exports.walkDir = walkDir;
 exports.copy = copy;
