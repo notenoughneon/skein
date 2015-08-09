@@ -177,8 +177,8 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
                 return site.getSlug(req.files.photo.filename).
                     then(function (slug) {
                         key = slug;
-                        entry.content[0].html = '<img class="u-photo" src="' + slug + '">' +
-                        '<p>' + entry.content[0].html;
+                        entry.content[0].html = '<p><img class="u-photo" src="' + slug + '" /></p>' +
+                        entry.content[0].html;
                         return nodefn.call(fs.readFile, req.files.photo.tmpfile);
                     }).
                     then(function (fstream) {
