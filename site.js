@@ -41,9 +41,10 @@ var templateUtils = {
 };
 
 
-function init(config) {
+function init(config, dbfile) {
+    if (dbfile === undefined) dbfile = 'index.db';
     var publisher;
-    var db = require('./db').init('index.db');
+    var db = require('./db').init(dbfile);
     if (config.publisher.type == 's3') {
         publisher = require('./s3publisher').init(config.publisher);
     } else if (config.publisher.type == 'file') {
