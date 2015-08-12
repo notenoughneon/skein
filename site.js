@@ -180,6 +180,8 @@ function init(config, dbfile) {
 
         publish: publish,
 
+        get: db.get,
+
         generateIndex: generateIndex,
 
         sendWebmentionsFor: function(entry) {
