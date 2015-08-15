@@ -1,8 +1,8 @@
 {
   "name": "skein",
   "version": "0.1.0",
-  "description": "Indieweb microblog",
-  "main": "skein.js",
+  "description": "Indieweb static site generator",
+  "main": "apiserver.js",
   "dependencies": {
     "aws-sdk": "^2.1.36",
     "busboy": "^0.2.9",
