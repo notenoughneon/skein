@@ -1,8 +1,9 @@
-var fs = require('fs');
-var pathlib = require('path');
+///<reference path="typings/tsd.d.ts"/>
+import fs = require('fs');
+import pathlib = require('path');
 var when = require('when');
-var nodefn = require('when/node');
-var util = require('./util');
+import nodefn = require('when/node');
+import util = require('./util');
 
 
 function readWithFallback(filepath, extensions) {
@@ -22,7 +23,7 @@ function existsWithFallback(filepath, extensions) {
         catch(function() { return false; });
 }
 
-function init(config) {
+export function init(config) {
     return {
         config: config,
         put: function(path, obj, contentType) {
@@ -46,5 +47,3 @@ function init(config) {
         }
     };
 }
-
-exports.init = init;

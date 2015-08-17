@@ -31,9 +31,9 @@ function mkdirRecursive(dir) {
 }
 
 /* writeFile with recursive parent dir creation */
-export function writeFile(filename, data, options) {
+export function writeFile(filename, data) {
     return when.try(mkdirRecursive, path.dirname(filename)).
-        then(nodefn.lift(fs.writeFile, filename, data, options));
+        then(nodefn.lift(fs.writeFile, filename, data));
 }
 
 /* flatten an array of arrays */
