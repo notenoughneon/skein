@@ -1,10 +1,12 @@
+///<reference path="typings/tsd.d.ts"/>
 var parser = require('microformat-node');
 var nodefn = require('when/node');
-var util = require('./util');
-var url = require('url');
+import util = require('./util');
+import url = require('url');
+
 var parseHtml = nodefn.lift(parser.parseHtml);
 
-function getHEntryWithCard(html, url) {
+export function getHEntryWithCard(html: string, url: string) {
     return getHEntry(html, url).
         then(function(entry) {
             if (entry.author.length == 0) {
@@ -18,14 +20,14 @@ function getHEntryWithCard(html, url) {
         });
 }
 
-function getHEntry(html, url) {
+export function getHEntry(html: string, url: string) {
     return parseHtml(html, {filters: ['h-entry'], baseUrl: url}).
         then(function(mf) {
             return new Entry(mf.items[0]);
         });
 }
 
-function getRepHCard(html, url) {
+export function getRepHCard(html: string, url: string) {
     return parseHtml(html, {filters: ['h-card'], baseUrl: url}).
         then(function(mf) {
             var cards = mf.items.map(function(h) {
@@ -80,151 +82,138 @@ function children(mf) {
     return [];
 }
 
-function Entry(mf) {
-    this.name = [];
-    this.published = [];
-    this.content = [];
-    this.photo = [];
-    this.url = [];
-    this.author = [];
-    this.syndication = [];
-    this.replyTo = [];
-    this.likeOf = [];
-    this.repostOf = [];
-    this.children = [];
+export class Entry {
+    name: string[];
+    published: string[];
+    content: {value: string, html: string}[];
+    photo: string[];
+    url: string[];
+    author: string[];
+    syndication: string[];
+    replyTo: Entry[];
+    likeOf: Entry[];
+    repostOf: Entry[];
+    children: Entry[];
 
-    if (typeof(mf) === 'string') {
-        // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
-        this.url = [mf];
-    } else if (mf.h !== undefined && mf.h === 'entry') {
-        // micropub object
-        if (mf.url === undefined)
-            throw new Exception("url is required");
-        this.url = [mf.url];
-        if (mf.published !== undefined)
-            this.published = [mf.published];
-        else
-            this.published = [new Date().toISOString()];
-        if (mf.content === undefined)
-            mf.content = '';
-        this.content = [{
-            value: mf.content,
-            html: util.autoLink(util.escapeHtml(mf.content))
-        }];
-        if (mf.name !== undefined)
-            this.name = [mf.name];
-        else
-            this.name = [this.content[0].value];
-    } else if (mf.properties !== undefined) {
-        // mf parser output
-        this.name = prop(mf, 'name');
-        this.published = prop(mf, 'published');
-        this.content = prop(mf, 'content');
-        this.photo = prop(mf, 'photo');
-        this.url = prop(mf, 'url');
-        this.author = prop(mf, 'author').
-            map(function (a) {
-                return new Card(a);
-            });
-        this.syndication = prop(mf, 'syndication');
-        this.replyTo = prop(mf, 'in-reply-to').
-            map(function (r) {
-                return new Entry(r);
-            });
-        this.likeOf = prop(mf, 'like-of').
-            map(function (r) {
-                return new Entry(r);
-            });
-        this.repostOf = prop(mf, 'repost-of').
-            map(function (r) {
-                return new Entry(r);
-            });
-        this.children = children(mf).
-            concat(prop(mf, 'comment')).
-            map(function (c) {
-                return new Entry(c);
-            });
-    } else {
-        // deserialized json
-        this.name = mf.name;
-        this.published = mf.published;
-        this.content = mf.content;
-        this.photo = mf.photo;
-        this.url = mf.url;
-        this.author = mf.author.
-            map(function (a) {
-                return new Card(a);
-            });
-        this.syndication = mf.syndication;
-        this.replyTo = mf.replyTo.
-            map(function (r) {
-                return new Entry(r);
-            });
-        this.likeOf = mf.likeOf.
-            map(function (r) {
-                return new Entry(r);
-            });
-        this.repostOf = mf.repostOf.
-            map(function (r) {
-                return new Entry(r);
-            });
-        this.children = mf.children.
-            map(function (c) {
-                return new Entry(c);
-            });
+    constructor(mf) {
+        if (typeof(mf) === 'string') {
+            // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
+            this.url = [mf];
+        } else if (mf.h !== undefined && mf.h === 'entry') {
+            // micropub object
+            if (mf.url === undefined)
+                throw new Error("url is required");
+            this.url = [mf.url];
+            if (mf.published !== undefined)
+                this.published = [mf.published];
+            else
+                this.published = [new Date().toISOString()];
+            if (mf.content === undefined)
+                mf.content = '';
+            this.content = [{
+                value: mf.content,
+                html: util.autoLink(util.escapeHtml(mf.content))
+            }];
+            if (mf.name !== undefined)
+                this.name = [mf.name];
+            else
+                this.name = [this.content[0].value];
+        } else if (mf.properties !== undefined) {
+            // mf parser output
+            this.name = prop(mf, 'name');
+            this.published = prop(mf, 'published');
+            this.content = prop(mf, 'content');
+            this.photo = prop(mf, 'photo');
+            this.url = prop(mf, 'url');
+            this.author = prop(mf, 'author').
+                map(function (a) {
+                    return new Card(a);
+                });
+            this.syndication = prop(mf, 'syndication');
+            this.replyTo = prop(mf, 'in-reply-to').
+                map(function (r) {
+                    return new Entry(r);
+                });
+            this.likeOf = prop(mf, 'like-of').
+                map(function (r) {
+                    return new Entry(r);
+                });
+            this.repostOf = prop(mf, 'repost-of').
+                map(function (r) {
+                    return new Entry(r);
+                });
+            this.children = children(mf).
+                concat(prop(mf, 'comment')).
+                map(function (c) {
+                    return new Entry(c);
+                });
+        } else {
+            // deserialized json
+            this.name = mf.name;
+            this.published = mf.published;
+            this.content = mf.content;
+            this.photo = mf.photo;
+            this.url = mf.url;
+            this.author = mf.author.
+                map(function (a) {
+                    return new Card(a);
+                });
+            this.syndication = mf.syndication;
+            this.replyTo = mf.replyTo.
+                map(function (r) {
+                    return new Entry(r);
+                });
+            this.likeOf = mf.likeOf.
+                map(function (r) {
+                    return new Entry(r);
+                });
+            this.repostOf = mf.repostOf.
+                map(function (r) {
+                    return new Entry(r);
+                });
+            this.children = mf.children.
+                map(function (c) {
+                    return new Entry(c);
+                });
+        }
     }
-}
 
-function Card(mf) {
-    this.name = [];
-    this.photo = [];
-    this.url = [];
-    this.uid = [];
-    if (mf.properties !== undefined) {
-        // mf parser output
-        this.name = prop(mf, 'name');
-        this.photo = prop(mf, 'photo');
-        this.url = prop(mf, 'url');
-        this.uid = prop(mf, 'uid');
-    } else {
-        // deserialized json
-        this.name = mf.name;
-        this.photo = mf.photo;
-        this.url = mf.url;
-        this.uid = mf.uid;
+    references(): string[] {
+        return this.replyTo.
+            concat(this.repostOf).
+            concat(this.likeOf).
+            map(function(r) { return r.url[0]; });
     }
-}
 
-Entry.prototype = {
-    references: function() {
-                    return this.replyTo.
-                        concat(this.repostOf).
-                        concat(this.likeOf).
-                        map(function(r) { return r.url[0]; });
-                },
-    allLinks: function() {
+    allLinks(): string[] {
         var allLinks = this.references();
         if (this.content.length > 0)
             allLinks = allLinks.concat(util.getLinks(this.content[0].html));
         return allLinks;
 
-    },
-    isReply: function() {
-                 return this.replyTo.length > 0;
-             },
-    isRepost: function() {
-                  return this.repostOf.length > 0;
-              },
-    isLike: function() {
-                return this.likeOf.length > 0;
-            },
-    isPhoto: function() {
-                 return this.photo.length > 0;
-             },
-    isReplyTo: function(url) {
-                   return this.references().indexOf(url) !== -1;
-               },
-    isArticle: function() {
+    }
+
+    isReply(): boolean {
+        return this.replyTo.length > 0;
+    }
+
+    isRepost(): boolean {
+        return this.repostOf.length > 0;
+    }
+
+    isLike(): boolean {
+        return this.likeOf.length > 0;
+    }
+
+    isPhoto(): boolean {
+        return this.photo.length > 0;
+    }
+
+    isReplyTo(url: string): boolean {
+        return this.references().indexOf(url) !== -1;
+    }
+
+    isArticle(): boolean {
         return !this.isReply() &&
             !this.isRepost() &&
             !this.isLike() &&
@@ -233,11 +222,28 @@ Entry.prototype = {
             this.content.length > 0 &&
             this.name[0] !== this.content[0].value;
     }
+}
 
-};
+export class Card {
+    name: string[];
+    photo: string[];
+    url: string[];
+    uid: string[];
 
-exports.getHEntryWithCard = getHEntryWithCard;
-exports.getHEntry = getHEntry;
-exports.getRepHCard = getRepHCard;
-exports.Entry = Entry;
-exports.Card = Card;
+    constructor(mf) {
+        if (mf.properties !== undefined) {
+            // mf parser output
+            this.name = prop(mf, 'name');
+            this.photo = prop(mf, 'photo');
+            this.url = prop(mf, 'url');
+            this.uid = prop(mf, 'uid');
+        } else {
+            // deserialized json
+            this.name = mf.name;
+            this.photo = mf.photo;
+            this.url = mf.url;
+            this.uid = mf.uid;
+        }
+    }
+}
+
