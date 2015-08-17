@@ -1,8 +1,9 @@
-var sqlite3 = require('sqlite3').verbose();
+///<reference path="typings/tsd.d.ts"/>
+import sqlite3 = require('sqlite3');
 var nodefn = require('when/node');
-var microformat = require('./microformat');
+import microformat = require('./microformat');
 
-function init(dbfile) {
+export function init(dbfile) {
     var db = new sqlite3.Database(dbfile);
     var run = nodefn.lift(db.run.bind(db));
     var get = nodefn.lift(db.get.bind(db));
@@ -103,5 +104,3 @@ function init(dbfile) {
         }
     };
 }
-
-exports.init = init;
