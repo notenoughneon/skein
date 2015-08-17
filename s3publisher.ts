@@ -1,12 +1,14 @@
+///<reference path="typings/tsd.d.ts"/>
 var AWS = require('aws-sdk');
 var nodefn = require('when/node');
+import util = require('./util');
 
 // S3 doesn't like leading slashes
 function normalizePath(p) {
     return p.split('/').filter(function(elt) { return elt != ''; }).join('/');
 }
 
-function init(config) {
+export function init(config) {
     var s3 = new AWS.S3({region: config.region});
     var putObject = nodefn.lift(s3.putObject.bind(s3));
     var getObject = nodefn.lift(s3.getObject.bind(s3));
@@ -15,8 +17,12 @@ function init(config) {
     return {
         config: config,
         put: function(path, obj, contentType) {
-            var params = {Bucket: config.bucket, Key: normalizePath(path), Body: obj};
-            params.ContentType = contentType !== undefined ? contentType : inferMimetype(path);
+            var params = {
+                Bucket: config.bucket,
+                Key: normalizePath(path),
+                Body: obj,
+                ContentType: contentType !== undefined ? contentType : util.inferMimetype(path)
+            };
             return putObject(params).
                 then(function() {
                     if (params.ContentType === 'text/html' && !/\.html$/.test(params.Key)) {
@@ -48,5 +54,3 @@ function init(config) {
         }
     };
 }
-
-exports.init = init;
