@@ -1,16 +1,17 @@
-var fs = require('fs');
-var path = require('path');
-var util = require('util');
+///<reference path="typings/tsd.d.ts"/>
+import fs = require('fs');
+import path = require('path');
+import util = require('util');
 var when = require('when');
 var nodefn = require('when/node');
-var cheerio = require('cheerio');
-var request = require('request');
+import cheerio = require('cheerio');
+import request = require('request');
 var parser = require('microformat-node');
 
 var readdir = nodefn.lift(fs.readdir);
 var stat = nodefn.lift(fs.stat);
 
-function dump(data) {
+export function dump(data) {
     console.log(util.inspect(data, {depth: null}));
 }
 
@@ -30,19 +31,19 @@ function mkdirRecursive(dir) {
 }
 
 /* writeFile with recursive parent dir creation */
-function writeFile(filename, data, options) {
+export function writeFile(filename, data, options) {
     return when.try(mkdirRecursive, path.dirname(filename)).
         then(nodefn.lift(fs.writeFile, filename, data, options));
 }
 
 /* flatten an array of arrays */
-function flatten(arrarr) {
+export function flatten(arrarr) {
     if (arrarr.length == 0)
         return [];
     return arrarr.reduce(function(a, b) { return a.concat(b); });
 }
 
-function chunk(size, arr) {
+export function chunk(size, arr) {
     var chunks = [];
     var b = 0;
     var c = arr.slice(b, b + size);
@@ -56,7 +57,7 @@ function chunk(size, arr) {
 }
 
 /* walk directory recursively and return list of files */
-function walkDir(d) {
+export function walkDir(d) {
     return stat(d).
         then(function(stats){
             if (stats.isDirectory())
@@ -72,11 +73,11 @@ function walkDir(d) {
         });
 }
 
-function copy(src, dst) {
+export function copy(src, dst) {
     return fs.createReadStream(src).pipe(fs.createWriteStream(dst));
 }
 
-function inferMimetype(filename) {
+export function inferMimetype(filename) {
     switch (path.extname(filename).toLowerCase()) {
         case '.html':
             return 'text/html';
@@ -106,14 +107,14 @@ function inferMimetype(filename) {
     }
 }
 
-function kebabCase(str) {
+export function kebabCase(str) {
     str = str.toLowerCase();
     str = str.replace(/[^a-z0-9 ]/g, ' ');
     str = str.replace(/ +/g, '-');
     return str;
 }
 
-function escapeHtml(str) {
+export function escapeHtml(str) {
     return str.replace(/&/g, '&amp;').
         replace(/</g, '&lt;').
         replace(/>/g, '&gt;');
@@ -127,16 +128,16 @@ function replacer(match, p1) {
     return '<a href="' + fixedUrl + '">' + p1 + '</a>';
 }
 
-function autoLink(str) {
+export function autoLink(str) {
     return str.replace(urlRe, replacer);
 }
 
-function getLinks(html) {
+export function getLinks(html) {
     var $ = cheerio.load(html);
     return $('a').toArray().map(function(a){return a.attribs.href;});
 }
 
-function isMentionOf(html, permalink) {
+export function isMentionOf(html, permalink) {
     return getLinks(html).some(function(l){return l === permalink;});
 }
 
@@ -155,7 +156,7 @@ function getWebmentionEndpoint(target) {
         });
 }
 
-function sendWebmention(source, target) {
+export function sendWebmention(source, target) {
     return getWebmentionEndpoint(target).
         then(function (endpoint) {
             return nodefn.call(request, {uri:endpoint, method:'POST', form:{source:source, target:target}}).
@@ -168,7 +169,7 @@ function sendWebmention(source, target) {
         });
 }
 
-function getPage(permalink) {
+export function getPage(permalink) {
     return nodefn.call(request, {uri: permalink}).
         then(function (res) {
             var status = res[0].statusCode;
@@ -177,19 +178,3 @@ function getPage(permalink) {
             throw new Error('Got statusCode ' + status);
         })
 }
-
-
-exports.dump = dump;
-exports.flatten = flatten;
-exports.chunk = chunk;
-exports.writeFile = writeFile;
-exports.walkDir = walkDir;
-exports.copy = copy;
-exports.inferMimetype = inferMimetype;
-exports.kebabCase = kebabCase;
-exports.escapeHtml = escapeHtml;
-exports.autoLink = autoLink;
-exports.getLinks = getLinks;
-exports.isMentionOf = isMentionOf;
-exports.sendWebmention = sendWebmention;
-exports.getPage = getPage;
