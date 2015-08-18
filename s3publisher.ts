@@ -5,52 +5,64 @@ import util = require('./util');
 
 // S3 doesn't like leading slashes
 function normalizePath(p) {
-    return p.split('/').filter(function(elt) { return elt != ''; }).join('/');
+    return p.split('/').filter(function (elt) {
+        return elt != '';
+    }).join('/');
 }
 
-export function init(config) {
-    var s3 = new AWS.S3({region: config.region});
-    var putObject = nodefn.lift(s3.putObject.bind(s3));
-    var getObject = nodefn.lift(s3.getObject.bind(s3));
-    var headObject = nodefn.lift(s3.headObject.bind(s3));
-    var listObjects = nodefn.lift(s3.listObjects.bind(s3));
-    return {
-        config: config,
-        put: function(path, obj, contentType) {
-            var params = {
-                Bucket: config.bucket,
-                Key: normalizePath(path),
-                Body: obj,
-                ContentType: contentType !== undefined ? contentType : util.inferMimetype(path)
-            };
-            return putObject(params).
-                then(function() {
-                    if (params.ContentType === 'text/html' && !/\.html$/.test(params.Key)) {
-                        params.Key = params.Key + '.html';
-                        return putObject(params);
-                    }
+export class S3Publisher {
+    config: any;
+    putObject: any;
+    getObject: any;
+    headObject: any;
+    listObjects: any;
+
+    constructor(config) {
+        this.config = config;
+        var s3 = new AWS.S3({region: config.region});
+        this.putObject = nodefn.lift(s3.putObject.bind(s3));
+        this.getObject = nodefn.lift(s3.getObject.bind(s3));
+        this.headObject = nodefn.lift(s3.headObject.bind(s3));
+        this.listObjects = nodefn.lift(s3.listObjects.bind(s3));
+    }
+
+    put(path, obj, contentType) {
+        var params = {
+            Bucket: this.config.bucket,
+            Key: normalizePath(path),
+            Body: obj,
+            ContentType: contentType !== undefined ? contentType : util.inferMimetype(path)
+        };
+        return this.putObject(params).
+            then(function () {
+                if (params.ContentType === 'text/html' && !/\.html$/.test(params.Key)) {
+                    params.Key = params.Key + '.html';
+                    return this.putObject(params);
+                }
+            });
+    }
+
+    get(path) {
+        return this.getObject({Bucket: this.config.bucket, Key: normalizePath(path)});
+    }
+
+    exists(path) {
+        return this.headObject({Bucket: this.config.bucket, Key: normalizePath(path)}).
+            then(function () {
+                return true;
+            }).
+            catch(function () {
+                return false;
+            });
+    }
+
+    list() {
+        // FIXME: handle truncated results
+        return this.listObjects({Bucket: this.config.bucket}).
+            then(function (data) {
+                return data.Contents.map(function (o) {
+                    return o.Key;
                 });
-        },
-        get: function(path) {
-            return getObject({Bucket: config.bucket, Key: normalizePath(path)});
-        },
-        exists: function(path) {
-            return headObject({Bucket: config.bucket, Key: normalizePath(path)}).
-                then(function() {
-                    return true;
-                }).
-                catch(function() {
-                    return false;
-                });
-        },
-        list: function() {
-            // FIXME: handle truncated results
-            return listObjects({Bucket: config.bucket}).
-                then(function(data) {
-                    return data.Contents.map(function(o) {
-                       return o.Key;
-                    });
-                })
-        }
-    };
+            })
+    }
 }
