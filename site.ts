@@ -10,6 +10,7 @@ import util = require('./util');
 import microformat = require('./microformat');
 import s3publisher = require('./s3publisher');
 import filepublisher = require('./filepublisher');
+import db = require('./db');
 
 function getPathForUrl(u) {
     return url.parse(u).pathname;
@@ -54,7 +55,7 @@ export class Site {
     constructor(config, dbfile) {
         this.config = config;
         if (dbfile === undefined) dbfile = 'index.db';
-        this.db = require('./db').init(dbfile);
+        this.db = new db.Db(dbfile);
         if (config.publisher.type == 's3') {
             this.publisher = new s3publisher.S3Publisher(config.publisher);
         } else if (config.publisher.type == 'file') {
