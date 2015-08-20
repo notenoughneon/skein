@@ -1,22 +1,25 @@
-var fs = require('fs');
-var os = require('os');
-var path = require('path');
-var querystring = require('querystring');
-var express = require('express');
+///<reference path="typings/tsd.d.ts"/>
+import fs = require('fs');
+import os = require('os');
+import path = require('path');
+import querystring = require('querystring');
+import express = require('express');
 var Busboy = require('busboy');
 var app = express();
 var ejs = require('ejs');
-var crypto = require('crypto');
+import crypto = require('crypto');
 var nodefn = require('when/node');
-var util = require('util');
-var debug = require('debug')('api');
-var microformat = require('./microformat');
+import util = require('util');
+import Debug = require('debug');
+var debug = Debug('api');
+import microformat = require('./microformat');
+import sitelib = require('./site');
 
 if (process.argv[3] === undefined)
     var configFile = 'config.json';
 else
     configFile = process.argv[3];
-var site = require('./site').init(JSON.parse(fs.readFileSync(configFile)));
+var site = new sitelib.Site(JSON.parse(fs.readFileSync(configFile).toString()));
 
 app.set('views', './template');
 app.set('view engine', 'ejs');
@@ -76,13 +79,13 @@ function requireAuth(scope) {
 }
 
 function rateLimit(count, cooldown) {
-    var lastreq = new Date();
+    var lastreq = Date.now();
     var capacity = count;
     return function(req, res, next) {
-        capacity = Math.min(capacity + (new Date() - lastreq) * (count / cooldown), count);
+        capacity = Math.min(capacity + (Date.now() - lastreq) * (count / cooldown), count);
         if (capacity >= 1) {
             capacity--;
-            lastreq = new Date();
+            lastreq = Date.now();
             next();
         } else {
             res.sendStatus(429);
@@ -119,7 +122,7 @@ app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
                     code: code,
                     client_id: req.post.client_id,
                     scope: req.post.scope,
-                    date: new Date()
+                    date: Date.now()
                 };
                 res.redirect(req.post.redirect_uri + '?' +
                 querystring.stringify({code: code, state: req.post.state, me: site.config.url}));
@@ -136,7 +139,7 @@ app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
 app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
     if (lastIssuedCode !== null &&
         lastIssuedCode.code === req.post.code &&
-        ((new Date() - lastIssuedCode.date) < 60 * 1000)) {
+        ((Date.now() - lastIssuedCode.date) < 60 * 1000)) {
         site.generateToken(lastIssuedCode.client_id, lastIssuedCode.scope).
             then(function (result) {
                 lastIssuedCode = null;

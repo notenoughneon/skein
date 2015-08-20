@@ -52,7 +52,7 @@ export class Site {
     deleteToken: any;
     listTokens: any;
 
-    constructor(config, dbfile) {
+    constructor(config, dbfile?) {
         this.config = config;
         if (dbfile === undefined) dbfile = 'index.db';
         this.db = new db.Db(dbfile);
