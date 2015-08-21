@@ -114,18 +114,18 @@ app.get('/auth', function(req, res) {
 });
 
 app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
-    if (req.post.password === site.config.password) {
+    if (req['post'].password === site.config.password) {
         nodefn.call(crypto.randomBytes, 18).
             then(function (buf) {
                 var code = buf.toString('base64');
                 lastIssuedCode = {
                     code: code,
-                    client_id: req.post.client_id,
-                    scope: req.post.scope,
+                    client_id: req['post'].client_id,
+                    scope: req['post'].scope,
                     date: Date.now()
                 };
-                res.redirect(req.post.redirect_uri + '?' +
-                querystring.stringify({code: code, state: req.post.state, me: site.config.url}));
+                res.redirect(req['post'].redirect_uri + '?' +
+                querystring.stringify({code: code, state: req['post'].state, me: site.config.url}));
             }).
             catch(function (e) {
                 handleError(res, e);
@@ -138,7 +138,7 @@ app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
 
 app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
     if (lastIssuedCode !== null &&
-        lastIssuedCode.code === req.post.code &&
+        lastIssuedCode.code === req['post'].code &&
         ((Date.now() - lastIssuedCode.date) < 60 * 1000)) {
         site.generateToken(lastIssuedCode.client_id, lastIssuedCode.scope).
             then(function (result) {
@@ -161,12 +161,12 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
 
 app.post('/micropub', requireAuth('post'), function(req, res) {
     var entry;
-    site.getSlug(req.post.name, true).
+    site.getSlug(req['post'].name, true).
         then(function (slug) {
-            if (req.post.slug === undefined)
-                req.post.slug = slug;
-            req.post.url = site.config.url + req.post.slug;
-            entry = new microformat.Entry(req.post);
+            if (req['post'].slug === undefined)
+                req['post'].slug = slug;
+            req['post'].url = site.config.url + req['post'].slug;
+            entry = new microformat.Entry(req['post']);
             entry.author = [{
                 url: [site.config.url],
                 name: [site.config.author.name],
@@ -176,16 +176,16 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         }).
         then(function () {
             var key;
-            if (req.files.photo !== undefined) {
-                return site.getSlug(req.files.photo.filename).
+            if (req['files'].photo !== undefined) {
+                return site.getSlug(req['files'].photo.filename).
                     then(function (slug) {
                         key = slug;
                         entry.content[0].html = '<p><img class="u-photo" src="' + slug + '" /></p>' +
                         entry.content[0].html;
-                        return nodefn.call(fs.readFile, req.files.photo.tmpfile);
+                        return nodefn.call(fs.readFile, req['files'].photo.tmpfile);
                     }).
                     then(function (fstream) {
-                        return site.publisher.put(key, fstream, req.files.photo.mimetype);
+                        return site.publisher.put(key, fstream, req['files'].photo.mimetype);
                     });
             }
         }).
@@ -197,7 +197,7 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             return site.sendWebmentionsFor(entry);
         }).
         then(function () {
-            res.location(req.post.slug);
+            res.location(req['post'].slug);
             res.sendStatus(201);
         }).
         catch(function (e) {
@@ -206,9 +206,9 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
 });
 
 app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
-    if (req.post.source === undefined || req.post.target === undefined)
+    if (req['post'].source === undefined || req['post'].target === undefined)
         return res.status(400).send('"source" and "target" parameters are required');
-    site.receiveWebmention(req.post.source, req.post.target).
+    site.receiveWebmention(req['post'].source, req['post'].target).
         then(function () {
             res.sendStatus(200);
         }).

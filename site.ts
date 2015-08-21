@@ -120,7 +120,7 @@ export class Site {
             });
     }
 
-    getSlug(name, kebabCase) {
+    getSlug(name, kebabCase?) {
         var now = new Date();
         var datepart = '/' + now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate();
         if (name !== undefined) {
