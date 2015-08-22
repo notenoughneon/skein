@@ -1,5 +1,6 @@
-var assert = require('assert');
-var util = require('../util');
+///<reference path="../typings/tsd.d.ts"/>
+import assert = require('assert');
+import util = require('../util');
 
 describe('chunk', function() {
     it('should return [] for (3, [])', function () {

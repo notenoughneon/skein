@@ -1,7 +1,9 @@
-var assert = require('assert');
-var fs = require('fs');
-var microformat = require('../microformat');
-var site = require('../site').init(JSON.parse(fs.readFileSync('test/testconfig.json')),'test/testindex.db');
+///<reference path="../typings/tsd.d.ts"/>
+import assert = require('assert');
+import fs = require('fs');
+import microformat = require('../microformat');
+var Site = require('../site');
+var site = new Site.Site(JSON.parse(fs.readFileSync('test/testconfig.json').toString()),'test/testindex.db');
 
 describe('site', function() {
     it('can post a note', function(done) {
