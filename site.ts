@@ -131,7 +131,7 @@ class Site {
         }
     }
 
-    copyFrom(from) {
+    clone(from) {
         var postRe = new RegExp(from.config.postRegex);
         return from.list().
             then(function (files) {

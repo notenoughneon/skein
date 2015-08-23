@@ -3,7 +3,7 @@ import assert = require('assert');
 import fs = require('fs');
 import microformat = require('../microformat');
 var Site = require('../site');
-var site = new Site.Site(JSON.parse(fs.readFileSync('test/testconfig.json').toString()),'test/testindex.db');
+var site = new Site(JSON.parse(fs.readFileSync('test/testconfig.json').toString()),'test/testindex.db');
 
 describe('site', function() {
     it('can post a note', function(done) {
