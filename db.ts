@@ -7,7 +7,7 @@ function unmarshall(record) {
     return new microformat.Entry(JSON.parse(record.json));
 }
 
-export class Db {
+class Db {
     dbRun: any;
     dbGet: any;
     dbAll: any;
@@ -105,3 +105,5 @@ export class Db {
         return this.dbAll('SELECT * FROM tokens ORDER BY date_issued DESC');
     }
 }
+
+export = Db;

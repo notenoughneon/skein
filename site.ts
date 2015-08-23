@@ -8,9 +8,9 @@ import Debug = require('debug');
 var debug = Debug('site');
 import util = require('./util');
 import microformat = require('./microformat');
-import s3publisher = require('./s3publisher');
-import filepublisher = require('./filepublisher');
-import db = require('./db');
+import S3Publisher = require('./s3publisher');
+import FilePublisher = require('./filepublisher');
+import Db = require('./db');
 
 function getPathForUrl(u) {
     return url.parse(u).pathname;
@@ -44,7 +44,7 @@ var templateUtils = {
     truncate: truncate
 };
 
-export class Site {
+class Site {
     config: any;
     db: any;
     publisher: any;
@@ -55,11 +55,11 @@ export class Site {
     constructor(config, dbfile?) {
         this.config = config;
         if (dbfile === undefined) dbfile = 'index.db';
-        this.db = new db.Db(dbfile);
+        this.db = new Db(dbfile);
         if (config.publisher.type == 's3') {
-            this.publisher = new s3publisher.S3Publisher(config.publisher);
+            this.publisher = new S3Publisher(config.publisher);
         } else if (config.publisher.type == 'file') {
-            this.publisher = new filepublisher.FilePublisher(config.publisher);
+            this.publisher = new FilePublisher(config.publisher);
         }
         this.getToken = this.db.getToken;
         this.deleteToken = this.db.deleteToken;
@@ -238,3 +238,5 @@ export class Site {
             });
     }
 }
+
+export = Site;

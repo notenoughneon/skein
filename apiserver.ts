@@ -13,13 +13,13 @@ import util = require('util');
 import Debug = require('debug');
 var debug = Debug('api');
 import microformat = require('./microformat');
-import sitelib = require('./site');
+import Site = require('./site');
 
 if (process.argv[3] === undefined)
     var configFile = 'config.json';
 else
     configFile = process.argv[3];
-var site = new sitelib.Site(JSON.parse(fs.readFileSync(configFile).toString()));
+var site = new Site(JSON.parse(fs.readFileSync(configFile).toString()));
 
 app.set('views', './template');
 app.set('view engine', 'ejs');

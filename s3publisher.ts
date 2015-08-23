@@ -10,7 +10,7 @@ function normalizePath(p) {
     }).join('/');
 }
 
-export class S3Publisher {
+class S3Publisher {
     config: any;
     putObject: any;
     getObject: any;
@@ -66,3 +66,5 @@ export class S3Publisher {
             })
     }
 }
+
+export = S3Publisher;

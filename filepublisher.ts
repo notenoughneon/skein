@@ -5,7 +5,7 @@ var when = require('when');
 import nodefn = require('when/node');
 import util = require('./util');
 
-export class FilePublisher {
+class FilePublisher {
     config: any;
 
     constructor(config) {
@@ -56,3 +56,5 @@ export class FilePublisher {
             })
     }
 }
+
+export = FilePublisher;
