@@ -88,7 +88,7 @@ export class Entry {
     content: {value: string, html: string}[];
     photo: string[];
     url: string[];
-    author: string[];
+    author: Card[];
     syndication: string[];
     replyTo: Entry[];
     likeOf: Entry[];
@@ -96,6 +96,17 @@ export class Entry {
     children: Entry[];
 
     constructor(mf) {
+        this.name = [];
+        this.published = [];
+        this.content = [];
+        this.photo = [];
+        this.url = [];
+        this.author = [];
+        this.syndication = [];
+        this.replyTo = [];
+        this.likeOf = [];
+        this.repostOf = [];
+        this.children = [];
         if (typeof(mf) === 'string') {
             // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
             this.url = [mf];
@@ -231,6 +242,10 @@ export class Card {
     uid: string[];
 
     constructor(mf) {
+        this.name = [];
+        this.photo = [];
+        this.url = [];
+        this.uid = [];
         if (mf.properties !== undefined) {
             // mf parser output
             this.name = prop(mf, 'name');

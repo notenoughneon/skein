@@ -87,6 +87,10 @@ class Site {
         return url.resolve(this.config.url, permalink);
     }
 
+    get(url) {
+        return this.db.get(url);
+    }
+
     publish(entry) {
         return this.db.store(entry).
             then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {
@@ -94,9 +98,7 @@ class Site {
                 entry: entry,
                 utils: templateUtils
             })).
-            then(function (html) {
-                return this.publisher.put(getPathForUrl(entry.url[0]), html, 'text/html');
-            });
+            then(html => this.publisher.put(getPathForUrl(entry.url[0]), html, 'text/html'));
     }
 
     generateIndex() {

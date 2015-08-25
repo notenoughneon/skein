@@ -9,7 +9,14 @@ describe('site', function() {
     it('can post a note', function(done) {
         var url = 'http://localhost:8000/firstpost';
         var content = 'hello world';
-        site.publish(new microformat.Entry({h: 'entry', url: url, content: content})).
+        var entry = new microformat.Entry({h: 'entry', url: url, content: content});
+        entry.author = [new microformat.Card(
+            {
+                url: site.config.url,
+                name: site.config.author.name,
+                photo: site.config.author.photo
+            })];
+        site.publish(entry).
             then(function() {
                 return site.get(url);
             }).
