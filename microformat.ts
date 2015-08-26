@@ -9,10 +9,10 @@ var parseHtml = nodefn.lift(parser.parseHtml);
 export function getHEntryWithCard(html: string, url: string) {
     return getHEntry(html, url).
         then(function(entry) {
-            if (entry.author.length == 0) {
+            if (entry.author != null) {
                 return getRepHCard(html, url).
                     then(function(card) {
-                        if (card !== null) entry.author = [card];
+                        if (card !== null) entry.author = card;
                         return entry;
                     });
             }
@@ -35,18 +35,18 @@ export function getRepHCard(html: string, url: string) {
             });
             // 1. uid and url match page url
             var match = cards.filter(function(c) {
-                return c.url.length > 0 &&
-                c.uid.length > 0 &&
-                urlsEqual(c.url[0], url) &&
-                urlsEqual(c.uid[0], url);
+                return c.url != null &&
+                c.uid != null &&
+                urlsEqual(c.url, url) &&
+                urlsEqual(c.uid, url);
             });
             if (match.length > 0) return match[0];
             // 2. url has rel=me
-            if (mf.rels.me !== undefined) {
+            if (mf.rels.me != null) {
                 var match = cards.filter(function(c) {
                     return mf.rels.me.some(function(r) {
-                        return c.url.length > 0 &&
-                        urlsEqual(c.url[0], r);
+                        return c.url != null &&
+                        urlsEqual(c.url, r);
                     });
                 });
                 if (match.length > 0) return match[0];
@@ -54,8 +54,8 @@ export function getRepHCard(html: string, url: string) {
             // 3. is only hcard, url matches page url
             if (cards.length === 1) {
                 var card = cards[0];
-                if (card.url.length > 0 &&
-                        urlsEqual(card.url[0], url))
+                if (card.url != null &&
+                        urlsEqual(card.url, url))
                     return card;
             }
             return null;
@@ -83,52 +83,43 @@ function children(mf) {
 }
 
 export class Entry {
-    name: string[];
-    published: string[];
-    content: {value: string, html: string}[];
-    photo: string[];
-    url: string[];
-    author: Card[];
+    name: string;
+    published: string;
+    content: {value: string, html: string};
+    photo: string;
+    url: string;
+    author: Card;
     syndication: string[];
-    replyTo: Entry[];
-    likeOf: Entry[];
-    repostOf: Entry[];
+    replyTo: Entry;
+    likeOf: Entry;
+    repostOf: Entry;
     children: Entry[];
 
     constructor(mf) {
-        this.name = [];
-        this.published = [];
-        this.content = [];
-        this.photo = [];
-        this.url = [];
-        this.author = [];
         this.syndication = [];
-        this.replyTo = [];
-        this.likeOf = [];
-        this.repostOf = [];
         this.children = [];
         if (typeof(mf) === 'string') {
             // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
-            this.url = [mf];
+            this.url = mf;
         } else if (mf.h !== undefined && mf.h === 'entry') {
             // micropub object
             if (mf.url === undefined)
                 throw new Error("url is required");
-            this.url = [mf.url];
+            this.url = mf.url;
             if (mf.published !== undefined)
-                this.published = [mf.published];
+                this.published = mf.published;
             else
-                this.published = [new Date().toISOString()];
+                this.published = new Date().toISOString();
             if (mf.content === undefined)
                 mf.content = '';
-            this.content = [{
+            this.content = {
                 value: mf.content,
                 html: util.autoLink(util.escapeHtml(mf.content))
-            }];
+            };
             if (mf.name !== undefined)
-                this.name = [mf.name];
+                this.name = mf.name;
             else
-                this.name = [this.content[0].value];
+                this.name = this.content.value;
         } else if (mf.properties !== undefined) {
             // mf parser output
             this.name = prop(mf, 'name');
@@ -137,27 +128,17 @@ export class Entry {
             this.photo = prop(mf, 'photo');
             this.url = prop(mf, 'url');
             this.author = prop(mf, 'author').
-                map(function (a) {
-                    return new Card(a);
-                });
+                map(a => new Card(a));
             this.syndication = prop(mf, 'syndication');
             this.replyTo = prop(mf, 'in-reply-to').
-                map(function (r) {
-                    return new Entry(r);
-                });
+                map(r => new Entry(r));
             this.likeOf = prop(mf, 'like-of').
-                map(function (r) {
-                    return new Entry(r);
-                });
+                map(r => new Entry(r));
             this.repostOf = prop(mf, 'repost-of').
-                map(function (r) {
-                    return new Entry(r);
-                });
+                map(r => new Entry(r));
             this.children = children(mf).
                 concat(prop(mf, 'comment')).
-                map(function (c) {
-                    return new Entry(c);
-                });
+                map(r => new Entry(r));
         } else {
             // deserialized json
             this.name = mf.name;
@@ -193,13 +174,13 @@ export class Entry {
         return this.replyTo.
             concat(this.repostOf).
             concat(this.likeOf).
-            map(function(r) { return r.url[0]; });
+            map(function(r) { return r.url; });
     }
 
     allLinks(): string[] {
         var allLinks = this.references();
-        if (this.content.length > 0)
-            allLinks = allLinks.concat(util.getLinks(this.content[0].html));
+        if (this.content != null)
+            allLinks = allLinks.concat(util.getLinks(this.content.html));
         return allLinks;
 
     }
@@ -229,23 +210,19 @@ export class Entry {
             !this.isRepost() &&
             !this.isLike() &&
             !this.isPhoto() &&
-            this.name.length > 0 &&
-            this.content.length > 0 &&
-            this.name[0] !== this.content[0].value;
+            this.name != null &&
+            this.content != null &&
+            this.name !== this.content.value;
     }
 }
 
 export class Card {
-    name: string[];
-    photo: string[];
-    url: string[];
-    uid: string[];
+    name: string;
+    photo: string;
+    url: string;
+    uid: string;
 
     constructor(mf) {
-        this.name = [];
-        this.photo = [];
-        this.url = [];
-        this.uid = [];
         if (mf.properties !== undefined) {
             // mf parser output
             this.name = prop(mf, 'name');
