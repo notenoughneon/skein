@@ -70,16 +70,28 @@ function urlsEqual(u1, u2) {
         p1.path === p2.path;
 }
 
-function prop(mf, name) {
-    if (mf.properties[name] !== undefined)
+function prop(mf, name, f?) {
+    if (mf.properties[name] != null) {
+        if (f != null)
+            return mf.properties[name].map(f);
         return mf.properties[name];
-    return [];
+    }
+    return undefined;
+}
+
+function firstProp(mf, name, f?) {
+    if (mf.properties[name] != null) {
+        if (f != null)
+            return f(mf.properties[name][0]);
+        return mf.properties[name][0];
+    }
+    return undefined;
 }
 
 function children(mf) {
-    if (mf.children !== undefined)
+    if (mf.children != null)
         return mf.children;
-    return [];
+    return undefined;
 }
 
 export class Entry {
@@ -96,8 +108,6 @@ export class Entry {
     children: Entry[];
 
     constructor(mf) {
-        this.syndication = [];
-        this.children = [];
         if (typeof(mf) === 'string') {
             // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
             this.url = mf;
@@ -122,20 +132,16 @@ export class Entry {
                 this.name = this.content.value;
         } else if (mf.properties !== undefined) {
             // mf parser output
-            this.name = prop(mf, 'name');
-            this.published = prop(mf, 'published');
-            this.content = prop(mf, 'content');
-            this.photo = prop(mf, 'photo');
-            this.url = prop(mf, 'url');
-            this.author = prop(mf, 'author').
-                map(a => new Card(a));
+            this.name = firstProp(mf, 'name');
+            this.published = firstProp(mf, 'published');
+            this.content = firstProp(mf, 'content');
+            this.photo = firstProp(mf, 'photo');
+            this.url = firstProp(mf, 'url');
+            this.author = firstProp(mf, 'author', a => new Card(a));
             this.syndication = prop(mf, 'syndication');
-            this.replyTo = prop(mf, 'in-reply-to').
-                map(r => new Entry(r));
-            this.likeOf = prop(mf, 'like-of').
-                map(r => new Entry(r));
-            this.repostOf = prop(mf, 'repost-of').
-                map(r => new Entry(r));
+            this.replyTo = firstProp(mf, 'in-reply-to', r => new Entry(r));
+            this.likeOf = firstProp(mf, 'like-of', r => new Entry(r));
+            this.repostOf = firstProp(mf, 'repost-of', r => new Entry(r));
             this.children = children(mf).
                 concat(prop(mf, 'comment')).
                 map(r => new Entry(r));
@@ -171,10 +177,10 @@ export class Entry {
     }
 
     references(): string[] {
-        return this.replyTo.
-            concat(this.repostOf).
-            concat(this.likeOf).
-            map(function(r) { return r.url; });
+        return util.flatten(
+            [this.replyTo, this.repostOf, this.likeOf].
+            map(r => r != null ? [r.url] : [])
+        );
     }
 
     allLinks(): string[] {
@@ -186,19 +192,19 @@ export class Entry {
     }
 
     isReply(): boolean {
-        return this.replyTo.length > 0;
+        return this.replyTo != null;
     }
 
     isRepost(): boolean {
-        return this.repostOf.length > 0;
+        return this.repostOf != null;
     }
 
     isLike(): boolean {
-        return this.likeOf.length > 0;
+        return this.likeOf != null;
     }
 
     isPhoto(): boolean {
-        return this.photo.length > 0;
+        return this.photo != null;
     }
 
     isReplyTo(url: string): boolean {
@@ -225,10 +231,10 @@ export class Card {
     constructor(mf) {
         if (mf.properties !== undefined) {
             // mf parser output
-            this.name = prop(mf, 'name');
-            this.photo = prop(mf, 'photo');
-            this.url = prop(mf, 'url');
-            this.uid = prop(mf, 'uid');
+            this.name = firstProp(mf, 'name');
+            this.photo = firstProp(mf, 'photo');
+            this.url = firstProp(mf, 'url');
+            this.uid = firstProp(mf, 'uid');
         } else {
             // deserialized json
             this.name = mf.name;
