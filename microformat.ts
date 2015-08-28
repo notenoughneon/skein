@@ -89,9 +89,10 @@ function firstProp(mf, name, f?) {
 }
 
 function children(mf) {
-    if (mf.children != null)
-        return mf.children;
-    return undefined;
+    var c = (mf.children || []).
+        concat(mf.properties['comment'] || []).
+        map(e => new Entry(e));
+    return c.length ? c : undefined;
 }
 
 export class Entry {
@@ -142,9 +143,7 @@ export class Entry {
             this.replyTo = firstProp(mf, 'in-reply-to', r => new Entry(r));
             this.likeOf = firstProp(mf, 'like-of', r => new Entry(r));
             this.repostOf = firstProp(mf, 'repost-of', r => new Entry(r));
-            this.children = children(mf).
-                concat(prop(mf, 'comment')).
-                map(r => new Entry(r));
+            this.children = children(mf);
         } else {
             // deserialized json
             this.name = mf.name;
