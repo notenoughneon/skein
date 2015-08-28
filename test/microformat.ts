@@ -19,23 +19,23 @@ describe('entry', function() {
             }
         };
         var entry = new microformat.Entry(mf2);
-        assert.equal(url, entry.url[0]);
-        assert.equal(content, entry.content[0].value);
-        assert.equal(content, entry.content[0].html);
+        assert.equal(url, entry.url);
+        assert.equal(content, entry.content.value);
+        assert.equal(content, entry.content.html);
     });
 
     it('can be constructed from url string', function() {
         var url = 'http://localhost:8000/firstpost';
         var entry = new microformat.Entry(url);
-        assert.equal(url, entry.url[0]);
+        assert.equal(url, entry.url);
     });
 
     it('can be constructed from micropub', function() {
         var url = 'http://localhost:8000/firstpost';
         var content = 'hello world';
         var entry = new microformat.Entry({h: 'entry', url: url, content: content});
-        assert.equal(url, entry.url[0]);
-        assert.equal(content, entry.content[0].value);
-        assert.equal(content, entry.content[0].html);
+        assert.equal(url, entry.url);
+        assert.equal(content, entry.content.value);
+        assert.equal(content, entry.content.html);
     });
 });
