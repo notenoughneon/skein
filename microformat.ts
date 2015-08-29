@@ -96,7 +96,7 @@ function children(mf) {
 
 export class Entry {
     name: string = null;
-    published: string = null;
+    published: Date = null;
     content: {value: string, html: string} = null;
     photo: string = null;
     url: string = null;
@@ -119,7 +119,7 @@ export class Entry {
             if (mf.published !== undefined)
                 this.published = mf.published;
             else
-                this.published = new Date().toISOString();
+                this.published = new Date();
             if (mf.content === undefined)
                 mf.content = '';
             this.content = {
@@ -133,7 +133,7 @@ export class Entry {
         } else if (mf.properties !== undefined) {
             // mf parser output
             this.name = firstProp(mf, 'name');
-            this.published = firstProp(mf, 'published');
+            this.published = firstProp(mf, 'published', p => new Date(p));
             this.content = firstProp(mf, 'content');
             this.photo = firstProp(mf, 'photo');
             this.url = firstProp(mf, 'url');
