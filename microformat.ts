@@ -76,7 +76,7 @@ function prop(mf, name, f?) {
             return mf.properties[name].map(f);
         return mf.properties[name];
     }
-    return undefined;
+    return [];
 }
 
 function firstProp(mf, name, f?) {
@@ -85,28 +85,27 @@ function firstProp(mf, name, f?) {
             return f(mf.properties[name][0]);
         return mf.properties[name][0];
     }
-    return undefined;
+    return null;
 }
 
 function children(mf) {
-    var c = (mf.children || []).
+    return (mf.children || []).
         concat(mf.properties['comment'] || []).
         map(e => new Entry(e));
-    return c.length ? c : undefined;
 }
 
 export class Entry {
-    name: string;
-    published: string;
-    content: {value: string, html: string};
-    photo: string;
-    url: string;
-    author: Card;
-    syndication: string[];
-    replyTo: Entry;
-    likeOf: Entry;
-    repostOf: Entry;
-    children: Entry[];
+    name: string = null;
+    published: string = null;
+    content: {value: string, html: string} = null;
+    photo: string = null;
+    url: string = null;
+    author: Card = null;
+    syndication: string[] = [];
+    replyTo: Entry = null;
+    likeOf: Entry = null;
+    repostOf: Entry = null;
+    children: Entry[] = [];
 
     constructor(mf) {
         if (typeof(mf) === 'string') {
@@ -222,10 +221,10 @@ export class Entry {
 }
 
 export class Card {
-    name: string;
-    photo: string;
-    url: string;
-    uid: string;
+    name: string = null;
+    photo: string = null;
+    url: string = null;
+    uid: string = null;
 
     constructor(mf) {
         if (mf.properties !== undefined) {

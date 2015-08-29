@@ -51,9 +51,16 @@ describe('entry', function() {
                 var expected =
                 {
                     "name":"Hello World!",
+                    "published":null,
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
+                    "photo":null,
                     "url":"http://testsite/2015/8/28/1",
-                    "author":{"name":"Test User","url":"http://testsite"}
+                    "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "syndication":[],
+                    "replyTo":null,
+                    "likeOf":null,
+                    "repostOf":null,
+                    "children":[]
                 };
                 assert.deepEqual(entry, expected);
             }).
