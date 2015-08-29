@@ -21,14 +21,14 @@ export function getHEntryWithCard(html: string, url: string) {
 }
 
 export function getHEntry(html: string, url: string) {
-    return parseHtml(html, {filters: ['h-entry'], baseUrl: url}).
+    return parseHtml(html, {filters: ['h-entry'], baseUrl: url, logLevel: 1}).
         then(function(mf) {
             return new Entry(mf.items[0]);
         });
 }
 
 export function getRepHCard(html: string, url: string) {
-    return parseHtml(html, {filters: ['h-card'], baseUrl: url}).
+    return parseHtml(html, {filters: ['h-card'], baseUrl: url, logLevel: 1}).
         then(function(mf) {
             var cards = mf.items.map(function(h) {
                 return new Card(h);
