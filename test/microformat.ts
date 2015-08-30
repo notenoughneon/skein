@@ -37,19 +37,19 @@ describe('entry', function() {
         assert.equal(url, entry.url);
     });
 
-    it('can be serialized', function() {
-        var entry = new microformat.Entry();
-        entry.url = 'http://testsite/2015/8/28/2';
-        entry.name = 'Hello World!';
-        entry.content = {"value":"Hello World!","html":"Hello <b>World!</b>"};
-        entry.author = new microformat.Card();
-        entry.author.name = 'Test User';
-        entry.author.url = 'http://testsite';
-        entry.replyTo = new microformat.Entry('http://testsite/2015/8/28/2');
-        entry.children = [new microformat.Entry('http://testsite/2015/8/28/3')];
-        assert.equal(entry.serialize(),
-'{"name":"Hello World!",\
-"published":null,\
+    var serializeEntry = new microformat.Entry();
+    serializeEntry.url = 'http://testsite/2015/8/28/2';
+    serializeEntry.name = 'Hello World!';
+    serializeEntry.published = new Date('2015-08-28T08:00:00Z');
+    serializeEntry.content = {"value":"Hello World!","html":"Hello <b>World!</b>"};
+    serializeEntry.author = new microformat.Card();
+    serializeEntry.author.name = 'Test User';
+    serializeEntry.author.url = 'http://testsite';
+    serializeEntry.replyTo = new microformat.Entry('http://testsite/2015/8/28/2');
+    serializeEntry.children = [new microformat.Entry('http://testsite/2015/8/28/3')];
+
+    var serializeJson = '{"name":"Hello World!",\
+"published":"2015-08-28T08:00:00.000Z",\
 "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},\
 "photo":null,\
 "url":"http://testsite/2015/8/28/2",\
@@ -58,7 +58,14 @@ describe('entry', function() {
 "replyTo":"http://testsite/2015/8/28/2",\
 "likeOf":null,\
 "repostOf":null,\
-"children":["http://testsite/2015/8/28/3"]}');
+"children":["http://testsite/2015/8/28/3"]}';
+
+    it('can be serialized', function() {
+        assert.equal(serializeEntry.serialize(), serializeJson);
+    });
+
+    it('can be deserialized', function() {
+        assert.deepEqual(microformat.Entry.deserialize(serializeJson), serializeEntry);
     });
 
     it('can load a note', function(done) {

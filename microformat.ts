@@ -181,23 +181,36 @@ export class Entry {
     }
 
     static deserialize(json: string): Entry {
-        var entry = new Entry();
-        JSON.parse(json, (key,val) => {
-            if (val != null && (key === 'replyTo' || key === 'repostOf' || key === 'likeOf')) {
-                var r = new Entry();
-                r.url = val;
-                val = r;
+        return JSON.parse(json, (key,val) => {
+            if (val != null && key === 'author') {
+                var author = new Card();
+                author.name = val.name;
+                author.photo = val.photo;
+                author.uid = val.uid;
+                author.url = val.url;
+                return author;
             }
+            if (val != null && (key === 'replyTo' || key === 'repostOf' || key === 'likeOf'))
+                return new Entry(val);
             if (key === 'children')
-                val = val.map(url => {
-                    var c = new Entry();
-                    c.url = url;
-                    return c;
-                });
-            if (key !== '')
-                entry[key] = val;
+                return val.map(url => new Entry(url));
+            if (key === '') {
+                var entry = new Entry();
+                entry.name = val.name;
+                entry.published = new Date(val.published);
+                entry.content = val.content;
+                entry.photo = val.photo;
+                entry.url = val.url;
+                entry.author = val.author;
+                entry.syndication = val.syndication;
+                entry.replyTo = val.replyTo;
+                entry.likeOf = val.likeOf;
+                entry.repostOf = val.repostOf;
+                entry.children = val.children;
+                return entry;
+            }
+            return val;
         });
-        return entry;
     }
 }
 
