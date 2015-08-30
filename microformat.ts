@@ -105,30 +105,11 @@ export class Entry {
     repostOf: Entry = null;
     children: Entry[] = [];
 
-    constructor(mf) {
-        if (typeof(mf) === 'string') {
+    constructor(mf?) {
+        if (mf != null && typeof(mf) === 'string') {
             // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
             this.url = mf;
-        } else if (mf.h !== undefined && mf.h === 'entry') {
-            // micropub object
-            if (mf.url === undefined)
-                throw new Error("url is required");
-            this.url = mf.url;
-            if (mf.published !== undefined)
-                this.published = mf.published;
-            else
-                this.published = new Date();
-            if (mf.content === undefined)
-                mf.content = '';
-            this.content = {
-                value: mf.content,
-                html: util.autoLink(util.escapeHtml(mf.content))
-            };
-            if (mf.name !== undefined)
-                this.name = mf.name;
-            else
-                this.name = this.content.value;
-        } else if (mf.properties !== undefined) {
+        } else if (mf != null && mf.properties !== undefined) {
             // mf parser output
             this.name = firstProp(mf, 'name');
             this.published = firstProp(mf, 'published', p => new Date(p));
@@ -141,34 +122,6 @@ export class Entry {
             this.likeOf = firstProp(mf, 'like-of', r => new Entry(r));
             this.repostOf = firstProp(mf, 'repost-of', r => new Entry(r));
             this.children = children(mf);
-        } else {
-            // deserialized json
-            this.name = mf.name;
-            this.published = mf.published;
-            this.content = mf.content;
-            this.photo = mf.photo;
-            this.url = mf.url;
-            this.author = mf.author.
-                map(function (a) {
-                    return new Card(a);
-                });
-            this.syndication = mf.syndication;
-            this.replyTo = mf.replyTo.
-                map(function (r) {
-                    return new Entry(r);
-                });
-            this.likeOf = mf.likeOf.
-                map(function (r) {
-                    return new Entry(r);
-                });
-            this.repostOf = mf.repostOf.
-                map(function (r) {
-                    return new Entry(r);
-                });
-            this.children = mf.children.
-                map(function (c) {
-                    return new Entry(c);
-                });
         }
     }
 
@@ -216,6 +169,36 @@ export class Entry {
             this.content != null &&
             this.name !== this.content.value;
     }
+
+    serialize(): string {
+        return JSON.stringify(this, (key,val) => {
+            if (val != null && (key === 'replyTo' || key === 'repostOf' || key === 'likeOf'))
+                return val.url;
+            if (key === 'children')
+                return val.map(c => c.url);
+            return val;
+        });
+    }
+
+    static deserialize(json: string): Entry {
+        var entry = new Entry();
+        JSON.parse(json, (key,val) => {
+            if (val != null && (key === 'replyTo' || key === 'repostOf' || key === 'likeOf')) {
+                var r = new Entry();
+                r.url = val;
+                val = r;
+            }
+            if (key === 'children')
+                val = val.map(url => {
+                    var c = new Entry();
+                    c.url = url;
+                    return c;
+                });
+            if (key !== '')
+                entry[key] = val;
+        });
+        return entry;
+    }
 }
 
 export class Card {
@@ -224,19 +207,13 @@ export class Card {
     url: string = null;
     uid: string = null;
 
-    constructor(mf) {
-        if (mf.properties !== undefined) {
+    constructor(mf?) {
+        if (mf != null && mf.properties !== undefined) {
             // mf parser output
             this.name = firstProp(mf, 'name');
             this.photo = firstProp(mf, 'photo');
             this.url = firstProp(mf, 'url');
             this.uid = firstProp(mf, 'uid');
-        } else {
-            // deserialized json
-            this.name = mf.name;
-            this.photo = mf.photo;
-            this.url = mf.url;
-            this.uid = mf.uid;
         }
     }
 }

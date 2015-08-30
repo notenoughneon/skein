@@ -3,6 +3,13 @@ import assert = require('assert');
 import microformat = require('../microformat');
 
 describe('entry', function() {
+    it('can be constructed with no args', function() {
+        var entry = new microformat.Entry();
+        assert.equal(entry.url, null);
+        assert.equal(entry.replyTo, null);
+        assert.deepEqual(entry.children, []);
+    });
+
     it('can be constructed from mf2', function() {
         var url = 'http://localhost:8000/firstpost';
         var content = 'hello world';
@@ -30,13 +37,28 @@ describe('entry', function() {
         assert.equal(url, entry.url);
     });
 
-    it('can be constructed from micropub', function() {
-        var url = 'http://localhost:8000/firstpost';
-        var content = 'hello world';
-        var entry = new microformat.Entry({h: 'entry', url: url, content: content});
-        assert.equal(url, entry.url);
-        assert.equal(content, entry.content.value);
-        assert.equal(content, entry.content.html);
+    it('can be serialized', function() {
+        var entry = new microformat.Entry();
+        entry.url = 'http://testsite/2015/8/28/2';
+        entry.name = 'Hello World!';
+        entry.content = {"value":"Hello World!","html":"Hello <b>World!</b>"};
+        entry.author = new microformat.Card();
+        entry.author.name = 'Test User';
+        entry.author.url = 'http://testsite';
+        entry.replyTo = new microformat.Entry('http://testsite/2015/8/28/2');
+        entry.children = [new microformat.Entry('http://testsite/2015/8/28/3')];
+        assert.equal(entry.serialize(),
+'{"name":"Hello World!",\
+"published":null,\
+"content":{"value":"Hello World!","html":"Hello <b>World!</b>"},\
+"photo":null,\
+"url":"http://testsite/2015/8/28/2",\
+"author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},\
+"syndication":[],\
+"replyTo":"http://testsite/2015/8/28/2",\
+"likeOf":null,\
+"repostOf":null,\
+"children":["http://testsite/2015/8/28/3"]}');
     });
 
     it('can load a note', function(done) {
@@ -78,7 +100,6 @@ describe('entry', function() {
             </div>';
         microformat.getHEntry(html, 'http://testsite').
             then(function(entry) {
-                var json = JSON.stringify(entry);
                 assert.deepEqual(entry, {
                     "name":"Here is a reply",
                     "published":new Date("2015-08-28T08:10:00Z"),
