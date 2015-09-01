@@ -2,6 +2,7 @@
 var AWS = require('aws-sdk');
 var nodefn = require('when/node');
 import util = require('./util');
+import Domain = require('./domain');
 
 // S3 doesn't like leading slashes
 function normalizePath(p) {
@@ -10,7 +11,7 @@ function normalizePath(p) {
     }).join('/');
 }
 
-class S3Publisher {
+class S3Publisher implements Domain {
     config: any;
     putObject: any;
     getObject: any;

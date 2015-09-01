@@ -4,8 +4,9 @@ import pathlib = require('path');
 var when = require('when');
 import nodefn = require('when/node');
 import util = require('./util');
+import Domain = require('./domain');
 
-class FilePublisher {
+class FilePublisher implements Domain {
     config: any;
 
     constructor(config) {
