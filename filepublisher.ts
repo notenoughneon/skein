@@ -1,7 +1,7 @@
 ///<reference path="typings/tsd.d.ts"/>
 import fs = require('fs');
 import pathlib = require('path');
-var when = require('when');
+import when = require('when');
 import nodefn = require('when/node');
 import util = require('./util');
 import Domain = require('./domain');

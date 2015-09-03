@@ -1,5 +1,5 @@
 ///<reference path="typings/tsd.d.ts"/>
-var nodefn = require('when/node');
+import nodefn = require('when/node');
 import request = require('request');
 import Domain = require('./domain');
 
@@ -8,12 +8,12 @@ class WebDomain implements Domain {
         throw new Error('Put not supported');
     }
 
-    get(path:string):any {
+    get(path) {
         return nodefn.call(request, path).
             then(res => res[1]);
     }
 
-    exists(path:string):boolean {
+    exists(path) {
         return nodefn.call(request, path).
             then(res => res[0].statusCode === 200);
     }

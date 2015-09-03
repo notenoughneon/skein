@@ -1,6 +1,6 @@
 ///<reference path="typings/tsd.d.ts"/>
 var AWS = require('aws-sdk');
-var nodefn = require('when/node');
+import nodefn = require('when/node');
 import util = require('./util');
 import Domain = require('./domain');
 
