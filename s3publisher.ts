@@ -2,7 +2,7 @@
 var AWS = require('aws-sdk');
 import nodefn = require('when/node');
 import util = require('./util');
-import Domain = require('./domain');
+import Publisher = require('./publisher');
 
 // S3 doesn't like leading slashes
 function normalizePath(p) {
@@ -11,7 +11,7 @@ function normalizePath(p) {
     }).join('/');
 }
 
-class S3Publisher implements Domain {
+class S3Publisher implements Publisher {
     config: any;
     putObject: any;
     getObject: any;
@@ -36,6 +36,8 @@ class S3Publisher implements Domain {
         };
         return this.putObject(params).
             then(function () {
+                // S3 doesn't infer '.html' on filenames,
+                // so we have to put both 'path' and 'path.html'
                 if (params.ContentType === 'text/html' && !/\.html$/.test(params.Key)) {
                     params.Key = params.Key + '.html';
                     return this.putObject(params);
@@ -65,6 +67,15 @@ class S3Publisher implements Domain {
                     return o.Key;
                 });
             })
+    }
+
+    //TODO: transactions could be implemented using s3 versioning
+    begin() {
+        // NOOP
+    }
+
+    commit(msg) {
+        // NOOP
     }
 }
 

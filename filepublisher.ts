@@ -4,9 +4,9 @@ import pathlib = require('path');
 import when = require('when');
 import nodefn = require('when/node');
 import util = require('./util');
-import Domain = require('./domain');
+import Publisher = require('./publisher');
 
-class FilePublisher implements Domain {
+class FilePublisher implements Publisher {
     config: any;
 
     constructor(config) {
@@ -55,6 +55,14 @@ class FilePublisher implements Domain {
                     return pathlib.relative(this.config.root, p);
                 });
             })
+    }
+
+    begin() {
+        // NOOP
+    }
+
+    commit(msg) {
+        // NOOP
     }
 }
 
