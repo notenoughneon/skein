@@ -57,12 +57,19 @@ class FilePublisher implements Publisher {
             })
     }
 
-    begin() {
+    begin(): when.Promise<boolean> {
         // NOOP
+        return when(false);
     }
 
-    commit(msg) {
+    rollback(): when.Promise<boolean> {
         // NOOP
+        return when(false);
+    }
+
+    commit(msg): when.Promise<boolean> {
+        // NOOP
+        return when(false);
     }
 }
 

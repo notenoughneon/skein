@@ -2,12 +2,13 @@
 import when = require('when');
 
 interface Publisher {
-    put(path: string, obj: any, contentType: string): void;
+    put(path: string, obj: any, contentType: string): when.Promise<void>;
     get(path: string): when.Promise<Buffer>;
     exists(path: string): when.Promise<boolean>;
     list(): when.Promise<string[]>;
-    begin(): void;
-    commit(msg: string): void;
+    begin(): when.Promise<boolean>;
+    rollback(): when.Promise<boolean>;
+    commit(msg: string): when.Promise<boolean>;
 }
 
 export = Publisher;

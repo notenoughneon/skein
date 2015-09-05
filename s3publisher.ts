@@ -1,5 +1,6 @@
 ///<reference path="typings/tsd.d.ts"/>
 var AWS = require('aws-sdk');
+import when = require('when');
 import nodefn = require('when/node');
 import util = require('./util');
 import Publisher = require('./publisher');
@@ -27,7 +28,7 @@ class S3Publisher implements Publisher {
         this.listObjects = nodefn.lift(s3.listObjects.bind(s3));
     }
 
-    put(path, obj, contentType) {
+    put(path, obj, contentType): when.Promise<void> {
         var params = {
             Bucket: this.config.bucket,
             Key: normalizePath(path),
@@ -45,11 +46,11 @@ class S3Publisher implements Publisher {
             });
     }
 
-    get(path) {
+    get(path): when.Promise<Buffer> {
         return this.getObject({Bucket: this.config.bucket, Key: normalizePath(path)});
     }
 
-    exists(path) {
+    exists(path): when.Promise<boolean> {
         return this.headObject({Bucket: this.config.bucket, Key: normalizePath(path)}).
             then(function () {
                 return true;
@@ -59,7 +60,7 @@ class S3Publisher implements Publisher {
             });
     }
 
-    list() {
+    list(): when.Promise<string[]> {
         // FIXME: handle truncated results
         return this.listObjects({Bucket: this.config.bucket}).
             then(function (data) {
@@ -70,12 +71,19 @@ class S3Publisher implements Publisher {
     }
 
     //TODO: transactions could be implemented using s3 versioning
-    begin() {
+    begin(): when.Promise<boolean> {
         // NOOP
+        return when(false);
     }
 
-    commit(msg) {
+    rollback(): when.Promise<boolean> {
         // NOOP
+        return when(false);
+    }
+
+    commit(msg): when.Promise<boolean> {
+        // NOOP
+        return when(false);
     }
 }
 
