@@ -33,3 +33,16 @@ describe('chunk', function() {
         assert.deepEqual(util.chunk(3, [1,2,3,4,5]), [[1,2,3],[4,5]]);
     })
 });
+
+describe('getLinks', function() {
+    it('works on no links', function() {
+        assert.deepEqual(util.getLinks('<b>hello</b>'), []);
+    });
+    it('works on single link', function() {
+        assert.deepEqual(util.getLinks('<a href="foo/bar">hi</a>'), ['foo/bar']);
+    });
+    it('works on multiple links', function() {
+        assert.deepEqual(util.getLinks('<div><a href="foo/bar">hi</a></div><a href="baz">there</a>'),
+            ['foo/bar', 'baz']);
+    });
+});

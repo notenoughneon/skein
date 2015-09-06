@@ -134,7 +134,7 @@ export function autoLink(str) {
 
 export function getLinks(html) {
     var $ = cheerio.load(html);
-    return $('a').toArray().map(function(a){return a.attribs.href;});
+    return $('a').toArray().map(a => a.attribs['href']);
 }
 
 export function isMentionOf(html, permalink) {
