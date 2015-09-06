@@ -325,4 +325,8 @@ describe('entry', function() {
             then(done).
             catch(done);
     });
+    it('domain works', function() {
+        assert.equal((new microformat.Entry('http://somesite.com/2015/1/2/3')).domain(), 'somesite.com');
+        assert.equal((new microformat.Entry('https://somesite.com:8080/2015/1/2/3')).domain(), 'somesite.com:8080');
+    });
 });

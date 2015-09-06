@@ -124,6 +124,11 @@ export class Entry {
         }
     }
 
+    domain(): string {
+        // TODO: ignores protocol, is this important?
+        return url.parse(this.url).host;
+    }
+
     references(): string[] {
         return util.flatten(
             [this.replyTo, this.repostOf, this.likeOf].
