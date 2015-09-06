@@ -167,9 +167,9 @@ export class Entry {
         return !this.isReply() &&
             !this.isRepost() &&
             !this.isLike() &&
-            this.getPhotos().length > 0 &&
             this.name != null &&
             this.content != null &&
+            this.content.value != '' &&
             this.name !== this.content.value;
     }
 

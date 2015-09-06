@@ -310,4 +310,19 @@ describe('entry', function() {
             then(done).
             catch(done);
     });
+    it('isArticle works (photo without caption)', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/1"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content"><img class="u-photo" src="photo.jpg"/></div>\
+            </div>';
+        microformat.getHEntry(html, 'http://testsite').
+            then(function(entry){
+                assert.equal(entry.isArticle(), false);
+            }).
+            then(done).
+            catch(done);
+    });
 });
