@@ -170,6 +170,18 @@ export class Entry {
             this.name !== this.content.value;
     }
 
+    flatten(): Entry[] {
+        var entries = [this];
+        if (this.replyTo != null)
+            entries.push(this.replyTo);
+        if (this.repostOf != null)
+            entries.push(this.repostOf);
+        if (this.likeOf != null)
+            entries.push(this.likeOf);
+        entries = entries.concat(this.children);
+        return entries;
+    }
+
     serialize(): string {
         return JSON.stringify(this, (key,val) => {
             if (val != null && (key === 'replyTo' || key === 'repostOf' || key === 'likeOf'))
