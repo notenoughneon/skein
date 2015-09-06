@@ -51,7 +51,6 @@ describe('entry', function() {
     var serializeJson = '{"name":"Hello World!",\
 "published":"2015-08-28T08:00:00.000Z",\
 "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},\
-"photo":null,\
 "url":"http://testsite/2015/8/28/2",\
 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},\
 "syndication":[],\
@@ -82,7 +81,6 @@ describe('entry', function() {
                     "name":"Hello World!",
                     "published":new Date("2015-08-28T08:00:00Z"),
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
-                    "photo":null,
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "syndication":[],
@@ -111,7 +109,6 @@ describe('entry', function() {
                     "name":"Here is a reply",
                     "published":new Date("2015-08-28T08:10:00Z"),
                     "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
-                    "photo":null,
                     "url":"http://testsite/2015/8/28/2",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "syndication":[],
@@ -119,7 +116,6 @@ describe('entry', function() {
                         "name":null,
                         "published":null,
                         "content":null,
-                        "photo":null,
                         "url":"http://testsite/2015/8/28/1",
                         "author":null,
                         "syndication":[],
@@ -152,7 +148,6 @@ describe('entry', function() {
                     "name":"First Post",
                     "published":new Date("2015-08-28T08:00:00Z"),
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
-                    "photo":null,
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "syndication":[],
@@ -180,7 +175,6 @@ describe('entry', function() {
                     "name":"Hello World!",
                     "published":new Date("2015-08-28T08:00:00Z"),
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
-                    "photo":null,
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "syndication":[],
@@ -218,7 +212,6 @@ describe('entry', function() {
                         "name":"Hello World!",
                         "published":new Date("2015-08-28T08:00:00Z"),
                         "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
-                        "photo":null,
                         "url":"http://testsite/2015/8/28/1",
                         "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                         "syndication":[],
@@ -226,7 +219,6 @@ describe('entry', function() {
                             "name":null,
                             "published":null,
                             "content":null,
-                            "photo":null,
                             "url":"http://othersite/somepost",
                             "author":null,
                             "syndication":[],
@@ -242,7 +234,6 @@ describe('entry', function() {
                                 "name":"Here is a reply",
                                 "published":new Date("2015-08-28T08:10:00Z"),
                                 "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
-                                "photo":null,
                                 "url":"http://testsite/2015/8/28/2",
                                 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                                 "syndication":[],
@@ -250,7 +241,6 @@ describe('entry', function() {
                                     "name":null,
                                     "published":null,
                                     "content":null,
-                                    "photo":null,
                                     "url":"http://testsite/2015/8/28/1",
                                     "author":null,
                                     "syndication":[],
@@ -269,7 +259,6 @@ describe('entry', function() {
                         "name":null,
                         "published":null,
                         "content":null,
-                        "photo":null,
                         "url":"http://othersite/somepost",
                         "author":null,
                         "syndication":[],
@@ -282,7 +271,6 @@ describe('entry', function() {
                         "name":"Here is a reply",
                         "published":new Date("2015-08-28T08:10:00Z"),
                         "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
-                        "photo":null,
                         "url":"http://testsite/2015/8/28/2",
                         "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                         "syndication":[],
@@ -290,7 +278,6 @@ describe('entry', function() {
                             "name":null,
                             "published":null,
                             "content":null,
-                            "photo":null,
                             "url":"http://testsite/2015/8/28/1",
                             "author":null,
                             "syndication":[],
@@ -304,6 +291,21 @@ describe('entry', function() {
                         "children":[]
                     }
                 ]);
+            }).
+            then(done).
+            catch(done);
+    });
+    it('getPhotos works', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/1"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content">Hello <b>World!</b><img class="u-photo" src="photo.jpg"/></div>\
+            </div>';
+        microformat.getHEntry(html, 'http://testsite').
+            then(function(entry){
+                assert.deepEqual(entry.getPhotos(), ['http://testsite/photo.jpg']);
             }).
             then(done).
             catch(done);

@@ -1,6 +1,7 @@
 ///<reference path="typings/tsd.d.ts"/>
 var parser = require('microformat-node');
 var nodefn = require('when/node');
+import cheerio = require('cheerio');
 import util = require('./util');
 import url = require('url');
 
@@ -96,7 +97,6 @@ export class Entry {
     name: string = null;
     published: Date = null;
     content: {value: string, html: string} = null;
-    photo: string = null;
     url: string = null;
     author: Card = null;
     syndication: string[] = [];
@@ -114,7 +114,6 @@ export class Entry {
             this.name = firstProp(mf, 'name');
             this.published = firstProp(mf, 'published', p => new Date(p));
             this.content = firstProp(mf, 'content');
-            this.photo = firstProp(mf, 'photo');
             this.url = firstProp(mf, 'url');
             this.author = firstProp(mf, 'author', a => new Card(a));
             this.syndication = prop(mf, 'syndication');
@@ -152,8 +151,12 @@ export class Entry {
         return this.likeOf != null;
     }
 
-    isPhoto(): boolean {
-        return this.photo != null;
+    getPhotos(): string[] {
+        if (this.content != null && this.content.html != null) {
+            var $ = cheerio.load(this.content.html);
+            return $('img.u-photo').toArray().map(img => img.attribs['src']);
+        }
+        return [];
     }
 
     isReplyTo(url: string): boolean {
@@ -164,7 +167,7 @@ export class Entry {
         return !this.isReply() &&
             !this.isRepost() &&
             !this.isLike() &&
-            !this.isPhoto() &&
+            this.getPhotos().length > 0 &&
             this.name != null &&
             this.content != null &&
             this.name !== this.content.value;
@@ -211,7 +214,6 @@ export class Entry {
                 entry.name = val.name;
                 entry.published = new Date(val.published);
                 entry.content = val.content;
-                entry.photo = val.photo;
                 entry.url = val.url;
                 entry.author = val.author;
                 entry.syndication = val.syndication;
