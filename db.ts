@@ -1,67 +1,56 @@
 ///<reference path="typings/tsd.d.ts"/>
 import sqlite3 = require('sqlite3');
-var nodefn = require('when/node');
+import nodefn = require('when/node');
 import microformat = require('./microformat');
-
-function unmarshall(record) {
-    return new microformat.Entry(JSON.parse(record.json));
-}
 
 class Db {
     dbRun: any;
     dbGet: any;
     dbAll: any;
 
-    constructor(dbfile) {
-        var db = new sqlite3.Database(dbfile);
+    constructor(dbfile, done) {
+        var db = new sqlite3.Database(dbfile, done);
         this.dbRun = nodefn.lift(db.run.bind(db));
         this.dbGet = nodefn.lift(db.get.bind(db));
         this.dbAll = nodefn.lift(db.all.bind(db));
-        this.dbRun(
+    }
+
+    init() {
+        return this.dbRun(
             'CREATE TABLE IF NOT EXISTS entries (' +
             'url TEXT PRIMARY KEY,' +
-            'author TEXT,' +
+            'domain TEXT,' +
             'date TEXT,' +
             'isArticle INTEGER,' +
             'isReply INTEGER,' +
             'isRepost INTEGER,' +
             'isLike INTEGER,' +
-            'isPhoto INTEGER,' +
             'json TEXT' +
             ')'
-        );
-        this.dbRun(
-            'CREATE TABLE IF NOT EXISTS tokens (' +
-            'token TEXT PRIMARY KEY,' +
-            'client_id TEXT,' +
-            'scope TEXT,' +
-            'date_issued TEXT' +
-            ')'
-        );
+        ).
+            then(() => this.dbRun(
+                    'CREATE TABLE IF NOT EXISTS tokens (' +
+                    'token TEXT PRIMARY KEY,' +
+                    'client_id TEXT,' +
+                    'scope TEXT,' +
+                    'date_issued TEXT' +
+                    ')')
+            );
     }
 
     store(entry) {
         return this.dbRun('INSERT OR REPLACE INTO entries ' +
-            '(url, author, date, isArticle, isReply, isRepost, ' +
-            'isLike, isPhoto, json) ' +
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            entry.url[0],
-            entry.author[0].url[0],
-            entry.published[0],
+            '(url, domain, date, isArticle, isReply, isRepost, isLike, json) ' +
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            entry.url,
+            entry.domain(),
+            entry.published.toISOString(),
             entry.isArticle(),
             entry.isReply(),
             entry.isRepost(),
             entry.isLike(),
-            entry.isPhoto(),
-            JSON.stringify(entry)
+            entry.serialize()
         );
-    }
-
-    existsByAuthor(author, url) {
-        return this.dbGet('SELECT * FROM entries WHERE author=? AND url=?', author, url).
-            then(function(data) {
-                return data !== undefined;
-            });
     }
 
     get(url) {
@@ -70,13 +59,13 @@ class Db {
                 if (data === undefined) throw new Error(url + ' not found');
                 return data;
             }).
-            then(unmarshall);
+            then(record => microformat.Entry.deserialize(record.json));
     }
 
-    getAllByAuthor(author) {
-        return this.dbAll('SELECT * FROM entries WHERE author=? ORDER BY date DESC', author).
+    getAllByDomain(domain) {
+        return this.dbAll('SELECT * FROM entries WHERE domain=? ORDER BY date DESC', domain).
             then(function (records) {
-                return records.map(unmarshall);
+                return records.map(record => microformat.Entry.deserialize(record.json));
             });
     }
 
