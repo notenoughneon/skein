@@ -2,19 +2,16 @@
 var ejs = require('ejs');
 import url = require('url');
 import crypto = require('crypto');
-var when = require('when');
-var nodefn = require('when/node');
+import when = require('when');
+import nodefn = require('when/node');
 import Debug = require('debug');
 var debug = Debug('site');
 import util = require('./util');
 import microformat = require('./microformat');
+import Publisher = require('./publisher');
 import S3Publisher = require('./s3publisher');
 import FilePublisher = require('./filepublisher');
 import Db = require('./db');
-
-function getPathForUrl(u) {
-    return url.parse(u).pathname;
-}
 
 function getPathForIndex(page) {
     return 'index' + (page == 1 ? '' : page);
@@ -26,15 +23,14 @@ function truncate(s, len) {
     return s;
 }
 
-function formatDate(datestring) {
+function formatDate(date) {
     var month = ["Jan","Feb","Mar","Apr","May","Jun",
         "Jul","Aug","Sep","Oct","Nov","Dec"];
-    var d = new Date(datestring);
-    var minutes = d.getMinutes();
-    return d.getDate() + ' ' +
-        month[d.getMonth()] + ' ' +
-        d.getFullYear() + ' ' +
-        d.getHours() + ':' +
+    var minutes = date.getMinutes();
+    return date.getDate() + ' ' +
+        month[date.getMonth()] + ' ' +
+        date.getFullYear() + ' ' +
+        date.getHours() + ':' +
         ((minutes < 10) ? '0' + minutes : minutes);
 }
 
@@ -47,24 +43,23 @@ var templateUtils = {
 class Site {
     config: any;
     db: any;
-    publisher: any;
-    getToken: any;
-    deleteToken: any;
-    listTokens: any;
+    publisher: Publisher;
 
-    constructor(config, dbfile?) {
+    constructor(config, db) {
         this.config = config;
-        if (dbfile === undefined) dbfile = 'index.db';
-        this.db = new Db(dbfile);
-        if (config.publisher.type == 's3') {
-            this.publisher = new S3Publisher(config.publisher);
-        } else if (config.publisher.type == 'file') {
-            this.publisher = new FilePublisher(config.publisher);
+        this.db = db;
+        switch(config.publisher.type) {
+            case 's3':
+                this.publisher = new S3Publisher(config.publisher);
+                break;
+            case 'file':
+                this.publisher = new FilePublisher(config.publisher);
+                break;
+            default:
+                throw new Error('Unknown publisher type');
         }
-        this.getToken = this.db.getToken;
-        this.deleteToken = this.db.deleteToken;
-        this.listTokens = this.db.listTokens;
     }
+
     getNextAvailable(seed, prefix) {
         var n = seed;
         function chain() {
@@ -87,27 +82,23 @@ class Site {
         return url.resolve(this.config.url, permalink);
     }
 
-    get(url) {
-        return this.db.get(url);
-    }
-
-    publish(entry) {
+    publish(entry: microformat.Entry) {
         return this.db.store(entry).
-            then(nodefn.lift(ejs.renderFile, 'template/entrypage.ejs', {
+            then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
                 site: this.config,
                 entry: entry,
                 utils: templateUtils
             })).
-            then(html => this.publisher.put(getPathForUrl(entry.url[0]), html, 'text/html'));
+            then(html => this.publisher.put(url.parse(entry.url).pathname, html, 'text/html'));
     }
 
     generateIndex() {
         var limit = this.config.entriesPerPage;
-        return this.db.getAllByAuthor(this.config.url).
-            then(util.chunk.bind(null, limit)).
-            then(function (chunks) {
-                return when.map(chunks, function (chunk, index) {
-                    return nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
+        return this.db.getAllByDomain(url.parse(this.config.url).host).
+            then(entries => util.chunk(limit, entries)).
+            then(chunks =>
+                when.map(chunks, (chunk, index) =>
+                    nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
                         {
                             site: this.config,
                             entries: chunk,
@@ -115,11 +106,9 @@ class Site {
                             totalPages: chunks.length,
                             utils: templateUtils
                         }).
-                        then(function (html) {
-                            return this.publisher.put(getPathForIndex(index + 1), html, 'text/html');
-                        });
-                });
-            });
+                        then(html => this.publisher.put(getPathForIndex(index + 1), html, 'text/html'))
+                )
+            );
     }
 
     getSlug(name, kebabCase?) {
@@ -187,7 +176,7 @@ class Site {
                     return nodefn.call(ejs.renderFile, 'template/entrypage.ejs',
                         {site: this.config, entry: entry, utils: templateUtils}).
                         then(function (html) {
-                            return this.publisher.put(getPathForUrl(entry.url[0]), html, 'text/html');
+                            return this.publisher.put(url.parse(entry.url).pathname, html, 'text/html');
                         });
                 });
             });

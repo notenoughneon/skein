@@ -4,18 +4,11 @@ import fs = require('fs');
 import microformat = require('../microformat');
 import Db = require('../db');
 
-function tryDelete(p) {
-    try {
-        fs.unlinkSync(p);
-    } catch (e) {}
-}
-
 describe('db', function() {
     var db;
 
     before(function(done) {
-        tryDelete('test/testindex.db');
-        db = new Db('test/testindex.db', done);
+        db = new Db(':memory:', done);
     });
 
     it('initialize', function(done) {

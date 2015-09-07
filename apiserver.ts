@@ -13,13 +13,17 @@ import util = require('util');
 import Debug = require('debug');
 var debug = Debug('api');
 import microformat = require('./microformat');
+import Db = require('./db');
 import Site = require('./site');
 
 if (process.argv[3] === undefined)
     var configFile = 'config.json';
 else
     configFile = process.argv[3];
-var site = new Site(JSON.parse(fs.readFileSync(configFile).toString()));
+var db = new Db('index.db');
+db.init();
+var config = JSON.parse(fs.readFileSync(configFile).toString());
+var site = new Site(config, db);
 
 app.set('views', './template');
 app.set('view engine', 'ejs');
@@ -68,7 +72,7 @@ function requireAuth(scope) {
         } else {
             return denyAccess(req, res);
         }
-        site.getToken(token).
+        site.db.getToken(token).
             then(function (row) {
                 if (row === undefined || !row.scope.split(' ').some(function(s) {return s === scope;}))
                     return denyAccess(req, res);
@@ -218,7 +222,7 @@ app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
 });
 
 app.get('/tokens', requireAuth('admin'), function(req, res) {
-    site.listTokens().
+    site.db.listTokens().
         then(res.json.bind(res)).
         catch(function (e) {
             handleError(res, e);
@@ -226,7 +230,7 @@ app.get('/tokens', requireAuth('admin'), function(req, res) {
 });
 
 app.delete('/tokens/*', requireAuth('admin'), function(req, res) {
-    site.deleteToken(req.params[0]).
+    site.db.deleteToken(req.params[0]).
         then(res.json.bind(res)).
         catch(function (e) {
             handleError(res, e);

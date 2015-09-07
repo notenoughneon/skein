@@ -1,18 +1,19 @@
         <p class="blog-post-meta">
-            <% var authorsToDisplay = entry.author.filter(function(a) {return a.url[0] != site.url;}); %>
-<% authorsToDisplay.forEach(function(author) { %>
-            <a class="p-author h-card" href="<%= author.url[0] %>">
-                <img src="<%= author.photo[0] %>">
-                <%= author.name[0] %>
+<% if (entry.author.url != site.url) { %>
+            <a class="p-author h-card" href="<%= entry.author.url %>">
+                <% if (entry.author.photo != null) { %>
+                <img src="<%= author.photo %>">
+                <% } %>
+                <%= entry.author.name %>
             </a>
-<% }); %>
-<% if (authorsToDisplay.length > 0 && entry.published.length > 0) { %>
+<% } %>
+<% if (entry.author.url != site.url && entry.published != null) { %>
             -
 <% } %>
-            <a class="u-url" href="<%= entry.url[0] %>">
-<% if (entry.published.length > 0) {
-       var dateString =utils.formatDate(entry.published[0]); %>
-                <time class="dt-published" datetime="<%= entry.published[0] %>" title="<%= dateString %>"><%= dateString %></time>
+            <a class="u-url" href="<%= entry.url %>">
+<% if (entry.published != null) {
+       var dateString =utils.formatDate(entry.published); %>
+                <time class="dt-published" datetime="<%= entry.published.toISOString() %>" title="<%= dateString %>"><%= dateString %></time>
 <% } %>
             </a>
         </p>

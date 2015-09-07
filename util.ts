@@ -15,6 +15,12 @@ export function dump(data) {
     console.log(util.inspect(data, {depth: null}));
 }
 
+export function tryDelete(p) {
+    try {
+        fs.unlinkSync(p);
+    } catch (e) {}
+}
+
 function mkdirRecursive(dir) {
     try {
         var stats = fs.statSync(dir);
