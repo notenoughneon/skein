@@ -8,13 +8,10 @@ describe('db', function() {
     var db;
 
     before(function(done) {
-        db = new Db(':memory:', done);
-    });
-
-    it('initialize', function(done) {
-       db.init().
-           then(done).
-           catch(done);
+        db = new Db(':memory:');
+        db.init().
+            then(done).
+            catch(done);
     });
 
     it('store/load entry', function (done) {

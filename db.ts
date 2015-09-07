@@ -8,8 +8,8 @@ class Db {
     dbGet: any;
     dbAll: any;
 
-    constructor(dbfile, done?) {
-        var db = new sqlite3.Database(dbfile, done);
+    constructor(dbfile) {
+        var db = new sqlite3.Database(dbfile);
         this.dbRun = nodefn.lift(db.run.bind(db));
         this.dbGet = nodefn.lift(db.get.bind(db));
         this.dbAll = nodefn.lift(db.all.bind(db));
