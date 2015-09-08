@@ -1,5 +1,6 @@
 ///<reference path="typings/tsd.d.ts"/>
 import sqlite3 = require('sqlite3');
+import when = require('when');
 import nodefn = require('when/node');
 import microformat = require('./microformat');
 
@@ -67,6 +68,16 @@ class Db {
             then(function (records) {
                 return records.map(record => microformat.Entry.deserialize(record.json));
             });
+    }
+
+    hydrate(entry: microformat.Entry): when.Promise<microformat.Entry> {
+        return when.all([
+            entry.replyTo == null || this.get(entry.replyTo.url).then(e => entry.replyTo = e),
+            entry.likeOf == null || this.get(entry.likeOf.url).then(e => entry.likeOf = e),
+            entry.repostOf == null || this.get(entry.repostOf.url).then(e => entry.repostOf = e),
+            when.map(entry.children, c => this.get(c.url)).then(cc => entry.children = cc)
+        ]).
+            then(() => entry);
     }
 
     storeToken(token, client_id, scope) {

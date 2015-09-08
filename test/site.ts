@@ -46,11 +46,23 @@ describe('site', function() {
             catch(done);
     });
 
-    it.skip('can post a reply', function(done) {
+    it('can post a reply', function(done) {
         site.publish(entry2).
             then(() => site.db.get(entry2.url)).
+            then(e => site.db.hydrate(e)).
             then(e => assert.deepEqual(e, entry2)).
             then(done).
             catch(done);
-    })
+    });
+
+    it('can update post with reply', function(done) {
+        entry1.children.push(entry2);
+        entry2.replyTo = new microformat.Entry(entry1.url); // break circular reference
+        site.publish(entry1).
+            then(() => site.db.get(entry1.url)).
+            then(e => site.db.hydrate(e)).
+            then(e => assert.deepEqual(e, entry1)).
+            then(done).
+            catch(done);
+    });
 });
