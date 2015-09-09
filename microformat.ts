@@ -1,11 +1,22 @@
 ///<reference path="typings/tsd.d.ts"/>
 var parser = require('microformat-node');
-var nodefn = require('when/node');
+import when = require('when');
+import nodefn = require('when/node');
+import request = require('request');
 import cheerio = require('cheerio');
 import util = require('./util');
 import url = require('url');
 
-export function getHEntryWithCard(html: string, url: string) {
+export function getHEntryFromUrl(url: string): when.Promise<Entry> {
+    return nodefn.call(request, url).
+        then(res => {
+            if (res[0].statusCode != 200)
+                throw new Error(url + ' returned status ' + res[0].statusCode);
+            return getHEntryWithCard(res[1], url);
+        });
+}
+
+export function getHEntryWithCard(html: string, url: string): when.Promise<Entry> {
     return getHEntry(html, url).
         then(function(entry) {
             if (entry.author != null) {
@@ -19,14 +30,14 @@ export function getHEntryWithCard(html: string, url: string) {
         });
 }
 
-export function getHEntry(html: string, url: string) {
+export function getHEntry(html: string, url: string): when.Promise<Entry> {
     return parser.parseHtml(html, {filters: ['h-entry'], baseUrl: url, logLevel: 1}).
         then(function(mf) {
             return new Entry(mf.items[0]);
         });
 }
 
-export function getRepHCard(html: string, url: string) {
+export function getRepHCard(html: string, url: string): when.Promise<Card> {
     return parser.parseHtml(html, {filters: ['h-card'], baseUrl: url, logLevel: 1}).
         then(function(mf) {
             var cards = mf.items.map(function(h) {

@@ -62,8 +62,9 @@ class Site {
 
     getNextAvailable(seed, prefix) {
         var n = seed;
+        var that = this;
         function chain() {
-            return this.publisher.exists(prefix + n).
+            return that.publisher.exists(prefix + n).
                 then(function (exists) {
                     if (exists) {
                         n++;
@@ -76,20 +77,43 @@ class Site {
         return chain();
     }
 
-    resolve(permalink) {
-        if (url.parse(permalink).protocol !== null)
-            return permalink;
-        return url.resolve(this.config.url, permalink);
+    getAuthor() {
+        var card = new microformat.Card();
+        card.url = this.config.url;
+        card.name = this.config.author.name;
+        card.photo = this.config.author.photo;
+        return card;
     }
 
-    publish(entry: microformat.Entry) {
-        return this.db.store(entry).
+    publish(m: {
+        name: string,
+        content: string,
+        replyTo: string}): when.Promise<microformat.Entry> {
+        var entry = new microformat.Entry();
+        entry.author = this.getAuthor();
+        entry.name = m.name || m.content;
+        entry.content = {
+            value: m.content,
+            html: util.autoLink(util.escapeHtml(m.content))
+        };
+        entry.published = new Date();
+        return this.getSlug(m.name, entry.published).
+            then(slug => entry.url = this.config.url + slug).
+            then(() => {
+                if (m.replyTo != null)
+                    return microformat.getHEntryFromUrl(m.replyTo).
+                        then(e => {
+                            entry.replyTo = e;
+                        });
+            }).
+            then(() => this.db.store(entry)).
             then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
                 site: this.config,
                 entry: entry,
                 utils: templateUtils
             })).
-            then(html => this.publisher.put(url.parse(entry.url).pathname, html, 'text/html'));
+            then(html => this.publisher.put(url.parse(entry.url).pathname, html, 'text/html')).
+            then(() => entry);
     }
 
     generateIndex() {
@@ -111,12 +135,10 @@ class Site {
             );
     }
 
-    getSlug(name, kebabCase?) {
-        var now = new Date();
-        var datepart = '/' + now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate();
+    getSlug(name: string, date: Date) {
+        var datepart = '/' + date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
         if (name !== undefined) {
-            if (kebabCase) name = util.kebabCase(name);
-            return this.getNextAvailable("", datepart + '/' + name);
+            return this.getNextAvailable("", datepart + '/' + util.kebabCase(name));
         } else {
             return this.getNextAvailable(1, datepart + '/');
         }
