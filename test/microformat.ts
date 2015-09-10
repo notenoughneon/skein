@@ -1,5 +1,6 @@
 ///<reference path="../typings/tsd.d.ts"/>
 import assert = require('assert');
+import fs = require('fs');
 import microformat = require('../microformat');
 
 describe('entry', function() {
@@ -328,5 +329,18 @@ describe('entry', function() {
     it('domain works', function() {
         assert.equal((new microformat.Entry('http://somesite.com/2015/1/2/3')).domain(), 'somesite.com');
         assert.equal((new microformat.Entry('https://somesite.com:8080/2015/1/2/3')).domain(), 'somesite.com:8080');
+    });
+    it('getRepHCard (case 2)', function(done) {
+        var expected = new microformat.Card();
+        expected.name = 'Test User';
+        expected.url = 'http://somesite.com';
+        expected.photo = 'http://somesite.com/photo.jpg';
+        var html = '<a class="h-card" href="http://somesite.com" rel="me">Test User<img class="u-photo" src="/photo.jpg"/></a>';
+        microformat.getRepHCard(html, 'http://somesite.com/2015/9/9').
+            then(card => {
+                assert.deepEqual(card, expected);
+            }).
+            then(done).
+            catch(done);
     });
 });
