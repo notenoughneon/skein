@@ -5,14 +5,14 @@ import fs = require('fs');
 
 describe('writeFile', function() {
     before(function() {
-        util.tryDelete('test/foo/bar/baz.txt');
-        util.tryDelete('test/foo/bar');
-        util.tryDelete('test/foo');
+        util.tryDelete('build/test/foo/bar/baz.txt');
+        util.tryDelete('build/test/foo/bar');
+        util.tryDelete('build/test/foo');
     });
     it('should work', function(done) {
-        util.writeFile('test/foo/bar/baz.txt', 'hello world').
+        util.writeFile('build/test/foo/bar/baz.txt', 'hello world').
             then(function () {
-                assert.equal(fs.readFileSync('test/foo/bar/baz.txt'), 'hello world');
+                assert.equal(fs.readFileSync('build/test/foo/bar/baz.txt'), 'hello world');
             }).
             then(done).
             catch(done);

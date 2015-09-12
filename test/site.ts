@@ -10,14 +10,35 @@ import util = require('../util');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-app.use(express.static('test/static', {extensions: ['html']}));
+app.use(express.static('build/test/static', {extensions: ['html']}));
+
+var config = {
+    "title": "Test Site",
+    "url": "http://localhost:8000",
+    "author": {
+    "name": "Test User",
+        "elsewhere": [
+        {"name": "Twitter", "url": "https://twitter.com/testuser"},
+    ]
+},
+    "entriesPerPage": 10,
+    "authUrl": "http://localhost:8001/auth",
+    "tokenUrl": "http://localhost:8001/token",
+    "micropubUrl": "http://localhost:8001/micropub",
+    "webmentionUrl": "http://localhost:8001/webmention",
+    "publisher": {
+    "type": "file",
+        "postRegex": "^20[0-9][0-9]/.*\\.html$",
+        "root": "build/test/static"
+},
+    "password": "xxxxxxxx"
+};
 
 describe('site', function() {
     var site;
     var post1, post2;
 
     before(function(done) {
-        var config = JSON.parse(fs.readFileSync('test/testconfig.json').toString());
         var db = new Db(':memory:');
         db.init().
             then(done).
