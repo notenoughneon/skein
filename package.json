@@ -1,8 +1,13 @@
 {
   "name": "skein",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Indieweb static site generator",
-  "main": "apiserver.js",
+  "scripts": {
+    "prebuild": "tsd install",
+    "build": "tsc",
+    "test": "mocha build/test"
+  },
   "dependencies": {
     "aws-sdk": "^2.1.36",
     "busboy": "^0.2.9",
