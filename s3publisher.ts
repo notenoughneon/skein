@@ -1,5 +1,5 @@
 ///<reference path="typings/tsd.d.ts"/>
-var AWS = require('aws-sdk');
+import AWS = require('aws-sdk');
 import when = require('when');
 import nodefn = require('when/node');
 import util = require('./util');

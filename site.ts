@@ -103,7 +103,7 @@ class Site {
                             entry.replyTo = e;
                         });
             }).
-            then(() => this.db.store(entry)).
+            then(() => this.db.storeTree(entry)).
             then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
                 site: this.config,
                 entry: entry,
@@ -141,7 +141,7 @@ class Site {
         }
     }
 
-    clone(from) {
+    clone(from: Publisher) {
         var postRe = new RegExp(from.config.postRegex);
         return from.list().
             then(function (files) {
@@ -189,7 +189,7 @@ class Site {
     }
 
     reGenerate() {
-        return this.db.getAllByAuthor(this.config.url).
+        return this.db.getAllByDomain(this.config.url).
             then(function (entries) {
                 return when.map(entries, function (entry) {
                     return nodefn.call(ejs.renderFile, 'template/entrypage.ejs',
