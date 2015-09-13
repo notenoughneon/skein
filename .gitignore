@@ -33,3 +33,4 @@ test/static
 *.map
 typings
 .settings
+build
