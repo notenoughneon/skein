@@ -29,8 +29,5 @@ node_modules
 
 # other stuff
 *.db
-test/static
-*.map
 typings
-.settings
 build
