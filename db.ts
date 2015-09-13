@@ -39,7 +39,7 @@ class Db {
             );
     }
 
-    store(entry) {
+    store(entry: microformat.Entry): when.Promise<any> {
         return this.dbRun('INSERT OR REPLACE INTO entries ' +
             '(url, domain, date, isArticle, isReply, isRepost, isLike, json) ' +
             'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -54,7 +54,12 @@ class Db {
         );
     }
 
-    get(url) {
+    storeAll(entry: microformat.Entry): when.Promise<any> {
+        var entries = entry.flatten();
+        return when.map(entries, e => this.store(e));
+    }
+
+    get(url: string): when.Promise<microformat.Entry> {
         return this.dbGet('SELECT * FROM entries WHERE url=?', url).
             then(function (data) {
                 if (data === undefined) throw new Error(url + ' not found');

@@ -42,10 +42,10 @@ var templateUtils = {
 
 class Site {
     config: any;
-    db: any;
+    db: Db;
     publisher: Publisher;
 
-    constructor(config, db) {
+    constructor(config, db: Db) {
         this.config = config;
         this.db = db;
         switch(config.publisher.type) {
@@ -85,10 +85,7 @@ class Site {
         return card;
     }
 
-    publish(m: {
-        name: string,
-        content: string,
-        replyTo: string}): when.Promise<microformat.Entry> {
+    publish(m: {name?: string, content: string, replyTo?: string}): when.Promise<microformat.Entry> {
         var entry = new microformat.Entry();
         entry.author = this.getAuthor();
         entry.name = m.name || m.content;
@@ -217,35 +214,39 @@ class Site {
         });
     }
 
-    receiveWebmention(source, target) {
-        return util.getPage(source).
-            then(function (html) {
-                if (!util.isMentionOf(html, target)) {
+    receiveWebmention(sourceUrl: string, targetUrl: string): when.Promise<any> {
+        if (url.parse(targetUrl).host != url.parse(this.config.url).host)
+            throw new Error("Target URL " + targetUrl + " doesn't match " + this.config.url);
+        return util.getPage(sourceUrl).
+            then(html => {
+                if (!util.isMentionOf(html, targetUrl)) {
                     throw new Error('Didn\'t find mention on source page');
                 } else {
                     var targetEntry;
-                    return this.db.existsByAuthor(this.config.url, target).
-                        then(function (exists) {
-                            if (!exists)
-                                throw new Error(target + ' isn\'t a valid target');
-                            return target;
-                        }).
-                        then(this.db.get).
-                        then(function (entry) {
+                    return this.db.get(targetUrl).
+                        then(this.db.hydrate).
+                        then(entry => {
                             targetEntry = entry;
-                            return microformat.getHEntryWithCard(html, source);
+                            return microformat.getHEntryWithCard(html, sourceUrl);
                         }).
-                        then(function (sourceEntry) {
+                        then(sourceEntry => {
+                            // TODO: handle non mf mentions
                             targetEntry.children.push(sourceEntry);
-                            return this.publish(targetEntry);
-                        });
+                        }).
+                        then(() => this.db.storeAll(targetEntry)).
+                        then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
+                            site: this.config,
+                            entry: targetEntry,
+                            utils: templateUtils
+                        })).
+                        then(html => this.publisher.put(url.parse(targetEntry.url).pathname, html, 'text/html'));
                 }
             });
     }
 
     generateToken(client_id, scope) {
         return nodefn.call(crypto.randomBytes, 18).
-            then(function (buf) {
+            then(buf => {
                 var token = buf.toString('base64');
                 return this.db.storeToken(token, client_id, scope);
             });

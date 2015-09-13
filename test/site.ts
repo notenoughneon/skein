@@ -35,7 +35,7 @@ var config = {
 };
 
 describe('site', function() {
-    var site;
+    var site: Site;
     var post1, post2;
 
     before(function(done) {
@@ -76,13 +76,15 @@ describe('site', function() {
             catch(done);
     });
 
-    it.skip('can update post with reply', function(done) {
-        entry1.children.push(entry2);
-        entry2.replyTo = new microformat.Entry(entry1.url); // break circular reference
-        site.publish(entry1).
-            then(() => site.db.get(entry1.url)).
+    it('can update post with reply', function(done) {
+        site.receiveWebmention(post2.url, post1.url).
+            then(() => site.db.get(post1.url)).
             then(e => site.db.hydrate(e)).
-            then(e => assert.deepEqual(e, entry1)).
+            then(e => {
+                assert.equal(e.children.length, 1);
+                assert.equal(e.children[0].url, post2.url);
+                assert.equal(e.children[0].content.value, post2.content.value);
+            }).
             then(done).
             catch(done);
     });
