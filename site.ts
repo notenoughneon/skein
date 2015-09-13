@@ -223,8 +223,7 @@ class Site {
                     throw new Error('Didn\'t find mention on source page');
                 } else {
                     var targetEntry;
-                    return this.db.get(targetUrl).
-                        then(this.db.hydrate).
+                    return this.db.getTree(targetUrl).
                         then(entry => {
                             targetEntry = entry;
                             return microformat.getHEntryWithCard(html, sourceUrl);
@@ -233,7 +232,7 @@ class Site {
                             // TODO: handle non mf mentions
                             targetEntry.children.push(sourceEntry);
                         }).
-                        then(() => this.db.storeAll(targetEntry)).
+                        then(() => this.db.storeTree(targetEntry)).
                         then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
                             site: this.config,
                             entry: targetEntry,

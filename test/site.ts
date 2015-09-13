@@ -78,8 +78,7 @@ describe('site', function() {
 
     it('can update post with reply', function(done) {
         site.receiveWebmention(post2.url, post1.url).
-            then(() => site.db.get(post1.url)).
-            then(e => site.db.hydrate(e)).
+            then(() => site.db.getTree(post1.url)).
             then(e => {
                 assert.equal(e.children.length, 1);
                 assert.equal(e.children[0].url, post2.url);

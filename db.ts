@@ -54,7 +54,7 @@ class Db {
         );
     }
 
-    storeAll(entry: microformat.Entry): when.Promise<any> {
+    storeTree(entry: microformat.Entry): when.Promise<any> {
         var entries = entry.flatten();
         return when.map(entries, e => this.store(e));
     }
@@ -66,6 +66,11 @@ class Db {
                 return data;
             }).
             then(record => microformat.Entry.deserialize(record.json));
+    }
+
+    getTree(url: string): when.Promise<microformat.Entry> {
+        return this.get(url).
+            then(e => this.hydrate(e));
     }
 
     getAllByDomain(domain) {
