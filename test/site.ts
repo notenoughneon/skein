@@ -70,7 +70,7 @@ describe('site', function() {
             }).
             then(e => {
                 assert.equal(e.content.value, m.content);
-                assert.equal(e.content.replyTo, m.replyTo);
+                assert.equal(e.replyTo.url, m.replyTo);
             }).
             then(done).
             catch(done);

@@ -19,7 +19,7 @@ export function getHEntryFromUrl(url: string): when.Promise<Entry> {
 export function getHEntryWithCard(html: string, url: string): when.Promise<Entry> {
     return getHEntry(html, url).
         then(function(entry) {
-            if (entry.author != null) {
+            if (entry.author == null) {
                 return getRepHCard(html, url).
                     then(function(card) {
                         if (card !== null) entry.author = card;
