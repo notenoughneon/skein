@@ -68,6 +68,15 @@ describe('entry', function() {
         assert.deepEqual(microformat.Entry.deserialize(serializeJson), serializeEntry);
     });
 
+    it('returns null for no entry', function(done) {
+       microformat.getHEntryWithCard('<html></html>', 'http://testsite').
+        then(entry => {
+            assert.equal(entry, null);
+        }).
+        then(done).
+        catch(done);
+    });
+
     it('can load a note', function(done) {
         var html =
             '<div class="h-entry">\

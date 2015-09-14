@@ -19,7 +19,7 @@ export function getHEntryFromUrl(url: string): when.Promise<Entry> {
 export function getHEntryWithCard(html: string, url: string): when.Promise<Entry> {
     return getHEntry(html, url).
         then(function(entry) {
-            if (entry.author == null) {
+            if (entry && entry.author == null) {
                 return getRepHCard(html, url).
                     then(function(card) {
                         if (card !== null) entry.author = card;
@@ -33,6 +33,8 @@ export function getHEntryWithCard(html: string, url: string): when.Promise<Entry
 export function getHEntry(html: string, url: string): when.Promise<Entry> {
     return parser.getAsync({html: html, filters: ['h-entry'], baseUrl: url}).
         then(function(mf) {
+            if (mf.items.length == 0)
+                return null;
             return new Entry(mf.items[0]);
         });
 }
