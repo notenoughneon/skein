@@ -142,48 +142,37 @@ class Site {
     }
 
     clone(from: Publisher) {
-        var postRe = new RegExp(from.config.postRegex);
         return from.list().
             then(function (files) {
                 return when.map(files, function (file) {
-                    if (postRe.test(file)) {
-                        return from.get(file).
-                            then(function (obj) {
-                                return obj.Body;
-                            }).
-                            then(function (html) {
-                                return microformat.getHEntryWithCard(html, this.config.url);
-                            }).
-                            then(function (entry) {
-                                return this.publish(entry);
-                            });
-                    } else {
-                        return from.get(file).
-                            then(function (obj) {
-                                return this.publisher.put(file, obj.Body, obj.ContentType);
-                            })
-                    }
+                    return from.get(file).
+                        then(function (obj) {
+                            if (obj.ContentType == 'text/html') {
+                                return microformat.getHEntryWithCard(obj.Body, this.config.url).
+                                    then(entry => {
+                                        if (entry != null)
+                                            this.db.storeTree(entry);
+                                    }).
+                                    then(() => obj);
+                            }
+                            return obj;
+                        }).
+                        then(obj => this.publisher.put(file, obj.Body, obj.ContentType));
                 });
             }).
             then(this.generateIndex);
     }
 
     reIndex() {
-        var postRe = new RegExp(this.publisher.config.postRegex);
         return this.publisher.list().
-            then(function (keys) {
-                return keys.filter(function (key) {
-                    return postRe.test(key);
-                });
-            }).
-            then(function (keys) {
-                return when.map(keys, function (key) {
-                    debug(key);
+            then(keys => {
+                return when.map(keys, key => {
                     return this.publisher.get(key).
-                        then(function (obj) {
-                            return microformat.getHEntryWithCard(obj.Body, this.config.url);
-                        }).
-                        then(this.db.store);
+                        then(obj => microformat.getHEntryWithCard(obj.Body, this.config.url)).
+                        then(entry => {
+                            if (entry != null)
+                                this.db.store(entry);
+                            });
                 });
             });
     }

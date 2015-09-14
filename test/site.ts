@@ -28,7 +28,6 @@ var config = {
     "webmentionUrl": "http://localhost:8001/webmention",
     "publisher": {
     "type": "file",
-        "postRegex": "^20[0-9][0-9]/.*\\.html$",
         "root": "build/test/static"
 },
     "password": "xxxxxxxx"
