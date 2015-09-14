@@ -150,7 +150,7 @@ export function isMentionOf(html, permalink) {
 function getWebmentionEndpoint(target) {
     return nodefn.call(request, target).
         then(function (res) {
-            return nodefn.call(parser.parseHtml, res[1], {baseUrl: target});
+            return nodefn.call(parser.getAsync, {html: res[1], baseUrl: target});
         }).
         then(function (mf) {
             if (mf.rels['webmention'] !== undefined)

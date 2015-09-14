@@ -31,14 +31,14 @@ export function getHEntryWithCard(html: string, url: string): when.Promise<Entry
 }
 
 export function getHEntry(html: string, url: string): when.Promise<Entry> {
-    return parser.parseHtml(html, {filters: ['h-entry'], baseUrl: url, logLevel: 1}).
+    return parser.getAsync({html: html, filters: ['h-entry'], baseUrl: url}).
         then(function(mf) {
             return new Entry(mf.items[0]);
         });
 }
 
 export function getRepHCard(html: string, url: string): when.Promise<Card> {
-    return parser.parseHtml(html, {filters: ['h-card'], baseUrl: url, logLevel: 1}).
+    return parser.getAsync({html: html, filters: ['h-card'], baseUrl: url}).
         then(function(mf) {
             var cards = mf.items.map(function(h) {
                 return new Card(h);
