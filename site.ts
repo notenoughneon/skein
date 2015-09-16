@@ -141,34 +141,12 @@ class Site {
         }
     }
 
-    clone(from: Publisher) {
-        return from.list().
-            then(function (files) {
-                return when.map(files, function (file) {
-                    return from.get(file).
-                        then(function (obj) {
-                            if (obj.ContentType == 'text/html') {
-                                return microformat.getHEntryWithCard(obj.Body, this.config.url).
-                                    then(entry => {
-                                        if (entry != null)
-                                            this.db.storeTree(entry);
-                                    }).
-                                    then(() => obj);
-                            }
-                            return obj;
-                        }).
-                        then(obj => this.publisher.put(file, obj.Body, obj.ContentType));
-                });
-            }).
-            then(this.generateIndex);
-    }
-
     reIndex() {
         return this.publisher.list().
             then(keys => {
                 return when.map(keys, key => {
                     return this.publisher.get(key).
-                        then(obj => microformat.getHEntryWithCard(obj.Body, this.config.url)).
+                        then(obj => microformat.getHEntryWithCard(obj.Body, url.resolve(this.config.url, key))).
                         then(entry => {
                             if (entry != null)
                                 this.db.store(entry);
