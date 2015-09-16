@@ -46,7 +46,7 @@ class S3Publisher implements Publisher {
             });
     }
 
-    get(path): when.Promise<Buffer> {
+    get(path) {
         return this.getObject({Bucket: this.config.bucket, Key: normalizePath(path)});
     }
 
