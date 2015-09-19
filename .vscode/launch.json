@@ -32,7 +32,7 @@
 			"type": "node",
 			"program": "node_modules/mocha/bin/_mocha",
 			"stopOnEntry": false,
-			"args": ["build/test"],
+			"args": ["build/test","-t 0"],
 			"cwd": ".",
 			"runtimeExecutable": null,
 			"runtimeArgs": ["--nolazy"],
