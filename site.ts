@@ -115,7 +115,7 @@ class Site {
 
     generateIndex() {
         var limit = this.config.entriesPerPage;
-        return this.db.getAllByDomain(url.parse(this.config.url).host).
+        return this.db.getAllByDomain(this.config.url).
             then(entries => util.chunk(limit, entries)).
             then(chunks =>
                 when.map(chunks, (chunk, index) =>

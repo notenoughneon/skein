@@ -125,7 +125,7 @@ describe('site', function() {
         site.db = new Db(':memory:');
         site.db.init().
             then(() => site.reIndex()).
-            then(() => site.db.getAllByDomain('localhost:8000')).
+            then(() => site.db.getAllByDomain(config.url)).
             then(entries => {
                 assert.equal(entries.length, 2);
                 assert.equal(entries[0].url, post2.url);

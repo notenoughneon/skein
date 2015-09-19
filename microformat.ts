@@ -138,8 +138,8 @@ export class Entry {
     }
 
     domain(): string {
-        // TODO: ignores protocol, is this important?
-        return url.parse(this.url).host;
+        var p = url.parse(this.url);
+        return p.protocol + '//' + p.host;
     }
 
     references(): string[] {
