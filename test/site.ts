@@ -48,6 +48,7 @@ describe('site', function() {
         var db = new Db(':memory:');
         db.init().
             then(() => exec('rm -rf ' + config.publisher.root)).
+            then(() => exec('cp -R skel ' + config.publisher.root)).
             then(() => done()).
             catch(done);
         site = new Site(config, db);
@@ -139,7 +140,7 @@ describe('site', function() {
     });
 
     it('regenerate works', function(done) {
-        exec('rm -rf ' + config.publisher.root).
+        exec('find ' + config.publisher.root + ' -name *.html | xargs rm').
             then(() => site.reGenerate()).
             then(() => {
                 var path = config.publisher.root + url.parse(post1.url).path + '.html';
