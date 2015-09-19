@@ -145,10 +145,11 @@ class Site {
         return this.publisher.list().
             then(keys => {
                 return when.map(keys, key => {
+                    var u = url.resolve(this.config.url, key);
                     return this.publisher.get(key).
-                        then(obj => microformat.getHEntryWithCard(obj.Body, url.resolve(this.config.url, key))).
+                        then(obj => microformat.getHEntryWithCard(obj.Body, u)).
                         then(entry => {
-                            if (entry != null)
+                            if (entry != null && (entry.url === u || entry.url + '.html' === u))
                                 this.db.store(entry);
                             });
                 });
