@@ -50,11 +50,7 @@ class FilePublisher implements Publisher {
 
     list() {
         return util.walkDir(this.config.root).
-            then(function (paths) {
-                return paths.map(function (p) {
-                    return pathlib.relative(this.config.root, p);
-                });
-            })
+            then(paths => paths.map(p => pathlib.relative(this.config.root, p)));
     }
 
     begin(): when.Promise<boolean> {

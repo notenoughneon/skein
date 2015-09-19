@@ -120,4 +120,20 @@ describe('site', function() {
             then(done).
             catch(done);
     });
+
+    it('reindex works', function(done) {
+        site.db = new Db(':memory:');
+        site.db.init().
+            then(() => site.reIndex()).
+            then(() => site.db.getAllByDomain('localhost:8000')).
+            then(entries => {
+                assert.equal(entries.length, 2);
+                assert.equal(entries[0].url, post2.url);
+                assert.equal(entries[0].name, post2.name);
+                assert.equal(entries[1].url, post1.url);
+                assert.equal(entries[1].name, post1.name);
+            }).
+            then(done).
+            catch(done);
+    });
 });

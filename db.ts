@@ -73,7 +73,7 @@ class Db {
             then(e => this.hydrate(e));
     }
 
-    getAllByDomain(domain) {
+    getAllByDomain(domain): when.Promise<microformat.Entry[]> {
         return this.dbAll('SELECT * FROM entries WHERE domain=? ORDER BY date DESC', domain).
             then(function (records) {
                 return records.map(record => microformat.Entry.deserialize(record.json));
