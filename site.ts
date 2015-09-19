@@ -157,15 +157,15 @@ class Site {
 
     reGenerate() {
         return this.db.getAllByDomain(this.config.url).
-            then(function (entries) {
-                return when.map(entries, function (entry) {
-                    return nodefn.call(ejs.renderFile, 'template/entrypage.ejs',
+            then(entries => when.map(entries, entry => this.db.hydrate(entry))).
+            then(entries =>
+                when.map(entries, entry =>
+                    nodefn.call(ejs.renderFile, 'template/entrypage.ejs',
                         {site: this.config, entry: entry, utils: templateUtils}).
-                        then(function (html) {
-                            return this.publisher.put(url.parse(entry.url).pathname, html, 'text/html');
-                        });
-                });
-            });
+                        then(html => this.publisher.put(url.parse(entry.url).pathname, html, 'text/html'))
+                )
+            ).
+            then(() => this.generateIndex());
     }
 
     sendWebmentionsFor(entry) {

@@ -1,6 +1,7 @@
 ///<reference path="../typings/tsd.d.ts"/>
 import assert = require('assert');
 import fs = require('fs');
+import url = require('url');
 import child_process = require('child_process');
 import nodefn = require('when/node');
 var parser = require('microformat-node');
@@ -132,6 +133,21 @@ describe('site', function() {
                 assert.equal(entries[0].name, post2.name);
                 assert.equal(entries[1].url, post1.url);
                 assert.equal(entries[1].name, post1.name);
+            }).
+            then(done).
+            catch(done);
+    });
+
+    it('regenerate works', function(done) {
+        exec('rm -rf ' + config.publisher.root).
+            then(() => site.reGenerate()).
+            then(() => {
+                var path = config.publisher.root + url.parse(post1.url).path + '.html';
+                assert.equal(fs.existsSync(path), true, path + ' exists');
+                path = config.publisher.root + url.parse(post2.url).path + '.html';
+                assert.equal(fs.existsSync(path), true, path + ' exists');
+                path = config.publisher.root + '/index.html';
+                assert.equal(fs.existsSync(path), true, path + ' exists');
             }).
             then(done).
             catch(done);
