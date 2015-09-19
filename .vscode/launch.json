@@ -28,6 +28,19 @@
 			"outDir": "build"
 		},
 		{
+			"name": "test",
+			"type": "node",
+			"program": "build/test.js",
+			"stopOnEntry": true,
+			"args": [],
+			"cwd": ".",
+			"runtimeExecutable": null,
+			"runtimeArgs": ["--nolazy"],
+			"env": {},
+			"sourceMaps": true,
+			"outDir": "build"
+		},
+		{
 			"name": "mocha",
 			"type": "node",
 			"program": "node_modules/mocha/bin/_mocha",
