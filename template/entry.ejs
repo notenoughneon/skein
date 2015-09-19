@@ -3,7 +3,7 @@
     <% if (entry.replyTo != null) { %>
         <i class="fa fa-reply"></i>
         In reply to:
-        <%- include('cite', {entry: entry.replyTo, rootClass: ' p-reply-to'}); %>
+        <%- include('cite', {entry: entry.replyTo, rootClass: ' p-in-reply-to'}); %>
     <% } %>
 
     <% if (entry.likeOf != null) { %>

@@ -98,10 +98,7 @@ class Site {
             then(slug => entry.url = this.config.url + slug).
             then(() => {
                 if (m.replyTo != null)
-                    return microformat.getHEntryFromUrl(m.replyTo).
-                        then(e => {
-                            entry.replyTo = e;
-                        });
+                    return microformat.getHEntryFromUrl(m.replyTo).then(e => entry.replyTo = e);
             }).
             then(() => this.db.storeTree(entry)).
             then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
@@ -116,6 +113,7 @@ class Site {
     generateIndex() {
         var limit = this.config.entriesPerPage;
         return this.db.getAllByDomain(this.config.url).
+            then(entries => when.map(entries, entry => this.db.hydrate(entry))).
             then(entries => util.chunk(limit, entries)).
             then(chunks =>
                 when.map(chunks, (chunk, index) =>
