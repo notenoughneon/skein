@@ -12,6 +12,7 @@ import Publisher = require('./publisher');
 import S3Publisher = require('./s3publisher');
 import FilePublisher = require('./filepublisher');
 import Db = require('./db');
+import oembed = require('./oembed');
 
 function getPathForIndex(page) {
     return 'index' + (page == 1 ? '' : page);
@@ -100,6 +101,12 @@ class Site {
                 if (m.replyTo != null)
                     return microformat.getHEntryFromUrl(m.replyTo).then(e => entry.replyTo = e);
             }).
+            then(() => when.map(entry.allLinks(), link => oembed(link).
+                    then(embed => {
+                        if (embed != null)
+                            entry.content.html = entry.content.html + '<p>' + embed;
+                    }))
+            ).
             then(() => this.db.storeTree(entry)).
             then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
                 site: this.config,
