@@ -1,29 +1,22 @@
 {
-  "title": "Not Enough Neon",
-  "url": "http://notenoughneon.com",
+  "title": "Test Site",
+  "url": "http://localhost:8000",
   "author": {
-    "name": "Emma Kuo",
-    "photo": "/m/emma15-128.jpg",
-    "note": "Software engineer, amateur musician, house music fan. Portland, OR",
+    "name": "Test User",
+    "photo": "/photo.jpg",
+    "note": "Here is a bio",
     "elsewhere": [
-      {"name": "Twitter", "url": "https://twitter.com/notenoughneon"},
-      {"name": "Instagram", "url": "http://instagram.com/emmackuo"},
-      {"name": "SoundCloud", "url": "https://soundcloud.com/notenoughneon"},
-      {"name": "Tumblr", "url": "http://notenoughneon.tumblr.com"},
-      {"name": "Facebook", "url": "https://www.facebook.com/emma.kuo.5209"},
-      {"name": "Github", "url": "https://github.com/notenoughneon"},
-      {"name": "LinkedIn", "url": "http://www.linkedin.com/pub/emma-kuo/25/15a/586"}
+      {"name": "Twitter", "url": "https://twitter.com/testuser"}
     ]
   },
   "entriesPerPage": 10,
-  "authUrl": "http://api.notenoughneon.com/auth",
-  "tokenUrl": "http://api.notenoughneon.com/token",
-  "micropubUrl": "http://api.notenoughneon.com/micropub",
-  "webmentionUrl": "http://api.notenoughneon.com/webmention",
+  "authUrl": "http://localhost:8000/auth",
+  "tokenUrl": "http://localhost:8000/token",
+  "micropubUrl": "http://localhost:8000/micropub",
+  "webmentionUrl": "http://localhost:8000/webmention",
   "publisher": {
-    "type": "s3",
-    "region": "us-west-2",
-    "bucket": "notenoughneon.com"
+    "type": "file",
+    "root": "static"
   },
   "password": "xxxxxxxx"
 }

@@ -24,16 +24,16 @@ var config = {
     "author": {
     "name": "Test User",
         "elsewhere": [
-        {"name": "Twitter", "url": "https://twitter.com/testuser"},
+        {"name": "Twitter", "url": "https://twitter.com/testuser"}
     ]
 },
     "entriesPerPage": 10,
-    "authUrl": "http://localhost:8001/auth",
-    "tokenUrl": "http://localhost:8001/token",
-    "micropubUrl": "http://localhost:8001/micropub",
-    "webmentionUrl": "http://localhost:8001/webmention",
+    "authUrl": "http://localhost:8000/auth",
+    "tokenUrl": "http://localhost:8000/token",
+    "micropubUrl": "http://localhost:8000/micropub",
+    "webmentionUrl": "http://localhost:8000/webmention",
     "publisher": {
-    "type": "file",
+        "type": "file",
         "root": "build/test/static"
 },
     "password": "xxxxxxxx"
