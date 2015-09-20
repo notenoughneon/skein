@@ -31,3 +31,4 @@ node_modules
 *.db
 typings
 build
+static
