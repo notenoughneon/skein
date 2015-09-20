@@ -176,7 +176,7 @@ class Site {
 
     sendWebmentionsFor(entry) {
         return when.map(entry.allLinks(), function (link) {
-            return util.sendWebmention(this.resolve(entry.url[0]), link).
+            return util.sendWebmention(entry.url, link).
                 then(function () {
                     debug('Sent webmention to ' + link);
                 }).

@@ -164,61 +164,25 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
 });
 
 app.post('/micropub', requireAuth('post'), function(req, res) {
-    var entry;
-    site.getSlug(req['post'].name, true).
-        then(function (slug) {
-            if (req['post'].slug === undefined)
-                req['post'].slug = slug;
-            req['post'].url = site.config.url + req['post'].slug;
-            entry = new microformat.Entry(req['post']);
-            entry.author = [{
-                url: [site.config.url],
-                name: [site.config.author.name],
-                photo: [site.config.author.photo]
-            }];
-            return entry;
-        }).
-        then(function () {
-            var key;
-            if (req['files'].photo !== undefined) {
-                return site.getSlug(req['files'].photo.filename).
-                    then(function (slug) {
-                        key = slug;
-                        entry.content[0].html = '<p><img class="u-photo" src="' + slug + '" /></p>' +
-                        entry.content[0].html;
-                        return nodefn.call(fs.readFile, req['files'].photo.tmpfile);
-                    }).
-                    then(function (fstream) {
-                        return site.publisher.put(key, fstream, req['files'].photo.mimetype);
-                    });
-            }
-        }).
-        then(function () {
-            return site.publish(entry);
-        }).
-        then(site.generateIndex).
-        then(function() {
-            return site.sendWebmentionsFor(entry);
-        }).
-        then(function () {
-            res.location(req['post'].slug);
+    var entry: microformat.Entry;
+    //req.['files'].photo.filename, .tmpfile, .mimetype
+    site.publish(req['post']).
+        then(e => entry = e).
+        then(() => site.generateIndex()).
+        then(() => site.sendWebmentionsFor(entry)).
+        then(() => {
+            res.location(entry.url);
             res.sendStatus(201);
         }).
-        catch(function (e) {
-            handleError(res, e);
-        });
+        catch(e => handleError(res, e));
 });
 
 app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
     if (req['post'].source === undefined || req['post'].target === undefined)
         return res.status(400).send('"source" and "target" parameters are required');
     site.receiveWebmention(req['post'].source, req['post'].target).
-        then(function () {
-            res.sendStatus(200);
-        }).
-        catch(function (e) {
-            handleError(res, e);
-        });
+        then(() => res.sendStatus(200)).
+        catch(e => handleError(res, e));
 });
 
 app.get('/tokens', requireAuth('admin'), function(req, res) {
