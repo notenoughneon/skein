@@ -166,7 +166,11 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
 app.post('/micropub', requireAuth('post'), function(req, res) {
     var entry: microformat.Entry;
     //req.['files'].photo.filename, .tmpfile, .mimetype
-    site.publish(req['post']).
+    site.publish({
+        content: req['post'].content,
+        name: req['post'].name,
+        replyTo: req['post']['in-reply-to']
+        }).
         then(e => entry = e).
         then(() => site.generateIndex()).
         then(() => site.sendWebmentionsFor(entry)).

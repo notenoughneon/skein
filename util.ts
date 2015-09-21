@@ -2,8 +2,8 @@
 import fs = require('fs');
 import path = require('path');
 import util = require('util');
-var when = require('when');
-var nodefn = require('when/node');
+import when = require('when');
+import nodefn = require('when/node');
 import cheerio = require('cheerio');
 import request = require('request');
 var parser = require('microformat-node');
@@ -150,7 +150,7 @@ export function isMentionOf(html, permalink) {
 function getWebmentionEndpoint(target) {
     return nodefn.call(request, target).
         then(function (res) {
-            return nodefn.call(parser.getAsync, {html: res[1], baseUrl: target});
+            return parser.getAsync({html: res[1], baseUrl: target});
         }).
         then(function (mf) {
             if (mf.rels['webmention'] !== undefined)
