@@ -184,3 +184,18 @@ export function getPage(permalink) {
             throw new Error('Got statusCode ' + status);
         })
 }
+
+export class Mutex {
+    private tasks: (() => void)[] = [];
+
+    public lock(callback: (release: () => void) => void) {
+        var task = callback.bind(null, () => {
+            this.tasks.shift();
+            if (this.tasks.length > 0)
+                this.tasks[0]();
+        });
+        this.tasks.push(task);
+        if (this.tasks.length == 1)
+            process.nextTick(this.tasks[0]);
+    }
+}
