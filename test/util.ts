@@ -2,6 +2,7 @@
 import assert = require('assert');
 import util = require('../util');
 import fs = require('fs');
+import callbacks = require('when/callbacks');
 
 describe('util', function() {
     describe('writeFile', function() {
@@ -45,9 +46,10 @@ describe('util', function() {
     describe('mutex', function() {
         it('tasks do not overlap', function(done) {
             var m = new util.Mutex();
+            var lock = callbacks.lift(m.lock.bind(m));
             var task1running = false;
             var task2running = false;
-            m.lock(release => {
+            lock().then(release => {
                 task1running = true;
                 setTimeout(() => {
                     assert(!task2running);
@@ -55,7 +57,7 @@ describe('util', function() {
                     release();
                 }, 10);
             });
-            m.lock(release => {
+            lock().then(release => {
                 assert(!task1running);
                 task2running = true;
                 setTimeout(() => {
@@ -63,7 +65,7 @@ describe('util', function() {
                     release();
                 }, 50);
             });
-            m.lock(release => {
+            lock().then(release => {
                 assert(!task1running);
                 assert(!task2running);
                 done();
