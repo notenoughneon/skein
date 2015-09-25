@@ -9,12 +9,14 @@ var app = express();
 var ejs = require('ejs');
 import crypto = require('crypto');
 var nodefn = require('when/node');
-import util = require('util');
+var callbacks = require('when/callbacks');
+var inspect = require('util').inspect;
 import Debug = require('debug');
 var debug = Debug('api');
 import microformat = require('./microformat');
 import Db = require('./db');
 import Site = require('./site');
+import util = require('./util');
 
 if (process.argv[3] === undefined)
     var configFile = 'config.json';
@@ -30,6 +32,9 @@ app.set('view engine', 'ejs');
 
 // store the last code issued by the auth endpoint in memory
 var lastIssuedCode = null;
+
+var publishMutex = new util.Mutex();
+var publishLock = callbacks.lift(publishMutex.lock.bind(publishMutex));
 
 function parsePost(req, res, next) {
     if (req.method === 'POST') {
@@ -101,7 +106,7 @@ function logger(req, res, next) {
     var parms = (req.method == 'POST' ? req.post : req.query);
     debug('%s %s %s', req.ip, req.method, req.url);
     if (Object.keys(parms).length > 0)
-        debug(util.inspect(req.method == 'POST' ? req.post : req.query));
+        debug(inspect(req.method == 'POST' ? req.post : req.query));
     next();
 }
 
@@ -166,11 +171,14 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
 app.post('/micropub', requireAuth('post'), function(req, res) {
     var entry: microformat.Entry;
     //req.['files'].photo.filename, .tmpfile, .mimetype
-    site.publish({
-        content: req['post'].content,
-        name: req['post'].name,
-        replyTo: req['post']['in-reply-to']
-        }).
+    var release;
+    publishLock().
+        then(r => release = r).
+        then(() => site.publish({
+            content: req['post'].content,
+            name: req['post'].name,
+            replyTo: req['post']['in-reply-to']
+        })).
         then(e => entry = e).
         then(() => site.generateIndex()).
         then(() => site.sendWebmentionsFor(entry)).
@@ -178,15 +186,20 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             res.location(entry.url);
             res.sendStatus(201);
         }).
-        catch(e => handleError(res, e));
+        catch(e => handleError(res, e)).
+        finally(release);
 });
 
 app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
+    var release;
     if (req['post'].source === undefined || req['post'].target === undefined)
         return res.status(400).send('"source" and "target" parameters are required');
-    site.receiveWebmention(req['post'].source, req['post'].target).
+    publishLock().
+        then(r => release = r).
+        then(() => site.receiveWebmention(req['post'].source, req['post'].target)).
         then(() => res.sendStatus(200)).
-        catch(e => handleError(res, e));
+        catch(e => handleError(res, e)).
+        finally(release);
 });
 
 app.get('/tokens', requireAuth('admin'), function(req, res) {
