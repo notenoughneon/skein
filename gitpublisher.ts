@@ -10,11 +10,6 @@ import FilePublisher = require('./filepublisher');
 var exec = nodefn.lift(child_process.exec);
 
 class GitPublisher extends FilePublisher {
-    begin() {
-        // FIXME: this will need to acquire lock
-        return when(false);
-    }
-
     rollback() {
         var gitcheckout = 'git -C ' + this.config.root + ' checkout .';
         return exec(gitcheckout).

@@ -70,12 +70,6 @@ class S3Publisher implements Publisher {
             })
     }
 
-    //TODO: transactions could be implemented using s3 versioning
-    begin(): when.Promise<boolean> {
-        // NOOP
-        return when(false);
-    }
-
     rollback(): when.Promise<boolean> {
         // NOOP
         return when(false);

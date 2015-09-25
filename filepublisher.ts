@@ -53,11 +53,6 @@ class FilePublisher implements Publisher {
             then(paths => paths.map(p => pathlib.relative(this.config.root, p)));
     }
 
-    begin(): when.Promise<boolean> {
-        // NOOP
-        return when(false);
-    }
-
     rollback(): when.Promise<boolean> {
         // NOOP
         return when(false);

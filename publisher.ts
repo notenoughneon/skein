@@ -6,7 +6,6 @@ interface Publisher {
     get(path: string): when.Promise<{Body: Buffer, ContentType: string}>;
     exists(path: string): when.Promise<boolean>;
     list(): when.Promise<string[]>;
-    begin(): when.Promise<boolean>;
     rollback(): when.Promise<boolean>;
     commit(msg: string): when.Promise<boolean>;
 }
