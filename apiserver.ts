@@ -181,14 +181,17 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
         })).
         then(e => entry = e).
         then(() => site.generateIndex()).
+        then(() => site.publisher.commit('publish ' + entry.url)).
+        then(() => release()).
         then(() => site.sendWebmentionsFor(entry)).
         then(() => {
             res.location(entry.url);
             res.sendStatus(201);
         }).
-        then(() => site.publisher.commit('publish ' + entry.url)).
-        catch(e => handleError(res, e)).
-        finally(release);
+        catch(e => {
+            handleError(res, e);
+            release();
+        });
 });
 
 app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
@@ -200,10 +203,13 @@ app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
     publishLock().
         then(r => release = r).
         then(() => site.receiveWebmention(source, target)).
-        then(() => res.sendStatus(200)).
         then(() => site.publisher.commit('webmention from ' + source + ' to ' + target)).
-        catch(e => handleError(res, e)).
-        finally(release);
+        then(() => release()).
+        then(() => res.sendStatus(200)).
+        catch(e => {
+            handleError(res, e);
+            release();
+        });
 });
 
 app.get('/tokens', requireAuth('admin'), function(req, res) {
