@@ -73,7 +73,7 @@ describe('util', function() {
             assert(!task1running);
             assert(!task2running);
         });
-        it.only('double release ok', function(done) {
+        it('double release ok', function(done) {
             var release;
             var m = new util.Mutex();
             var lock = callbacks.lift(m.lock.bind(m));
