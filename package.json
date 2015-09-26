@@ -20,6 +20,11 @@
     "sqlite3": "^3.0.8",
     "when": "^3.7.3"
   },
+  "devDependencies": {
+    "mocha": "^2.3.3",
+    "tsd": "^0.6.4",
+    "typescript": "^1.6.2"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/notenoughneon/skein.git"
