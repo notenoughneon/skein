@@ -73,5 +73,16 @@ describe('util', function() {
             assert(!task1running);
             assert(!task2running);
         });
+        it.only('double release ok', function(done) {
+            var release;
+            var m = new util.Mutex();
+            var lock = callbacks.lift(m.lock.bind(m));
+            lock().
+                then(r => release = r).
+                then(() => release()).
+                then(() => release());
+            lock().
+                then(r => done());
+        });
     });
 });
