@@ -186,18 +186,22 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             res.location(entry.url);
             res.sendStatus(201);
         }).
+        then(() => site.publisher.commit('publish ' + entry.url)).
         catch(e => handleError(res, e)).
         finally(release);
 });
 
 app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
     var release;
-    if (req['post'].source === undefined || req['post'].target === undefined)
+    var source = req['post'].source;
+    var target = req['post'].target;
+    if (source === undefined || target === undefined)
         return res.status(400).send('"source" and "target" parameters are required');
     publishLock().
         then(r => release = r).
-        then(() => site.receiveWebmention(req['post'].source, req['post'].target)).
+        then(() => site.receiveWebmention(source, target)).
         then(() => res.sendStatus(200)).
+        then(() => site.publisher.commit('webmention from ' + source + ' to ' + target)).
         catch(e => handleError(res, e)).
         finally(release);
 });
