@@ -76,9 +76,10 @@ class S3Publisher implements Publisher {
     }
 
     commit(msg): when.Promise<{}> {
-        return this.get('log.txt').
-            then(obj => {
-                var log = obj.Body + new Date().toLocaleString() + ' ' + msg + '\n';
+        return this.exists('log.txt').
+            then(exists => exists ? this.get('log.txt').then(obj => obj.Body.toString()) : '').
+            then(text => {
+                var log = text + new Date().toLocaleString() + ' ' + msg + '\n';
                 return this.put('log.txt', log, 'text/plain');
             }).
             then(() => undefined);
