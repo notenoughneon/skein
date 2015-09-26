@@ -2,6 +2,7 @@
 import fs = require('fs');
 import os = require('os');
 import path = require('path');
+import repl = require('repl');
 import querystring = require('querystring');
 import express = require('express');
 var Busboy = require('busboy');
@@ -232,3 +233,5 @@ var server = app.listen(process.argv[2], function (){
     var address = server.address();
     debug('Listening on %s:%s', address.address, address.port);
 });
+
+repl.start('> ').context.site = site;
