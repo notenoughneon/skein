@@ -13,7 +13,7 @@ class FilePublisher implements Publisher {
         this.config = config;
     }
 
-    private readWithFallback(filepath, extensions) {
+    private readWithFallback(filepath, extensions): when.Promise<{Body: Buffer, ContentType: string}> {
         return when.any(extensions.map(function (ext) {
             return nodefn.call(fs.readFile, filepath + ext).
                 then(function (data) {
@@ -22,7 +22,7 @@ class FilePublisher implements Publisher {
         }));
     }
 
-    private existsWithFallback(filepath, extensions) {
+    private existsWithFallback(filepath, extensions): when.Promise<boolean> {
         return when.any(extensions.map(function (ext) {
             return nodefn.call(fs.stat, filepath + ext);
         })).
@@ -34,17 +34,17 @@ class FilePublisher implements Publisher {
             });
     }
 
-    put(path, obj, contentType) {
+    put(path, obj, contentType): when.Promise<{}> {
         if (contentType === 'text/html')
             path = path + '.html';
         return util.writeFile(pathlib.join(this.config.root, path), obj);
     }
 
-    get(path) {
+    get(path): when.Promise<{Body: Buffer, ContentType: string}> {
         return this.readWithFallback(pathlib.join(this.config.root, path), ['', '.html']);
     }
 
-    exists(path) {
+    exists(path): when.Promise<boolean> {
         return this.existsWithFallback(pathlib.join(this.config.root, path), ['', '.html'])
     }
 
@@ -53,14 +53,18 @@ class FilePublisher implements Publisher {
             then(paths => paths.map(p => pathlib.relative(this.config.root, p)));
     }
 
-    rollback(): when.Promise<boolean> {
+    rollback(): when.Promise<{}> {
         // NOOP
-        return when(false);
+        return when(undefined);
     }
 
-    commit(msg): when.Promise<boolean> {
-        // NOOP
-        return when(false);
+    commit(msg): when.Promise<{}> {
+        return this.get('log.txt').
+            then(obj => {
+                var log = obj.Body + new Date().toLocaleString() + ' ' + msg + '\n';
+                return this.put('log.txt', log, 'text/plain');
+            }).
+            then(() => undefined);
     }
 }
 
