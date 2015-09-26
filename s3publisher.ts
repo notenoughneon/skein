@@ -1,5 +1,5 @@
 ///<reference path="typings/tsd.d.ts"/>
-import AWS = require('aws-sdk');
+var AWS = require('aws-sdk');
 import when = require('when');
 import nodefn = require('when/node');
 import util = require('./util');
@@ -28,7 +28,7 @@ class S3Publisher implements Publisher {
         this.listObjects = nodefn.lift(s3.listObjects.bind(s3));
     }
 
-    put(path, obj, contentType): when.Promise<void> {
+    put(path, obj, contentType): when.Promise<{}> {
         var params = {
             Bucket: this.config.bucket,
             Key: normalizePath(path),
@@ -46,7 +46,7 @@ class S3Publisher implements Publisher {
             });
     }
 
-    get(path) {
+    get(path): when.Promise<{Body: Buffer, ContentType: string}> {
         return this.getObject({Bucket: this.config.bucket, Key: normalizePath(path)});
     }
 
@@ -70,14 +70,18 @@ class S3Publisher implements Publisher {
             })
     }
 
-    rollback(): when.Promise<boolean> {
+    rollback(): when.Promise<{}> {
         // NOOP
-        return when(false);
+        return when(undefined);
     }
 
-    commit(msg): when.Promise<boolean> {
-        // NOOP
-        return when(false);
+    commit(msg): when.Promise<{}> {
+        return this.get('log.txt').
+            then(obj => {
+                var log = obj.Body + new Date().toLocaleString() + ' ' + msg + '\n';
+                return this.put('log.txt', log, 'text/plain');
+            }).
+            then(() => undefined);
     }
 }
 
