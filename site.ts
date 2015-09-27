@@ -137,7 +137,8 @@ class Site {
                             debug('generated ' + getPathForIndex(index + 1));
                         })
                 )
-            );
+            ).
+            then(() => debug('done generating index'));
     }
 
     getSlug(name: string, date: Date) {
@@ -163,7 +164,8 @@ class Site {
                             }
                         });
                 });
-            });
+            }).
+            then(() => debug('done reindexing'));
     }
 
     reGenerate() {
@@ -179,7 +181,7 @@ class Site {
                         })
                 )
             ).
-            then(() => this.generateIndex());
+            then(() => debug('done regenerating'));
     }
 
     sendWebmentionsFor(entry) {
