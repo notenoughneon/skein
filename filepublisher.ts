@@ -3,8 +3,12 @@ import fs = require('fs');
 import pathlib = require('path');
 import when = require('when');
 import nodefn = require('when/node');
+var guard = require('when/guard');
 import util = require('./util');
 import Publisher = require('./publisher');
+
+var readFile = guard(guard.n(1), nodefn.lift(fs.readFile));
+var stat = guard(guard.n(1), nodefn.lift(fs.stat));
 
 class FilePublisher implements Publisher {
     config: any;
@@ -15,7 +19,7 @@ class FilePublisher implements Publisher {
 
     private readWithFallback(filepath, extensions): when.Promise<{Body: Buffer, ContentType: string}> {
         return when.any(extensions.map(function (ext) {
-            return nodefn.call(fs.readFile, filepath + ext).
+            return readFile(filepath + ext).
                 then(function (data) {
                     return {Body: data, ContentType: util.inferMimetype(filepath + ext)};
                 });
@@ -24,7 +28,7 @@ class FilePublisher implements Publisher {
 
     private existsWithFallback(filepath, extensions): when.Promise<boolean> {
         return when.any(extensions.map(function (ext) {
-            return nodefn.call(fs.stat, filepath + ext);
+            return stat(filepath + ext);
         })).
             then(function () {
                 return true;
