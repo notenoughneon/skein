@@ -159,7 +159,7 @@ class Site {
                         then(obj => microformat.getHEntryWithCard(obj.Body, u)).
                         then(entry => {
                             if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
-                                this.db.store(entry);
+                                this.db.storeTree(entry);
                                 debug('indexed ' + entry.url);
                             }
                         });

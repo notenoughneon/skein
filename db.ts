@@ -3,6 +3,8 @@ import sqlite3 = require('sqlite3');
 import when = require('when');
 import nodefn = require('when/node');
 import microformat = require('./microformat');
+import Debug = require('debug');
+var debug = Debug('db');
 
 class Db {
     dbRun: any;
@@ -40,18 +42,21 @@ class Db {
     }
 
     store(entry: microformat.Entry): when.Promise<any> {
+        if (!entry.url)
+            return when(undefined);
         return this.dbRun('INSERT OR REPLACE INTO entries ' +
             '(url, domain, date, isArticle, isReply, isRepost, isLike, json) ' +
             'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
             entry.url,
             entry.domain(),
-            entry.published.toISOString(),
+            entry.published ? entry.published.toISOString() : null,
             entry.isArticle(),
             entry.isReply(),
             entry.isRepost(),
             entry.isLike(),
             entry.serialize()
-        );
+        ).
+        then(() => debug('stored ' + entry.url));
     }
 
     storeTree(entry: microformat.Entry): when.Promise<any> {
