@@ -132,11 +132,8 @@ class Site {
                             totalPages: chunks.length,
                             utils: templateUtils
                         }).
-                        then(html => {
-                            this.publisher.put(getPathForIndex(index + 1), html, 'text/html');
-                            debug('generated ' + getPathForIndex(index + 1));
-                        })
-                )
+                        then(html => this.publisher.put(getPathForIndex(index + 1), html, 'text/html')).
+                        then(() => debug('generated ' + getPathForIndex(index + 1)))
             ).
             then(() => debug('done generating index'));
     }
@@ -159,8 +156,8 @@ class Site {
                         then(obj => microformat.getHEntryWithCard(obj.Body, u)).
                         then(entry => {
                             if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
-                                this.db.storeTree(entry);
-                                debug('indexed ' + entry.url);
+                                return this.db.storeTree(entry).
+                                    then(() => debug('indexed ' + entry.url));
                             }
                         });
                 });
@@ -175,10 +172,8 @@ class Site {
                 when.map(entries, entry =>
                     nodefn.call(ejs.renderFile, 'template/entrypage.ejs',
                         {site: this.config, entry: entry, utils: templateUtils}).
-                        then(html => {
-                            this.publisher.put(url.parse(entry.url).pathname, html, 'text/html');
-                            debug('regenerated '+ entry.url);
-                        })
+                        then(html => this.publisher.put(url.parse(entry.url).pathname, html, 'text/html')).
+                        then(() => debug('regenerated '+ entry.url))
                 )
             ).
             then(() => debug('done regenerating'));
