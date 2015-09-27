@@ -103,7 +103,8 @@ function firstProp(mf, name, f?) {
 function children(mf) {
     return (mf.children || []).
         concat(mf.properties['comment'] || []).
-        map(e => new Entry(e));
+        map(e => new Entry(e)).
+        filter(e => e.url != null);
 }
 
 export class Entry {
