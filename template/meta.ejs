@@ -2,7 +2,7 @@
 <% if (entry.author.url != site.url) { %>
             <a class="p-author h-card" href="<%= entry.author.url %>">
                 <% if (entry.author.photo != null) { %>
-                <img src="<%= author.photo %>">
+                <img src="<%= entry.author.photo %>">
                 <% } %>
                 <%= entry.author.name %>
             </a>
