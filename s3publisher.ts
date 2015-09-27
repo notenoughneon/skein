@@ -2,6 +2,7 @@
 var AWS = require('aws-sdk');
 import when = require('when');
 import nodefn = require('when/node');
+var guard = require('when/guard');
 import util = require('./util');
 import Publisher = require('./publisher');
 
@@ -22,10 +23,10 @@ class S3Publisher implements Publisher {
     constructor(config) {
         this.config = config;
         var s3 = new AWS.S3({region: config.region});
-        this.putObject = nodefn.lift(s3.putObject.bind(s3));
-        this.getObject = nodefn.lift(s3.getObject.bind(s3));
-        this.headObject = nodefn.lift(s3.headObject.bind(s3));
-        this.listObjects = nodefn.lift(s3.listObjects.bind(s3));
+        this.putObject = guard(guard.n(1), nodefn.lift(s3.putObject.bind(s3)));
+        this.getObject = guard(guard.n(1), nodefn.lift(s3.getObject.bind(s3)));
+        this.headObject = guard(guard.n(1), nodefn.lift(s3.headObject.bind(s3)));
+        this.listObjects = guard(guard.n(1), nodefn.lift(s3.listObjects.bind(s3)));
     }
 
     put(path, obj, contentType): when.Promise<{}> {
