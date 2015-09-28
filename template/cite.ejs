@@ -12,7 +12,7 @@
 <% if (entry.isArticle()) { %>
         <h2 class="blog-post-title p-name"><%= entry.name %></h2>
 <% } %>
-<%- include('meta'); %>
+<%- include('meta', {hideAuthor: false}); %>
         <div class="e-content<%= entry.isArticle() ? '' : ' p-name note-content' %>"><%= entry.content.value %></div>
 <%- include('actions'); %>
     </div>

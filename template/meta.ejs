@@ -1,5 +1,5 @@
         <p class="blog-post-meta">
-<% if (entry.author.url != site.url) { %>
+<% if (!hideAuthor) { %>
             <a class="p-author h-card" href="<%= entry.author.url %>">
                 <% if (entry.author.photo != null) { %>
                 <img src="<%= entry.author.photo %>">
@@ -7,7 +7,7 @@
                 <%= entry.author.name %>
             </a>
 <% } %>
-<% if (entry.author.url != site.url && entry.published != null) { %>
+<% if (!hideAuthor && entry.published != null) { %>
             -
 <% } %>
             <a class="u-url" href="<%= entry.url %>">
