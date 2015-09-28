@@ -171,14 +171,14 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
 
 app.post('/micropub', requireAuth('post'), function(req, res) {
     var entry: microformat.Entry;
-    //req.['files'].photo.filename, .tmpfile, .mimetype
     var release;
     publishLock().
         then(r => release = r).
         then(() => site.publish({
             content: req['post'].content,
             name: req['post'].name,
-            replyTo: req['post']['in-reply-to']
+            replyTo: req['post']['in-reply-to'],
+            photo: req['files'].photo
         })).
         then(e => entry = e).
         then(() => site.generateIndex()).

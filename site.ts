@@ -1,7 +1,9 @@
 ///<reference path="typings/tsd.d.ts"/>
 var ejs = require('ejs');
+import fs = require('fs');
 import url = require('url');
 import crypto = require('crypto');
+import path = require('path');
 import when = require('when');
 import nodefn = require('when/node');
 import Debug = require('debug');
@@ -86,7 +88,13 @@ class Site {
         return card;
     }
 
-    publish(m: {name?: string, content: string, replyTo?: string}): when.Promise<microformat.Entry> {
+    publish(m: {
+        name?: string,
+        content: string,
+        replyTo?: string,
+        photo?: {filename: string, tmpfile: string, mimetype: string}})
+        : when.Promise<microformat.Entry> {
+        var slug;
         var entry = new microformat.Entry();
         entry.author = this.getAuthor();
         entry.name = m.name || m.content;
@@ -96,10 +104,20 @@ class Site {
         };
         entry.published = new Date();
         return this.getSlug(m.name, entry.published).
-            then(slug => entry.url = this.config.url + slug).
+            then(s => {
+                slug = s;
+                entry.url = this.config.url + slug;
+            }).
             then(() => {
                 if (m.replyTo != null)
                     return microformat.getHEntryFromUrl(m.replyTo).then(e => entry.replyTo = e);
+            }).
+            then(() => {
+                if (m.photo != null) {
+                    var photoslug = path.join(path.dirname(slug),m.photo.filename);
+                    entry.content.html = '<img class="u-photo" src="' + photoslug + '"/>' + entry.content.html;
+                    return this.publisher.put(photoslug, fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
+                }
             }).
             then(() => when.map(entry.allLinks(), link => oembed(link).
                     then(embed => {
@@ -113,7 +131,7 @@ class Site {
                 entry: entry,
                 utils: templateUtils
             })).
-            then(html => this.publisher.put(url.parse(entry.url).pathname, html, 'text/html')).
+            then(html => this.publisher.put(slug, html, 'text/html')).
             then(() => entry);
     }
 

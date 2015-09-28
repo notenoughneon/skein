@@ -39,7 +39,12 @@ function mkdirRecursive(dir) {
 /* writeFile with recursive parent dir creation */
 export function writeFile(filename, data) {
     return when.try(mkdirRecursive, path.dirname(filename)).
-        then(nodefn.lift(fs.writeFile, filename, data));
+        then(() => {
+            if (data.readable)
+                data.pipe(fs.createWriteStream(filename));
+            else
+                return nodefn.call(fs.writeFile, filename, data);
+        });
 }
 
 /* flatten an array of arrays */
