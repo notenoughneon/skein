@@ -153,12 +153,14 @@ class Site {
                 return when.map(keys, key => {
                     var u = url.resolve(this.config.url, key);
                     return this.publisher.get(key).
-                        then(obj => microformat.getHEntryWithCard(obj.Body, u)).
-                        then(entry => {
-                            if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
-                                return this.db.storeTree(entry).
-                                    then(() => debug('indexed ' + entry.url));
-                            }
+                        then(obj => {
+                            if (obj.ContentType == 'text/html')
+                                return microformat.getHEntryWithCard(obj.Body, u).
+                                    then(entry => {
+                                        if (entry != null && (entry.url === u || entry.url + '.html' === u))
+                                            return this.db.storeTree(entry).
+                                                then(() => debug('indexed ' + entry.url));
+                                    });
                         });
                 });
             }).
