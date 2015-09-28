@@ -176,6 +176,7 @@ class Site {
                         then(() => debug('regenerated '+ entry.url))
                 )
             ).
+            then(() => this.generateIndex()).
             then(() => debug('done regenerating'));
     }
 
