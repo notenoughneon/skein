@@ -31,20 +31,21 @@ export function getHEntryWithCard(html: string, url: string): when.Promise<Entry
 }
 
 export function getHEntry(html: string, url: string): when.Promise<Entry> {
-    return parser.getAsync({html: html, filters: ['h-entry'], baseUrl: url}).
+    return parser.getAsync({html: html, baseUrl: url}).
         then(function(mf) {
-            if (mf.items.length == 0)
+            var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
+            if (entries.length == 0)
                 return null;
-            return new Entry(mf.items[0]);
+            return new Entry(entries[0]);
         });
 }
 
 export function getRepHCard(html: string, url: string): when.Promise<Card> {
-    return parser.getAsync({html: html, filters: ['h-card'], baseUrl: url}).
+    return parser.getAsync({html: html, baseUrl: url}).
         then(function(mf) {
-            var cards = mf.items.map(function(h) {
-                return new Card(h);
-            });
+            var cards = mf.items.
+                filter(i => i.type.some(t => t == 'h-card')).
+                map(h => new Card(h));
             // 1. uid and url match page url
             var match = cards.filter(function(c) {
                 return c.url != null &&
