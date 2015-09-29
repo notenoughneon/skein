@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 
-app.use(express.static('static', {extensions: ['html']}));
+app.use(express.static(process.argv[3], {extensions: ['html']}));
 
 var server = http.listen(process.argv[2], function () {
     var address = server.address();
