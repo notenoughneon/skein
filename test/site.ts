@@ -2,6 +2,7 @@
 import assert = require('assert');
 import fs = require('fs');
 import url = require('url');
+import path = require('path');
 import child_process = require('child_process');
 import nodefn = require('when/node');
 var parser = require('microformat-node');
@@ -149,6 +150,27 @@ describe('site', function() {
                 assert.equal(fs.existsSync(path), true, path + ' exists');
                 path = config.publisher.root + '/index.html';
                 assert.equal(fs.existsSync(path), true, path + ' exists');
+            }).
+            then(done).
+            catch(done);
+    });
+    
+        it('can post a photo', function(done) {
+        var m = {content: 'This is a photo', photo: {
+            filename: 'teacups.jpg',
+            tmpfile: 'test/teacups.jpg',
+            mimetype: 'image/jpeg'
+        }};
+        site.publish(m).
+            then(entry => {
+                post2 = entry;
+                return site.db.get(entry.url);
+            }).
+            then(e => {
+                assert.equal(e.content.value, m.content);
+                var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
+                assert.deepEqual(e.getPhotos(),[photoSlug]);
+                assert(fs.existsSync(path.join(config.publisher.root, photoSlug)));
             }).
             then(done).
             catch(done);
