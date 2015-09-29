@@ -170,6 +170,10 @@ export class Entry {
     isLike(): boolean {
         return this.likeOf != null;
     }
+    
+    getSlug(): string {
+        return url.parse(this.url).path;
+    }
 
     getPhotos(): string[] {
         if (this.content != null && this.content.html != null) {
