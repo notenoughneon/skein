@@ -92,6 +92,7 @@ class Site {
         name?: string,
         content: string,
         replyTo?: string,
+        syndication?: string[],
         photo?: {filename: string, tmpfile: string, mimetype: string}})
         : when.Promise<microformat.Entry> {
         var slug;
@@ -111,6 +112,10 @@ class Site {
             then(() => {
                 if (m.replyTo != null)
                     return microformat.getHEntryFromUrl(m.replyTo).then(e => entry.replyTo = e);
+            }).
+            then(() => {
+                if (m.syndication != null)
+                    entry.syndication = m.syndication;
             }).
             then(() => {
                 if (m.photo != null) {
