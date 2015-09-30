@@ -14,14 +14,14 @@ function normalizePath(p) {
 }
 
 class S3Publisher implements Publisher {
-    config: any;
+    bucket: string;
     putObject: any;
     getObject: any;
     headObject: any;
     listObjects: any;
 
-    constructor(config) {
-        this.config = config;
+    constructor(config: {region: string, bucket: string}) {
+        this.bucket = config.bucket;
         var s3 = new AWS.S3({region: config.region});
         this.putObject = guard(guard.n(1), nodefn.lift(s3.putObject.bind(s3)));
         this.getObject = guard(guard.n(1), nodefn.lift(s3.getObject.bind(s3)));
@@ -31,7 +31,7 @@ class S3Publisher implements Publisher {
 
     put(path, obj, contentType): when.Promise<{}> {
         var params = {
-            Bucket: this.config.bucket,
+            Bucket: this.bucket,
             Key: normalizePath(path),
             Body: obj,
             ContentType: contentType !== undefined ? contentType : util.inferMimetype(path)
@@ -48,11 +48,11 @@ class S3Publisher implements Publisher {
     }
 
     get(path): when.Promise<{Body: Buffer, ContentType: string}> {
-        return this.getObject({Bucket: this.config.bucket, Key: normalizePath(path)});
+        return this.getObject({Bucket: this.bucket, Key: normalizePath(path)});
     }
 
     exists(path): when.Promise<boolean> {
-        return this.headObject({Bucket: this.config.bucket, Key: normalizePath(path)}).
+        return this.headObject({Bucket: this.bucket, Key: normalizePath(path)}).
             then(function () {
                 return true;
             }).
@@ -63,7 +63,7 @@ class S3Publisher implements Publisher {
 
     list(): when.Promise<string[]> {
         // FIXME: handle truncated results
-        return this.listObjects({Bucket: this.config.bucket}).
+        return this.listObjects({Bucket: this.bucket}).
             then(function (data) {
                 return data.Contents.map(function (o) {
                     return o.Key;

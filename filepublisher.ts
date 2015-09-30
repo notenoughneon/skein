@@ -11,10 +11,10 @@ var readFile = guard(guard.n(1), nodefn.lift(fs.readFile));
 var stat = guard(guard.n(1), nodefn.lift(fs.stat));
 
 class FilePublisher implements Publisher {
-    config: any;
+    root: string;
 
-    constructor(config) {
-        this.config = config;
+    constructor(config: {root: string}) {
+        this.root = config.root;
     }
 
     private readWithFallback(filepath, extensions): when.Promise<{Body: Buffer, ContentType: string}> {
@@ -41,20 +41,20 @@ class FilePublisher implements Publisher {
     put(path, obj, contentType): when.Promise<{}> {
         if (contentType === 'text/html')
             path = path + '.html';
-        return util.writeFile(pathlib.join(this.config.root, path), obj);
+        return util.writeFile(pathlib.join(this.root, path), obj);
     }
 
     get(path): when.Promise<{Body: Buffer, ContentType: string}> {
-        return this.readWithFallback(pathlib.join(this.config.root, path), ['', '.html']);
+        return this.readWithFallback(pathlib.join(this.root, path), ['', '.html']);
     }
 
     exists(path): when.Promise<boolean> {
-        return this.existsWithFallback(pathlib.join(this.config.root, path), ['', '.html'])
+        return this.existsWithFallback(pathlib.join(this.root, path), ['', '.html'])
     }
 
     list() {
-        return util.walkDir(this.config.root).
-            then(paths => paths.map(p => pathlib.relative(this.config.root, p)));
+        return util.walkDir(this.root).
+            then(paths => paths.map(p => pathlib.relative(this.root, p)));
     }
 
     rollback(): when.Promise<{}> {
