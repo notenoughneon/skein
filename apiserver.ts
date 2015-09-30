@@ -43,7 +43,14 @@ function parsePost(req, res, next) {
         req.post = {};
         req.files = {};
         busboy.on('field', function (fieldname, val) {
-            req.post[fieldname] = val;
+            // php style array properties
+            if (/\[\]$/.test(fieldname)) {
+                if (req.post[fieldname] === undefined)
+                    req.post[fieldname] = [];
+                req.post[fieldname].push(val);
+            }
+            else
+                req.post[fieldname] = val;
         });
         busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
             var tmpfile = path.join(os.tmpdir(), path.basename(filename));
