@@ -21,7 +21,7 @@
 <% if (entry.isArticle()) { %>
         <h2 class="blog-post-title p-name"><%= entry.name %></h2>
 <% } %>
-<%- include('meta', {hideAuthor: true}); %>
+<%- include('meta', {hideAuthor: false}); %>
         <div class="e-content<%= entry.isArticle() ? '' : ' p-name note-content' %>"><%- entry.content.html %></div>
 <%- include('actions'); %>
     </div>
