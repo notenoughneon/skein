@@ -6,26 +6,13 @@
         <%- include('cite', {entry: entry.replyTo, rootClass: ' p-in-reply-to'}); %>
     <% } %>
 
-    <% if (entry.likeOf != null) { %>
-    <i class="fa fa-star"></i>
-    <a href="<%= entry.author.url %>" class="p-author h-card"><%= entry.author.name %></a> liked this.
-    <% } %>
-
-    <% if (entry.repostOf != null) { %>
-    <i class="fa fa-retweet"></i>
-    <a href="<%= entry.author.url %>" class="p-author h-card"><%= entry.author.name %></a> reposted this.
-    <% } %>
-
-    <% if (!entry.isLike() && !entry.isRepost()) { %>
     <div class="blog-post-larger">
-<% if (entry.isArticle()) { %>
+    <% if (entry.isArticle()) { %>
         <h2 class="blog-post-title p-name"><%= entry.name %></h2>
-<% } %>
-<%- include('meta', {hideAuthor: false}); %>
-        <div class="e-content<%= entry.isArticle() ? '' : ' p-name note-content' %>"><%- entry.content.html %></div>
-<%- include('actions'); %>
-    </div>
     <% } %>
+    <%- include('meta', {hideAuthor: false}); %>
+    <div class="e-content<%= entry.isArticle() ? '' : ' p-name note-content' %>"><%- entry.content.html %></div>
+    <%- include('actions'); %>
 
     <% if (entry.likeOf != null) { %>
         <%- include('cite', {entry: entry.likeOf, rootClass: ' p-like-of'}); %>
@@ -34,6 +21,10 @@
     <% if (entry.repostOf != null) { %>
         <%- include('cite', {entry: entry.repostOf, rootClass: ' p-repost-of'}); %>
     <% } %>
+    </div>
+
+
+
 
     <!-- replies -->
 <% entry.children.forEach(function(c) { %>
