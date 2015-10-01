@@ -93,7 +93,8 @@ class Site {
         content: string,
         replyTo?: string,
         syndication?: string[],
-        photo?: {filename: string, tmpfile: string, mimetype: string}})
+        photo?: {filename: string, tmpfile: string, mimetype: string},
+        audio?: {filename: string, tmpfile: string, mimetype: string}})
         : when.Promise<microformat.Entry> {
         var slug;
         var entry = new microformat.Entry();
@@ -120,14 +121,22 @@ class Site {
             then(() => {
                 if (m.photo != null) {
                     var photoslug = path.join(path.dirname(slug),m.photo.filename);
-                    entry.content.html = '<img class="u-photo" src="' + photoslug + '"/>' + entry.content.html;
+                    entry.content.html = '<p><img class="u-photo" src="' + photoslug + '"/></p>' + entry.content.html;
                     return this.publisher.put(photoslug, fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
+                }
+            }).
+            then(() => {
+                if (m.audio != null) {
+                    var audioslug = path.join(path.dirname(slug),m.audio.filename);
+                    entry.content.html = '<p><audio class="u-audio" src="' + audioslug + '" controls>' +
+                    'Your browser does not support the audio tag.</audio></p>' + entry.content.html;
+                    return this.publisher.put(audioslug, fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
                 }
             }).
             then(() => when.map(entry.allLinks(), link => oembed(link).
                     then(embed => {
                         if (embed != null)
-                            entry.content.html = entry.content.html + '<p>' + embed;
+                            entry.content.html = entry.content.html + '<p>' + embed + '</p>';
                     }))
             ).
             then(() => this.db.storeTree(entry)).

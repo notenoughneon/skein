@@ -195,6 +195,7 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             name: req['post'].name,
             replyTo: req['post']['in-reply-to'],
             photo: req['files'].photo,
+            audio: req['files'].audio,
             syndication: getArrayProperty(req, 'syndication')
         })).
         then(e => entry = e).
