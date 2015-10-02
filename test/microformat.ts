@@ -43,6 +43,7 @@ describe('entry', function() {
     serializeEntry.name = 'Hello World!';
     serializeEntry.published = new Date('2015-08-28T08:00:00Z');
     serializeEntry.content = {"value":"Hello World!","html":"Hello <b>World!</b>"};
+    serializeEntry.category = ['indieweb'];
     serializeEntry.author = new microformat.Card();
     serializeEntry.author.name = 'Test User';
     serializeEntry.author.url = 'http://testsite';
@@ -54,6 +55,7 @@ describe('entry', function() {
 "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},\
 "url":"http://testsite/2015/8/28/2",\
 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},\
+"category":["indieweb"],\
 "syndication":[],\
 "replyTo":"http://testsite/2015/8/28/2",\
 "likeOf":null,\
@@ -83,6 +85,7 @@ describe('entry', function() {
                 <a class="u-url" href="/2015/8/28/1"></a>\
                 <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <span class="p-category">indieweb</span>\
                 <div class="p-name e-content">Hello <b>World!</b></div>\
             </div>';
         microformat.getHEntry(html, 'http://testsite').
@@ -93,6 +96,7 @@ describe('entry', function() {
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":["indieweb"],
                     "syndication":[],
                     "replyTo":null,
                     "likeOf":null,
@@ -121,6 +125,7 @@ describe('entry', function() {
                     "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
                     "url":"http://testsite/2015/8/28/2",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":[],
                     "syndication":[],
                     "replyTo":{
                         "name":null,
@@ -128,6 +133,7 @@ describe('entry', function() {
                         "content":null,
                         "url":"http://testsite/2015/8/28/1",
                         "author":null,
+                        "category":[],
                         "syndication":[],
                         "replyTo":null,
                         "likeOf":null,
@@ -160,6 +166,7 @@ describe('entry', function() {
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":[],
                     "syndication":[],
                     "replyTo":null,
                     "likeOf":null,
@@ -187,6 +194,7 @@ describe('entry', function() {
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":[],
                     "syndication":[],
                     "replyTo":null,
                     "likeOf":null,
@@ -224,6 +232,7 @@ describe('entry', function() {
                         "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
                         "url":"http://testsite/2015/8/28/1",
                         "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                        "category":[],
                         "syndication":[],
                         "replyTo":{
                             "name":null,
@@ -231,6 +240,7 @@ describe('entry', function() {
                             "content":null,
                             "url":"http://othersite/somepost",
                             "author":null,
+                            "category":[],
                             "syndication":[],
                             "replyTo":null,
                             "likeOf":null,
@@ -246,6 +256,7 @@ describe('entry', function() {
                                 "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
                                 "url":"http://testsite/2015/8/28/2",
                                 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                                "category":[],
                                 "syndication":[],
                                 "replyTo":{
                                     "name":null,
@@ -253,6 +264,7 @@ describe('entry', function() {
                                     "content":null,
                                     "url":"http://testsite/2015/8/28/1",
                                     "author":null,
+                                    "category":[],
                                     "syndication":[],
                                     "replyTo":null,
                                     "likeOf":null,
@@ -271,6 +283,7 @@ describe('entry', function() {
                         "content":null,
                         "url":"http://othersite/somepost",
                         "author":null,
+                        "category":[],
                         "syndication":[],
                         "replyTo":null,
                         "likeOf":null,
@@ -283,6 +296,7 @@ describe('entry', function() {
                         "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
                         "url":"http://testsite/2015/8/28/2",
                         "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                        "category":[],
                         "syndication":[],
                         "replyTo":{
                             "name":null,
@@ -290,6 +304,7 @@ describe('entry', function() {
                             "content":null,
                             "url":"http://testsite/2015/8/28/1",
                             "author":null,
+                            "category":[],
                             "syndication":[],
                             "replyTo":null,
                             "likeOf":null,

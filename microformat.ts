@@ -114,6 +114,7 @@ export class Entry {
     content: {value: string, html: string} = null;
     url: string = null;
     author: Card = null;
+    category: string[] = [];
     syndication: string[] = [];
     replyTo: Entry = null;
     likeOf: Entry = null;
@@ -131,6 +132,7 @@ export class Entry {
             this.content = firstProp(mf, 'content');
             this.url = firstProp(mf, 'url');
             this.author = firstProp(mf, 'author', a => new Card(a));
+            this.category = prop(mf, 'category');
             this.syndication = prop(mf, 'syndication');
             this.replyTo = firstProp(mf, 'in-reply-to', r => new Entry(r));
             this.likeOf = firstProp(mf, 'like-of', r => new Entry(r));
@@ -240,6 +242,7 @@ export class Entry {
                 entry.content = val.content;
                 entry.url = val.url;
                 entry.author = val.author;
+                entry.category = val.category;
                 entry.syndication = val.syndication;
                 entry.replyTo = val.replyTo;
                 entry.likeOf = val.likeOf;
