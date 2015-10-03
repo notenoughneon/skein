@@ -31,14 +31,20 @@ class Db {
             'json TEXT' +
             ')'
         ).
-            then(() => this.dbRun(
-                    'CREATE TABLE IF NOT EXISTS tokens (' +
-                    'token TEXT PRIMARY KEY,' +
-                    'client_id TEXT,' +
-                    'scope TEXT,' +
-                    'date_issued TEXT' +
-                    ')')
-            );
+        then(() => this.dbRun(
+            'CREATE TABLE IF NOT EXISTS categories (' +
+            'category TEXT,' +
+            'url TEXT' +
+            ')'
+        )).
+        then(() => this.dbRun(
+            'CREATE TABLE IF NOT EXISTS tokens (' +
+            'token TEXT PRIMARY KEY,' +
+            'client_id TEXT,' +
+            'scope TEXT,' +
+            'date_issued TEXT' +
+            ')')
+        );
     }
 
     store(entry: microformat.Entry): when.Promise<any> {
@@ -56,6 +62,9 @@ class Db {
             entry.isLike(),
             entry.serialize()
         ).
+        then(() => this.dbRun('DELETE FROM categories WHERE url=?', entry.url)).
+        then(() => when.map(entry.category, c => this.dbRun(
+            'INSERT INTO categories (category, url) VALUES (?, ?)', c, entry.url))).
         then(() => debug('stored ' + entry.url));
     }
 
@@ -83,6 +92,11 @@ class Db {
             then(function (records) {
                 return records.map(record => microformat.Entry.deserialize(record.json));
             });
+    }
+    
+    getByCategory(category: string): when.Promise<microformat.Entry[]> {
+        return this.dbAll('SELECT * FROM categories JOIN entries USING (url) WHERE category=?', category).
+            then(records => records.map(record => microformat.Entry.deserialize(record.json)));
     }
 
     hydrate(entry: microformat.Entry): when.Promise<microformat.Entry> {

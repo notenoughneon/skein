@@ -5,7 +5,7 @@ import microformat = require('../microformat');
 import Db = require('../db');
 
 describe('db', function() {
-    var db;
+    var db: Db;
 
     before(function(done) {
         db = new Db(':memory:');
@@ -59,6 +59,20 @@ describe('db', function() {
             then(function(e) {
                 assert.deepEqual(e, entry);
             }).
+            then(done).
+            catch(done);
+    });
+    
+    it('store categories', function(done) {
+        var entry = new microformat.Entry();
+        entry.url = 'http://testsite/2015/10/2/1';
+        entry.published = new Date();
+        entry.category = ['indieweb'];
+        db.store(entry).
+            then(() => db.getByCategory('indieweb')).
+            then(entries => assert.deepEqual(entries, [entry])).
+            then(() => db.getByCategory('bogus')).
+            then(entries => assert.deepEqual(entries, [])).
             then(done).
             catch(done);
     });
