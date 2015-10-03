@@ -43,7 +43,9 @@ var config = {
 describe('site', function() {
     var site: Site;
     var post1: microformat.Entry,
-    post2: microformat.Entry;
+    post2: microformat.Entry,
+    post3: microformat.Entry,
+    post4: microformat.Entry;
 
     before(function(done) {
         var db = new Db(':memory:');
@@ -105,6 +107,7 @@ describe('site', function() {
         }};
         site.publish(m).
             then(entry => {
+                post3 = entry;
                 return site.db.get(entry.url);
             }).
             then(e => {
@@ -122,6 +125,7 @@ describe('site', function() {
         var m = {content: 'A post with tags', category: category};
         site.publish(m).
             then(entry => {
+                post4 = entry;
                 return site.db.get(entry.url);
             }).
             then(e => {
@@ -158,6 +162,22 @@ describe('site', function() {
             then(done).
             catch(done);
     });
+    
+    it('can generate a tag index', function(done) {
+        site.generateTagIndex('indieweb').
+            then(() => parser.getAsync({html: fs.readFileSync(config.publisher.root + '/tags/indieweb.html')})).
+            then(mf => {
+                var feed = mf.items[0];
+                assert.equal(feed.type[0], 'h-feed');
+                var entry1 = feed.children[0];
+                assert.equal(entry1.type[0], 'h-cite');
+                assert.equal(entry1.properties.url[0], post4.url);
+                assert.equal(entry1.properties.published[0], post4.published.toISOString());
+                assert.equal(entry1.properties.name[0], post4.name);
+            }).
+            then(done).
+            catch(done);
+    });
 
     it('reindex works', function(done) {
         site.db = new Db(':memory:');
@@ -184,6 +204,8 @@ describe('site', function() {
                 path = config.publisher.root + url.parse(post2.url).path + '.html';
                 assert.equal(fs.existsSync(path), true, path + ' exists');
                 path = config.publisher.root + '/index.html';
+                assert.equal(fs.existsSync(path), true, path + ' exists');
+                path = config.publisher.root + '/tags/indieweb.html';
                 assert.equal(fs.existsSync(path), true, path + ' exists');
             }).
             then(done).

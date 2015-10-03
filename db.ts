@@ -95,8 +95,13 @@ class Db {
     }
     
     getByCategory(category: string): when.Promise<microformat.Entry[]> {
-        return this.dbAll('SELECT * FROM categories JOIN entries USING (url) WHERE category=?', category).
+        return this.dbAll('SELECT * FROM categories JOIN entries USING (url) WHERE category=? ORDER BY date DESC', category).
             then(records => records.map(record => microformat.Entry.deserialize(record.json)));
+    }
+    
+    getAllCategories(): when.Promise<string[]> {
+        return this.dbAll('SELECT category FROM categories').
+            then(records => records.map(r => r.category));
     }
 
     hydrate(entry: microformat.Entry): when.Promise<microformat.Entry> {

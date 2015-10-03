@@ -173,9 +173,22 @@ class Site {
                             utils: templateUtils
                         }).
                         then(html => this.publisher.put(getPathForIndex(index + 1), html, 'text/html')).
-                        then(() => debug('generated ' + getPathForIndex(index + 1)))
+                        then(() => debug('generated ' + getPathForIndex(index + 1))))
             ).
             then(() => debug('done generating index'));
+    }
+    
+    generateTagIndex(category: string) {
+        return this.db.getByCategory(category).
+            then(entries => nodefn.call(ejs.renderFile, 'template/tagpage.ejs',
+            {
+                site: this.config,
+                category: category,
+                entries: entries,
+                utils: templateUtils
+            })).
+            then(html => this.publisher.put(getPathForCategory(category), html, 'text/html')).
+            then(() => debug('generated ' + getPathForCategory(category)));
     }
 
     getSlug(name: string, date: Date) {
@@ -219,6 +232,11 @@ class Site {
                 )
             ).
             then(() => this.generateIndex()).
+            then(() => {
+                return this.db.getAllCategories().
+                    then(categories => {
+                        return when.map(categories, category => this.generateTagIndex(category))})
+            }).
             then(() => debug('done regenerating'));
     }
 

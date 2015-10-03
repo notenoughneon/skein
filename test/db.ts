@@ -76,4 +76,11 @@ describe('db', function() {
             then(done).
             catch(done);
     });
+    
+    it('get all categories', function(done) {
+        db.getAllCategories().
+            then(categories => assert.deepEqual(categories, ['indieweb'])).
+            then(done).
+            catch(done);
+    })
 });
