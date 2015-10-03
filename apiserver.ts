@@ -9,7 +9,8 @@ var Busboy = require('busboy');
 var app = express();
 var ejs = require('ejs');
 import crypto = require('crypto');
-var nodefn = require('when/node');
+import when = require('when');
+import nodefn = require('when/node');
 var callbacks = require('when/callbacks');
 var inspect = require('util').inspect;
 import Debug = require('debug');
@@ -196,10 +197,12 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             replyTo: req['post']['in-reply-to'],
             photo: req['files'].photo,
             audio: req['files'].audio,
-            syndication: getArrayProperty(req, 'syndication')
+            syndication: getArrayProperty(req, 'syndication'),
+            category: getArrayProperty(req, 'category')
         })).
         then(e => entry = e).
         then(() => site.generateIndex()).
+        then(() => when.map(entry.category, category => site.generateTagIndex(category))).
         then(() => site.publisher.commit('publish ' + entry.url)).
         then(() => release()).
         then(() => site.sendWebmentionsFor(entry)).
