@@ -16,5 +16,8 @@
                 <time class="dt-published" datetime="<%= entry.published.toISOString() %>" title="<%= dateString %>"><%= dateString %></time>
 <% } %>
             </a>
+<% entry.category.forEach(function(c) { %>
+        <a href="<%= utils.getPathForCategory(c) %>"><span class="label label-default p-category"><%= c %></span></a>
+<% }); %>
         </p>
 

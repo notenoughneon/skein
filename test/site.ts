@@ -96,6 +96,41 @@ describe('site', function() {
             then(done).
             catch(done);
     });
+    
+    it('can post a photo', function(done) {
+        var m = {content: 'This is a photo', photo: {
+            filename: 'teacups.jpg',
+            tmpfile: 'test/teacups.jpg',
+            mimetype: 'image/jpeg'
+        }};
+        site.publish(m).
+            then(entry => {
+                return site.db.get(entry.url);
+            }).
+            then(e => {
+                assert.equal(e.content.value, m.content);
+                var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
+                assert.deepEqual(e.getPhotos(),[photoSlug]);
+                assert(fs.existsSync(path.join(config.publisher.root, photoSlug)));
+            }).
+            then(done).
+            catch(done);
+    });
+    
+    it('can post a note with a tag', function(done) {
+        var category = ['indieweb', 'test'];
+        var m = {content: 'A post with tags', category: category};
+        site.publish(m).
+            then(entry => {
+                return site.db.get(entry.url);
+            }).
+            then(e => {
+                assert.equal(e.content.value, m.content);
+                assert.deepEqual(e.category, category);
+            }).
+            then(done).
+            catch(done);
+    });
 
     it('can generate an index', function(done) {
         site.generateIndex().
@@ -103,13 +138,13 @@ describe('site', function() {
             then(mf => {
                 var feed = mf.items[0];
                 assert.equal(feed.type[0], 'h-feed');
-                var entry1 = feed.children[0];
+                var entry1 = feed.children[2];
                 assert.equal(entry1.type[0], 'h-entry');
                 assert.equal(entry1.properties.url[0], post2.url);
                 assert.equal(entry1.properties.published[0], post2.published.toISOString());
                 assert.deepEqual(entry1.properties.content[0], post2.content);
                 assert.equal(entry1.properties.name[0], post2.name);
-                var entry2 = feed.children[1];
+                var entry2 = feed.children[3];
                 assert.equal(entry2.type[0], 'h-entry');
                 assert.equal(entry2.properties.url[0], post1.url);
                 assert.equal(entry2.properties.published[0], post1.published.toISOString());
@@ -130,11 +165,11 @@ describe('site', function() {
             then(() => site.reIndex()).
             then(() => site.db.getAllByDomain(config.url)).
             then(entries => {
-                assert.equal(entries.length, 2);
-                assert.equal(entries[0].url, post2.url);
-                assert.equal(entries[0].name, post2.name);
-                assert.equal(entries[1].url, post1.url);
-                assert.equal(entries[1].name, post1.name);
+                assert.equal(entries.length, 4);
+                assert.equal(entries[2].url, post2.url);
+                assert.equal(entries[2].name, post2.name);
+                assert.equal(entries[3].url, post1.url);
+                assert.equal(entries[3].name, post1.name);
             }).
             then(done).
             catch(done);
@@ -155,24 +190,5 @@ describe('site', function() {
             catch(done);
     });
     
-        it('can post a photo', function(done) {
-        var m = {content: 'This is a photo', photo: {
-            filename: 'teacups.jpg',
-            tmpfile: 'test/teacups.jpg',
-            mimetype: 'image/jpeg'
-        }};
-        site.publish(m).
-            then(entry => {
-                post2 = entry;
-                return site.db.get(entry.url);
-            }).
-            then(e => {
-                assert.equal(e.content.value, m.content);
-                var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
-                assert.deepEqual(e.getPhotos(),[photoSlug]);
-                assert(fs.existsSync(path.join(config.publisher.root, photoSlug)));
-            }).
-            then(done).
-            catch(done);
-    });
+
 });

@@ -20,6 +20,10 @@ function getPathForIndex(page) {
     return 'index' + (page == 1 ? '' : page);
 }
 
+function getPathForCategory(category) {
+    return '/tags/' + category;
+}
+
 function truncate(s, len) {
     if (s.length > len)
         return s.substr(0, len) + '...';
@@ -40,6 +44,7 @@ function formatDate(date) {
 var templateUtils = {
     formatDate: formatDate,
     getPathForIndex: getPathForIndex,
+    getPathForCategory: getPathForCategory,
     truncate: truncate
 };
 
@@ -94,7 +99,8 @@ class Site {
         replyTo?: string,
         syndication?: string[],
         photo?: {filename: string, tmpfile: string, mimetype: string},
-        audio?: {filename: string, tmpfile: string, mimetype: string}})
+        audio?: {filename: string, tmpfile: string, mimetype: string},
+        category?: string[]})
         : when.Promise<microformat.Entry> {
         var slug;
         var entry = new microformat.Entry();
@@ -105,6 +111,8 @@ class Site {
             html: util.autoLink(util.escapeHtml(m.content))
         };
         entry.published = new Date();
+        if (m.category != null)
+            entry.category = m.category;
         return this.getSlug(m.name, entry.published).
             then(s => {
                 slug = s;
