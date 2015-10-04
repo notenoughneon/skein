@@ -105,6 +105,8 @@ class Site {
         var slug;
         var entry = new microformat.Entry();
         entry.author = this.getAuthor();
+        if (m.content == null)
+            m.content = '';
         entry.name = m.name || m.content;
         entry.content = {
             value: m.content,
