@@ -156,6 +156,15 @@ class Site {
             then(html => this.publisher.put(slug, html, 'text/html')).
             then(() => entry);
     }
+    
+    delete(url: string) {
+        return this.db.get(url).
+            then(entry => this.db.delete(url).
+                    then(() => this.publisher.delete(entry.getSlug(), 'text/html')).
+                    then(() => when.map(entry.category, c => this.generateTagIndex(c))).
+                    then(() => this.generateIndex())
+            );
+    }
 
     generateIndex() {
         var limit = this.config.entriesPerPage;

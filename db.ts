@@ -67,6 +67,12 @@ class Db {
             'INSERT INTO categories (category, url) VALUES (?, ?)', c, entry.url))).
         then(() => debug('stored ' + entry.url));
     }
+    
+    delete(url: string) {
+        return this.dbRun('DELETE FROM categories WHERE url=?', url).
+            then(() => this.dbRun('DELETE FROM entries WHERE url=?', url)).
+            then(() => undefined);
+    }
 
     storeTree(entry: microformat.Entry): when.Promise<any> {
         var entries = entry.flatten();

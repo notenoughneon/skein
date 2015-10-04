@@ -43,6 +43,13 @@ class FilePublisher implements Publisher {
             path = path + '.html';
         return util.writeFile(pathlib.join(this.root, path), obj);
     }
+    
+    delete(path, contentType): when.Promise<{}> {
+        if (contentType === 'text/html')
+            path = path + '.html';
+        return nodefn.call(fs.unlink, pathlib.join(this.root, path)).
+            then(() => undefined);
+    }
 
     get(path): when.Promise<{Body: Buffer, ContentType: string}> {
         return this.readWithFallback(pathlib.join(this.root, path), ['', '.html']);

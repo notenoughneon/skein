@@ -16,6 +16,7 @@ function normalizePath(p) {
 class S3Publisher implements Publisher {
     bucket: string;
     putObject: any;
+    deleteObject: any;
     getObject: any;
     headObject: any;
     listObjects: any;
@@ -24,6 +25,7 @@ class S3Publisher implements Publisher {
         this.bucket = config.bucket;
         var s3 = new AWS.S3({region: config.region});
         this.putObject = guard(guard.n(1), nodefn.lift(s3.putObject.bind(s3)));
+        this.deleteObject = guard(guard.n(1), nodefn.lift(s3.deleteObject.bind(s3)));
         this.getObject = guard(guard.n(1), nodefn.lift(s3.getObject.bind(s3)));
         this.headObject = guard(guard.n(1), nodefn.lift(s3.headObject.bind(s3)));
         this.listObjects = guard(guard.n(1), nodefn.lift(s3.listObjects.bind(s3)));
@@ -45,6 +47,15 @@ class S3Publisher implements Publisher {
                     return this.putObject(params);
                 }
             });
+    }
+    
+    delete(path, contentType): when.Promise<{}> {
+        return this.deleteObject({Bucket: this.bucket, Key: path}).
+            then(() => {
+                if (contentType == 'text/html' && !/\.html$/.test(path))
+                    return this.deleteObject({Bucket: this.bucket, Key: path + '.html'});
+            }).
+            then(() => undefined);
     }
 
     get(path): when.Promise<{Body: Buffer, ContentType: string}> {
