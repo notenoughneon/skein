@@ -5,7 +5,7 @@
     <li class="h-cite">
         <% var dateString =utils.formatDate(entry.published); %>
         <time class="dt-published" datetime="<%= entry.published.toISOString() %>" title="<%= dateString %>"><%= dateString %></time>
-        <a class="u-url p-name" href="<%= entry.url %>"><%= utils.truncate(entry.name, 32) %></a>
+        <a class="u-url p-name" href="<%= entry.url %>"><%= utils.truncate(entry.name, 64) %></a>
     </li>
 <% }); %>
 </ul>

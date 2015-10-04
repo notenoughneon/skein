@@ -1,3 +1,3 @@
-<%- include('header', {title: entry.name + ' - ' + site.title}); %>
+<%- include('header', {title: utils.truncate(entry.name, 32) + ' - ' + site.title}); %>
 <%- include('entry'); %>
 <%- include('entryfooter'); %>
