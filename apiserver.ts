@@ -20,13 +20,9 @@ import Db = require('./db');
 import Site = require('./site');
 import util = require('./util');
 
-if (process.argv[3] === undefined)
-    var configFile = 'config.json';
-else
-    configFile = process.argv[3];
 var db = new Db('index.db');
 db.init();
-var config = JSON.parse(fs.readFileSync(configFile).toString());
+var config = JSON.parse(fs.readFileSync(process.argv[3]).toString());
 var site = new Site(config, db);
 
 app.set('views', './template');
@@ -255,4 +251,5 @@ var server = app.listen(process.argv[2], function (){
     debug('Listening on %s:%s', address.address, address.port);
 });
 
-repl.start('> ').context.site = site;
+if (process.argv[4] == '-i')
+    repl.start('> ').context.site = site;
