@@ -124,7 +124,14 @@ app.use(parsePost);
 app.use(logger);
 
 app.get('/auth', function(req, res) {
-    res.render('authform', req.query);
+    if (req.query.client_id != null &&
+        req.query.me != null &&
+        req.query.redirect_uri != null &&
+        req.query.state != null &&
+        req.query.scope != null)
+        res.render('authform', req.query);
+    else
+        res.sendStatus(400);
 });
 
 app.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
