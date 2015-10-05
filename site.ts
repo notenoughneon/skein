@@ -159,6 +159,17 @@ class Site {
             then(() => entry);
     }
     
+    update(entry: microformat.Entry) {
+        return this.db.store(entry).
+            then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
+                site: this.config,
+                entry: entry,
+                utils: templateUtils
+            })).
+            then(html => this.publisher.put(entry.getSlug(), html, 'text/html')).
+            then(() => entry);
+    }
+
     delete(url: string) {
         return this.db.get(url).
             then(entry => this.db.delete(url).
