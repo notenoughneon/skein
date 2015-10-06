@@ -13,7 +13,11 @@
         <h2 class="blog-post-title p-name"><%= entry.name %></h2>
 <% } %>
 <%- include('meta', {hideAuthor: false}); %>
+<% if (entry.content != null) { %>
         <div class="e-content<%= entry.isArticle() ? '' : ' p-name note-content' %>"><%= entry.content.value %></div>
+<% } else if (entry.name != null) { %>
+        <div class="p-name"><%= entry.name %></div>
+<% } %>
 <%- include('actions'); %>
     </div>
 </div>
