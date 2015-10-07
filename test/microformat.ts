@@ -69,6 +69,25 @@ describe('entry', function() {
     it('can be deserialized', function() {
         assert.deepEqual(microformat.Entry.deserialize(serializeJson), serializeEntry);
     });
+    
+    it('can deserialize null values', function() {
+        var json = '{"name":null,\
+"published":null,\
+"content":null,\
+"url":"http://testsite/2015/10/6/1",\
+"author":null,\
+"category":[],\
+"syndication":[],\
+"replyTo":null,\
+"likeOf":null,\
+"repostOf":null,\
+"children":[]}';
+        var entry = microformat.Entry.deserialize(json);
+        assert.equal(entry.name, null);
+        assert.equal(entry.published, null);
+        assert.equal(entry.content, null);
+        assert.equal(entry.author, null);
+    });
 
     it('returns null for no entry', function(done) {
        microformat.getHEntryWithCard('<html></html>', 'http://testsite').

@@ -238,7 +238,7 @@ export class Entry {
             if (key === '') {
                 var entry = new Entry();
                 entry.name = val.name;
-                entry.published = new Date(val.published);
+                entry.published = val.published ? new Date(val.published) : null;
                 entry.content = val.content;
                 entry.url = val.url;
                 entry.author = val.author;
