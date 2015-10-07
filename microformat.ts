@@ -210,6 +210,18 @@ export class Entry {
         entries = entries.concat(this.children);
         return entries;
     }
+    
+    deduplicate() {
+        var seen = {};
+        var tmp = [];
+        this.children.forEach(c => {
+            if (!seen[c.url]) {
+                seen[c.url] = true;
+                tmp.push(c);
+            }
+        });
+        this.children = tmp;
+    }
 
     serialize(): string {
         return JSON.stringify(this, (key,val) => {

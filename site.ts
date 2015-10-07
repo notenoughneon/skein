@@ -292,6 +292,7 @@ class Site {
                         then(sourceEntry => {
                             // TODO: handle non mf mentions
                             targetEntry.children.push(sourceEntry);
+                            targetEntry.deduplicate();
                         }).
                         then(() => this.db.storeTree(targetEntry)).
                         then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {

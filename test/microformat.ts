@@ -373,6 +373,16 @@ describe('entry', function() {
         assert.equal((new microformat.Entry('http://somesite.com/2015/1/2/3')).domain(), 'http://somesite.com');
         assert.equal((new microformat.Entry('https://somesite.com:8080/2015/1/2/3')).domain(), 'https://somesite.com:8080');
     });
+    it('deduplicate works', function() {
+        var entry = new microformat.Entry('http://testsite/2015/10/6/1');
+        var c1 = new microformat.Entry('http://testsite/2015/10/6/2');
+        var c2 = new microformat.Entry('http://testsite/2015/10/6/3');
+        entry.children.push(c1);
+        entry.children.push(c2);
+        entry.children.push(c1);
+        entry.deduplicate();
+        assert.deepEqual(entry.children, [c1,c2]);
+    });
     it('getRepHCard (case 2)', function(done) {
         var expected = new microformat.Card();
         expected.name = 'Test User';
