@@ -13,6 +13,7 @@ import microformat = require('./microformat');
 import Publisher = require('./publisher');
 import S3Publisher = require('./s3publisher');
 import FilePublisher = require('./filepublisher');
+import GitPublisher = require('./gitpublisher');
 import Db = require('./db');
 import oembed = require('./oembed');
 
@@ -63,6 +64,8 @@ class Site {
             case 'file':
                 this.publisher = new FilePublisher(config.publisher);
                 break;
+            case 'git':
+                this.publisher = new GitPublisher(config.publisher);
             default:
                 throw new Error('Unknown publisher type');
         }

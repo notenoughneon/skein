@@ -10,18 +10,27 @@ import FilePublisher = require('./filepublisher');
 var exec = nodefn.lift(child_process.exec);
 
 class GitPublisher extends FilePublisher {
-    rollback() {
-        var gitcheckout = 'git -C ' + this.config.root + ' checkout .';
+    push: boolean;
+    
+    constructor(config: {root: string, push: boolean}) {
+        super(config);
+        this.push = config.push;
+    }
+    rollback(): when.Promise<{}> {
+        var gitcheckout = 'git -C ' + this.root + ' checkout .';
         return exec(gitcheckout).
-            then(() => true);
+            then(() => undefined);
     }
 
-    commit(msg) {
-        var gitcommit = 'git -C ' + this.config.root + ' commit -a -m \'' + msg + '\'';
-        var gitpush = 'git -C ' + this.config.root + ' push';
+    commit(msg): when.Promise<{}> {
+        var gitcommit = 'git -C ' + this.root + ' commit -a -m \'' + msg + '\'';
+        var gitpush = 'git -C ' + this.root + ' push';
         return exec(gitcommit).
-            then(() => exec(gitpush)).
-            then(() => true);
+            then(() => {
+                if (this.push)
+                    exec(gitpush);
+            }).
+            then(() => undefined);
     }
 }
 
