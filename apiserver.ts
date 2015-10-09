@@ -192,6 +192,8 @@ function getArrayProperty(req: any, name: string) {
 app.post('/micropub', requireAuth('post'), function(req, res) {
     var entry: microformat.Entry;
     var release;
+    if (req['post'].h != 'entry')
+        return res.sendStatus(400);
     publishLock().
         then(r => release = r).
         then(() => site.publish({
