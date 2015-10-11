@@ -239,6 +239,16 @@ app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
         });
 });
 
+app.get('/entries/*', requireAuth('post'), function(req, res) {
+    var url = req.params[0];
+    site.db.get(url).
+        then(entry => {
+            res.type('application/json');
+            res.send(entry.serialize());
+        }).
+        catch(e => handleError(res, e));
+});
+
 app.get('/tokens', requireAuth('admin'), function(req, res) {
     site.db.listTokens().
         then(res.json.bind(res)).
