@@ -249,6 +249,13 @@ app.get('/entries/*', requireAuth('post'), function(req, res) {
         catch(e => handleError(res, e));
 });
 
+app.delete('/entries/*', requireAuth('post'), function(req, res) {
+    var url = req.params[0];
+    site.delete(url).
+        then(() => res.sendStatus(204)).
+        catch(e => handleError(res, e));
+});
+
 app.get('/tokens', requireAuth('admin'), function(req, res) {
     site.db.listTokens().
         then(res.json.bind(res)).
