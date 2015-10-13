@@ -112,9 +112,9 @@ class Db {
 
     hydrate(entry: microformat.Entry): when.Promise<microformat.Entry> {
         return when.all([
-            entry.replyTo == null || this.get(entry.replyTo.url).then(e => entry.replyTo = e),
-            entry.likeOf == null || this.get(entry.likeOf.url).then(e => entry.likeOf = e),
-            entry.repostOf == null || this.get(entry.repostOf.url).then(e => entry.repostOf = e),
+            when.map(entry.replyTo, r => this.get(r.url)).then(rr => entry.replyTo = rr),
+            when.map(entry.likeOf, r => this.get(r.url)).then(rr => entry.likeOf = rr),
+            when.map(entry.repostOf, r => this.get(r.url)).then(rr => entry.repostOf = rr),
             when.map(entry.children, c => this.get(c.url)).then(cc => entry.children = cc)
         ]).
             then(() => entry);

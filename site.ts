@@ -125,7 +125,7 @@ class Site {
             }).
             then(() => {
                 if (m.replyTo != null)
-                    return microformat.getHEntryFromUrl(m.replyTo).then(e => entry.replyTo = e);
+                    return microformat.getHEntryFromUrl(m.replyTo).then(e => entry.replyTo.push(e));
             }).
             then(() => {
                 if (m.syndication != null)

@@ -81,7 +81,7 @@ describe('site', function() {
             }).
             then(e => {
                 assert.equal(e.content.value, m.content);
-                assert.equal(e.replyTo.url, m.replyTo);
+                assert.deepEqual(e.replyTo.map(r => r.url), [m.replyTo]);
             }).
             then(done).
             catch(done);

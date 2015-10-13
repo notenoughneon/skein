@@ -1,16 +1,16 @@
 <div class="h-entry">
 
-    <% if (entry.replyTo != null) { %>
+    <% entry.replyTo.forEach(function(replyTo) { %>
     <i class="fa fa-reply"></i>
-    In reply to <a href="<%= entry.replyTo.url %>" class="u-in-reply-to"><%= utils.truncate(entry.replyTo.name, 70) %></a>
-    <% } %>
+    In reply to <a href="<%= replyTo.url %>" class="u-in-reply-to"><%= utils.truncate(replyTo.name, 70) %></a>
+    <% }); %>
 
-    <% if (entry.likeOf != null) { %>
+    <% if (entry.likeOf.length > 0) { %>
     <i class="fa fa-star"></i>
     <a href="<%= entry.author.url %>" class="p-author h-card"><%= entry.author.name %></a> liked this.
     <% } %>
 
-    <% if (entry.repostOf != null) { %>
+    <% if (entry.repostOf.length > 0) { %>
     <i class="fa fa-retweet"></i>
     <a href="<%= entry.author.url %>" class="p-author h-card"><%= entry.author.name %></a> reposted this.
     <% } %>
@@ -26,13 +26,13 @@
     </div>
     <% } %>
 
-    <% if (entry.likeOf != null) { %>
-        <%- include('cite', {entry: entry.likeOf, rootClass: ' p-like-of'}); %>
-    <% } %>
+    <% entry.likeOf.forEach(function(likeOf) { %>
+        <%- include('cite', {entry: likeOf, rootClass: ' p-like-of'}); %>
+    <% }); %>
 
-    <% if (entry.repostOf != null) { %>
-        <%- include('cite', {entry: entry.repostOf, rootClass: ' p-repost-of'}); %>
-    <% } %>
+    <% entry.repostOf.forEach(function(repostOf) { %>
+        <%- include('cite', {entry: repostOf, rootClass: ' p-repost-of'}); %>
+    <% }); %>
 
 </div>
 

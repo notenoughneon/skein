@@ -7,7 +7,7 @@ describe('entry', function() {
     it('can be constructed with no args', function() {
         var entry = new microformat.Entry();
         assert.equal(entry.url, null);
-        assert.equal(entry.replyTo, null);
+        assert.deepEqual(entry.replyTo, []);
         assert.deepEqual(entry.children, []);
     });
 
@@ -47,7 +47,7 @@ describe('entry', function() {
     serializeEntry.author = new microformat.Card();
     serializeEntry.author.name = 'Test User';
     serializeEntry.author.url = 'http://testsite';
-    serializeEntry.replyTo = new microformat.Entry('http://testsite/2015/8/28/2');
+    serializeEntry.replyTo = [new microformat.Entry('http://testsite/2015/8/28/2')];
     serializeEntry.children = [new microformat.Entry('http://testsite/2015/8/28/3')];
 
     var serializeJson = '{"name":"Hello World!",\
@@ -57,9 +57,9 @@ describe('entry', function() {
 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},\
 "category":["indieweb"],\
 "syndication":[],\
-"replyTo":"http://testsite/2015/8/28/2",\
-"likeOf":null,\
-"repostOf":null,\
+"replyTo":["http://testsite/2015/8/28/2"],\
+"likeOf":[],\
+"repostOf":[],\
 "children":["http://testsite/2015/8/28/3"]}';
 
     it('can be serialized', function() {
@@ -78,9 +78,9 @@ describe('entry', function() {
 "author":null,\
 "category":[],\
 "syndication":[],\
-"replyTo":null,\
-"likeOf":null,\
-"repostOf":null,\
+"replyTo":[],\
+"likeOf":[],\
+"repostOf":[],\
 "children":[]}';
         var entry = microformat.Entry.deserialize(json);
         assert.equal(entry.name, null);
@@ -117,9 +117,9 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":["indieweb"],
                     "syndication":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "children":[]
                 });
             }).
@@ -146,7 +146,7 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
                     "syndication":[],
-                    "replyTo":{
+                    "replyTo":[{
                         "name":null,
                         "published":null,
                         "content":null,
@@ -154,13 +154,13 @@ describe('entry', function() {
                         "author":null,
                         "category":[],
                         "syndication":[],
-                        "replyTo":null,
-                        "likeOf":null,
-                        "repostOf":null,
+                        "replyTo":[],
+                        "likeOf":[],
+                        "repostOf":[],
                         "children":[]
-                    },
-                    "likeOf":null,
-                    "repostOf":null,
+                    }],
+                    "likeOf":[],
+                    "repostOf":[],
                     "children":[]}
                 );
             }).
@@ -187,9 +187,9 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
                     "syndication":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "children":[]
                 });
             }).
@@ -215,9 +215,9 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
                     "syndication":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "children":[]
                 }]);
             }).
@@ -253,7 +253,7 @@ describe('entry', function() {
                         "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                         "category":[],
                         "syndication":[],
-                        "replyTo":{
+                        "replyTo":[{
                             "name":null,
                             "published":null,
                             "content":null,
@@ -261,13 +261,13 @@ describe('entry', function() {
                             "author":null,
                             "category":[],
                             "syndication":[],
-                            "replyTo":null,
-                            "likeOf":null,
-                            "repostOf":null,
+                            "replyTo":[],
+                            "likeOf":[],
+                            "repostOf":[],
                             "children":[]
-                        },
-                        "likeOf":null,
-                        "repostOf":null,
+                        }],
+                        "likeOf":[],
+                        "repostOf":[],
                         "children":[
                             {
                                 "name":"Here is a reply",
@@ -277,7 +277,7 @@ describe('entry', function() {
                                 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                                 "category":[],
                                 "syndication":[],
-                                "replyTo":{
+                                "replyTo":[{
                                     "name":null,
                                     "published":null,
                                     "content":null,
@@ -285,13 +285,13 @@ describe('entry', function() {
                                     "author":null,
                                     "category":[],
                                     "syndication":[],
-                                    "replyTo":null,
-                                    "likeOf":null,
-                                    "repostOf":null,
+                                    "replyTo":[],
+                                    "likeOf":[],
+                                    "repostOf":[],
                                     "children":[]
-                                },
-                                "likeOf":null,
-                                "repostOf":null,
+                                }],
+                                "likeOf":[],
+                                "repostOf":[],
                                 "children":[]
                             }
                         ]
@@ -304,9 +304,9 @@ describe('entry', function() {
                         "author":null,
                         "category":[],
                         "syndication":[],
-                        "replyTo":null,
-                        "likeOf":null,
-                        "repostOf":null,
+                        "replyTo":[],
+                        "likeOf":[],
+                        "repostOf":[],
                         "children":[]
                     },
                     {
@@ -317,7 +317,7 @@ describe('entry', function() {
                         "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                         "category":[],
                         "syndication":[],
-                        "replyTo":{
+                        "replyTo":[{
                             "name":null,
                             "published":null,
                             "content":null,
@@ -325,13 +325,13 @@ describe('entry', function() {
                             "author":null,
                             "category":[],
                             "syndication":[],
-                            "replyTo":null,
-                            "likeOf":null,
-                            "repostOf":null,
+                            "replyTo":[],
+                            "likeOf":[],
+                            "repostOf":[],
                             "children":[]
-                        },
-                        "likeOf":null,
-                        "repostOf":null,
+                        }],
+                        "likeOf":[],
+                        "repostOf":[],
                         "children":[]
                     }
                 ]);

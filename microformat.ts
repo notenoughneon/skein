@@ -116,9 +116,9 @@ export class Entry {
     author: Card = null;
     category: string[] = [];
     syndication: string[] = [];
-    replyTo: Entry = null;
-    likeOf: Entry = null;
-    repostOf: Entry = null;
+    replyTo: Entry[] = [];
+    likeOf: Entry[] = [];
+    repostOf: Entry[] = [];
     children: Entry[] = [];
 
     constructor(mf?) {
@@ -134,9 +134,9 @@ export class Entry {
             this.author = firstProp(mf, 'author', a => new Card(a));
             this.category = prop(mf, 'category');
             this.syndication = prop(mf, 'syndication');
-            this.replyTo = firstProp(mf, 'in-reply-to', r => new Entry(r));
-            this.likeOf = firstProp(mf, 'like-of', r => new Entry(r));
-            this.repostOf = firstProp(mf, 'repost-of', r => new Entry(r));
+            this.replyTo = prop(mf, 'in-reply-to', r => new Entry(r));
+            this.likeOf = prop(mf, 'like-of', r => new Entry(r));
+            this.repostOf = prop(mf, 'repost-of', r => new Entry(r));
             this.children = children(mf);
         }
     }
@@ -147,10 +147,8 @@ export class Entry {
     }
 
     references(): string[] {
-        return util.flatten(
-            [this.replyTo, this.repostOf, this.likeOf].
-            map(r => r != null ? [r.url] : [])
-        );
+        return this.replyTo.concat(this.repostOf).concat(this.likeOf).
+            map(r => r.url);
     }
 
     allLinks(): string[] {
@@ -162,15 +160,15 @@ export class Entry {
     }
 
     isReply(): boolean {
-        return this.replyTo != null;
+        return this.replyTo.length > 0;
     }
 
     isRepost(): boolean {
-        return this.repostOf != null;
+        return this.repostOf.length > 0;
     }
 
     isLike(): boolean {
-        return this.likeOf != null;
+        return this.likeOf.length > 0;
     }
     
     getSlug(): string {
@@ -200,15 +198,11 @@ export class Entry {
     }
 
     flatten(): Entry[] {
-        var entries = [this];
-        if (this.replyTo != null)
-            entries.push(this.replyTo);
-        if (this.repostOf != null)
-            entries.push(this.repostOf);
-        if (this.likeOf != null)
-            entries.push(this.likeOf);
-        entries = entries.concat(this.children);
-        return entries;
+        return [this].
+            concat(this.replyTo).
+            concat(this.repostOf).
+            concat(this.likeOf).
+            concat(this.children);
     }
     
     deduplicate() {
@@ -225,10 +219,8 @@ export class Entry {
 
     serialize(): string {
         return JSON.stringify(this, (key,val) => {
-            if (val != null && (key === 'replyTo' || key === 'repostOf' || key === 'likeOf'))
-                return val.url;
-            if (key === 'children')
-                return val.map(c => c.url);
+            if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf' || key === 'children')
+                return val.map(r => r.url);
             return val;
         });
     }
@@ -243,9 +235,7 @@ export class Entry {
                 author.url = val.url;
                 return author;
             }
-            if (val != null && (key === 'replyTo' || key === 'repostOf' || key === 'likeOf'))
-                return new Entry(val);
-            if (key === 'children')
+            if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf' || key === 'children')
                 return val.map(url => new Entry(url));
             if (key === '') {
                 var entry = new Entry();

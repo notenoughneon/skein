@@ -1,10 +1,10 @@
 <div class="h-entry">
 
-    <% if (entry.replyTo != null) { %>
+    <% entry.replyTo.forEach(function(replyTo) { %>
         <i class="fa fa-reply"></i>
         In reply to:
-        <%- include('cite', {entry: entry.replyTo, rootClass: ' p-in-reply-to'}); %>
-    <% } %>
+        <%- include('cite', {entry: replyTo, rootClass: ' p-in-reply-to'}); %>
+    <% }); %>
 
     <div class="blog-post-larger">
     <% if (entry.isArticle()) { %>
@@ -18,13 +18,13 @@
     <% } %>
     <%- include('actions'); %>
 
-    <% if (entry.likeOf != null) { %>
-        <%- include('cite', {entry: entry.likeOf, rootClass: ' p-like-of'}); %>
-    <% } %>
+    <% entry.likeOf.forEach(function(likeOf) { %>
+        <%- include('cite', {entry: likeOf, rootClass: ' p-like-of'}); %>
+    <% }); %>
 
-    <% if (entry.repostOf != null) { %>
-        <%- include('cite', {entry: entry.repostOf, rootClass: ' p-repost-of'}); %>
-    <% } %>
+    <% entry.repostOf.forEach(function(repostOf) { %>
+        <%- include('cite', {entry: repostOf, rootClass: ' p-repost-of'}); %>
+    <% }); %>
     </div>
 
 

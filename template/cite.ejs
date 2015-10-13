@@ -1,13 +1,13 @@
 <div class="h-cite<%= rootClass %>">
-<% if (entry.replyTo != null) { %>
-    <a class="u-in-reply-to" href="<%= entry.replyTo.url %>"></a>
-<% } %>
-<% if (entry.likeOf != null) { %>
-    <a class="u-like-of" href="<%= entry.likeOf.url %>"></a>
-<% } %>
-<% if (entry.repostOf != null) { %>
-    <a class="u-repost-of" href="<%= entry.repostOf.url %>"></a>
-<% } %>
+<% entry.replyTo.forEach(function(replyTo) { %>
+    <a class="u-in-reply-to" href="<%= replyTo.url %>"></a>
+<% }); %>
+<% entry.likeOf.forEach(function(likeOf) { %>
+    <a class="u-like-of" href="<%= likeOf.url %>"></a>
+<% }); %>
+<% entry.repostOf.forEach(function(repostOf) { %>
+    <a class="u-repost-of" href="<%= repostOf.url %>"></a>
+<% }); %>
     <div class="blog-post">
 <% if (entry.isArticle()) { %>
         <h2 class="blog-post-title p-name"><%= entry.name %></h2>
