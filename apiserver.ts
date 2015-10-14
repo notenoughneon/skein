@@ -6,6 +6,7 @@ import repl = require('repl');
 import querystring = require('querystring');
 import express = require('express');
 var Busboy = require('busboy');
+var bodyParser = require('body-parser');
 var app = express();
 var ejs = require('ejs');
 import crypto = require('crypto');
@@ -246,6 +247,13 @@ app.get('/entries/*', requireAuth('post'), function(req, res) {
             res.type('application/json');
             res.send(entry.serialize());
         }).
+        catch(e => handleError(res, e));
+});
+
+app.put('/entries', requireAuth('post'), bodyParser.json(), function(req, res) {
+    var entry = req.body;
+    return db.hydrate(entry).
+        then(e => site.update(e)).
         catch(e => handleError(res, e));
 });
 

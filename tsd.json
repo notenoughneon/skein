@@ -40,6 +40,9 @@
     },
     "mocha/mocha.d.ts": {
       "commit": "8f081073e6cb416f901b272810d8b04d6e01c9e0"
+    },
+    "body-parser/body-parser.d.ts": {
+      "commit": "b27d0d0e1ce4207a7a5b1da847cb776c16d7531e"
     }
   }
 }
