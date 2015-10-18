@@ -1,0 +1,34 @@
+doctype html
+html(lang="en")
+    head
+        meta(http-equiv="Content-Type" content="text/html; charset=UTF-8")
+        meta(charset="utf-8")
+        meta(http-equiv="X-UA-Compatible" content="IE=edge")
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+
+        title= title
+
+        link(href="/css/bootstrap.min.css" rel="stylesheet")
+        link(rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css")
+        link(rel="stylesheet" href="/css/blog.css")
+        link(rel="authorization_endpoint" href=site.authUrl)
+        link(rel="token_endpoint" href=site.tokenUrl)
+        link(rel="micropub" href=site.micropubUrl)
+        link(rel="webmention" href=site.webmentionUrl)
+
+    body
+        div(class="navbar navbar-default" role="navigation")
+            div(class="container-fluid")
+                a(class="navbar-brand" href="/")
+                    = site.title
+                div(class="navbar-header")
+                    button(type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse")
+                        span(class="icon-bar")
+                        span(class="icon-bar")
+                        span(class="icon-bar")
+                div(class="navbar-collapse collapse")
+                    ul(class="nav navbar-nav")
+
+        div(class="container")
+            div(class="row")
+                div(class="col-sm-8 blog-main")
