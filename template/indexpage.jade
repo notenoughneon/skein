@@ -1,0 +1,10 @@
+- var title = site.title;
+include header
+div(class="h-feed")
+    each entry in entries
+        include streamentry
+        ul(class="pager")
+            if page < totalPages
+                li
+                    a(href=utils.getPathForIndex(page + 1))Older
+include footer
