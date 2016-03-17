@@ -1,4 +1,4 @@
-///<reference path="../typings/tsd.d.ts"/>
+///<reference path="../typings/main.d.ts"/>
 import assert = require('assert');
 import fs = require('fs');
 import microformat = require('../microformat');

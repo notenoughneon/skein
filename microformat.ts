@@ -1,4 +1,4 @@
-///<reference path="typings/tsd.d.ts"/>
+///<reference path="typings/main.d.ts"/>
 var parser = require('microformat-node');
 import when = require('when');
 import nodefn = require('when/node');

@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "Indieweb static site generator",
   "scripts": {
-    "prebuild": "tsd install",
+    "prebuild": "typings install",
     "build": "tsc",
     "test": "mocha build/test"
   },
@@ -24,8 +24,8 @@
   },
   "devDependencies": {
     "mocha": "^2.3.3",
-    "tsd": "^0.6.4",
-    "typescript": "^1.6.2"
+    "typescript": "^1.6.2",
+    "typings": "^0.7.9"
   },
   "repository": {
     "type": "git",

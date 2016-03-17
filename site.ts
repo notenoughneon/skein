@@ -1,4 +1,4 @@
-///<reference path="typings/tsd.d.ts"/>
+///<reference path="typings/main.d.ts"/>
 var ejs = require('ejs');
 import fs = require('fs');
 import url = require('url');
