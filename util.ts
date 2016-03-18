@@ -8,8 +8,13 @@ import cheerio = require('cheerio');
 import request = require('request');
 var parser = require('microformat-node');
 
-var readdir = nodefn.lift(fs.readdir);
-var stat = nodefn.lift(fs.stat);
+async function readdir(d: string) {
+    return new Promise<string[]>((res, rej) => fs.readdir(d, (err, files) => err !== null ? rej(err) : res(files)));
+}
+
+async function stat(d: string) {
+    return new Promise<fs.Stats>((res, rej) => fs.stat(d, (err, stats) => err !== null ? rej(err) : res(stats)));
+}
 
 export function dump(data) {
     console.log(util.inspect(data, {depth: null}));
@@ -68,20 +73,18 @@ export function chunk(size, arr) {
 }
 
 /* walk directory recursively and return list of files */
-export function walkDir(d) {
-    return stat(d).
-        then(function(stats){
-            if (stats.isDirectory())
-                return readdir(d).
-                    then(function (files) {
-                        return when.map(files, function (file) {
-                            return walkDir(path.join(d, file));
-                        }).
-                            then(flatten);
-                    });
-            else
-                return [d];
-        });
+export async function walkDir(d) {
+    var stats = await stat(d);
+    if (stats.isDirectory()) {
+        var children = [];
+        var entries = await readdir(d);
+        for (var e in entries) {
+            children.push(await walkDir(path.join(d, entries[e])));
+        }
+        return flatten(children);
+    } else {
+        return [d];
+    }
 }
 
 export function copy(src, dst) {
