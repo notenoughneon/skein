@@ -10,10 +10,10 @@
     ]
   },
   "entriesPerPage": 10,
-  "authUrl": "http://localhost:8000/auth",
-  "tokenUrl": "http://localhost:8000/token",
-  "micropubUrl": "http://localhost:8000/micropub",
-  "webmentionUrl": "http://localhost:8000/webmention",
+  "authUrl": "http://localhost:8001/auth",
+  "tokenUrl": "http://localhost:8001/token",
+  "micropubUrl": "http://localhost:8001/micropub",
+  "webmentionUrl": "http://localhost:8001/webmention",
   "publisher": {
     "type": "file",
     "root": "static"

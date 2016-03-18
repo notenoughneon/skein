@@ -9,48 +9,35 @@
 			// Type of configuration. Possible values: "node", "mono".
 			"type": "node",
 			// Workspace relative or absolute path to the program.
-			"program": "build/apiserver.js",
+			"program": "${workspaceRoot}/build/apiserver.js",
 			// Automatically stop program after launch.
 			"stopOnEntry": false,
 			// Command line arguments passed to the program.
-			"args": ["8001","test.json"],
+			"args": ["8001","config.json"],
 			// Workspace relative or absolute path to the working directory of the program being debugged. Default is the current workspace.
-			"cwd": ".",
+			"cwd": "${workspaceRoot}",
 			// Workspace relative or absolute path to the runtime executable to be used. Default is the runtime executable on the PATH.
 			"runtimeExecutable": null,
 			// Optional arguments passed to the runtime executable.
 			"runtimeArgs": ["--nolazy"],
 			// Environment variables passed to the program.
-			"env": { },
+			"env": { "DEBUG": "api,site,db" },
 			// Use JavaScript source maps (if they exist).
 			"sourceMaps": true,
 			// If JavaScript source maps are enabled, the generated code is expected in this directory.
-			"outDir": "build"
-		},
-		{
-			"name": "test",
-			"type": "node",
-			"program": "build/test.js",
-			"stopOnEntry": true,
-			"args": [],
-			"cwd": ".",
-			"runtimeExecutable": null,
-			"runtimeArgs": ["--nolazy"],
-			"env": {},
-			"sourceMaps": true,
-			"outDir": "build"
+			"outDir": "${workspaceRoot}/build"
 		},
 		{
 			"name": "mocha",
 			"type": "node",
-			"program": "node_modules/mocha/bin/_mocha",
+			"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
 			"stopOnEntry": false,
 			"args": ["build/test","-t 0"],
-			"cwd": ".",
+			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
 			"runtimeArgs": ["--nolazy"],
 			"sourceMaps": true,
-			"outDir": "build"
+			"outDir": "${workspaceRoot}/build"
 		}
 	]
 }
