@@ -96,8 +96,7 @@ class Site {
         return card;
     }
 
-    publish(m: Micropub)
-        : when.Promise<microformat.Entry> {
+    publish(m: Micropub) {
         var slug;
         var entry = new microformat.Entry();
         entry.author = this.getAuthor();
