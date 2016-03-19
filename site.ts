@@ -225,24 +225,20 @@ class Site {
         }
     }
 
-    reIndex() {
-        return this.publisher.list().
-            then(keys => {
-                return when.map(keys, key => {
-                    var u = url.resolve(this.config.url, key);
-                    return this.publisher.get(key).
-                        then(obj => {
-                            if (obj.ContentType == 'text/html')
-                                return microformat.getHEntryWithCard(obj.Body, u).
-                                    then(entry => {
-                                        if (entry != null && (entry.url === u || entry.url + '.html' === u))
-                                            return this.db.storeTree(entry).
-                                                then(() => debug('indexed ' + entry.url));
-                                    });
-                        });
-                });
-            }).
-            then(() => debug('done reindexing'));
+    async reIndex() {
+        var keys = await this.publisher.list();
+        for (var key of keys) {
+            var u = url.resolve(this.config.url, key);
+            var obj = await this.publisher.get(key);
+            if (obj.ContentType == 'text/html') {
+                var entry = await microformat.getHEntryWithCard(obj.Body, u);
+                if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
+                    await this.db.storeTree(entry);
+                    debug('indexed ' + entry.url);
+                }
+            }
+        }
+        debug('done reindexing');
     }
 
     reGenerate() {
