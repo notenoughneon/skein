@@ -76,12 +76,12 @@ export function chunk(size, arr) {
 export async function walkDir(d) {
     var stats = await stat(d);
     if (stats.isDirectory()) {
-        var children = [];
+        var files = [];
         var entries = await readdir(d);
-        for (var e in entries) {
-            children.push(await walkDir(path.join(d, entries[e])));
+        for (var i in entries) {
+            files.push(await walkDir(path.join(d, entries[i])));
         }
-        return flatten(children);
+        return flatten(files);
     } else {
         return [d];
     }
