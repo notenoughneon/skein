@@ -43,12 +43,18 @@ function parsePost(req, res, next) {
         busboy.on('field', function (fieldname, val) {
             // php style array properties
             if (/\[\]$/.test(fieldname)) {
-                if (req.post[fieldname] === undefined)
-                    req.post[fieldname] = [];
-                req.post[fieldname].push(val);
-            }
-            else
+                var match = /(.+)\[\]$/.exec(fieldname);
+                if (!(req.post[match[1]] instanceof Array))
+                    req.post[match[1]] = [];
+                req.post[match[1]].push(val);
+            } else if (/\[.+\]$/.test(fieldname)) {
+                var match = /(.+)\[(.+)\]/.exec(fieldname);
+                if (!(req.post[match[1]] instanceof Object))
+                    req.post[match[1]] = {};
+                req.post[match[1]][match[2]] = val;
+            } else {
                 req.post[fieldname] = val;
+            }
         });
         busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
             var tmpfile = path.join(os.tmpdir(), path.basename(filename));
