@@ -81,21 +81,11 @@ class Site {
         }
     }
 
-    getNextAvailable(seed, prefix) {
-        var n = seed;
-        var that = this;
-        function chain() {
-            return that.publisher.exists(prefix + n).
-                then(function (exists) {
-                    if (exists) {
-                        n++;
-                        return chain();
-                    } else {
-                        return prefix + n;
-                    }
-                })
+    async getNextAvailable(n, prefix) {
+        while (await this.publisher.exists(prefix + n)) {
+            n++;
         }
-        return chain();
+        return prefix + n;
     }
 
     getAuthor() {
