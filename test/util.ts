@@ -21,6 +21,23 @@ describe('util', function() {
         }) ;
     });
 
+    describe('walkDir', () => {
+        it('should work', done => {
+            util.walkDir('skel').
+            then(elts => {
+                assert.deepEqual(elts, [
+                    'skel/css/blog.css',
+                    'skel/css/bootstrap.min.css',
+                    'skel/js/blog.js',
+                    'skel/js/bootstrap.min.js',
+                    'skel/js/jquery.min.js'
+                ]);
+            }).
+            then(done).
+            catch(done);
+        });
+    });
+
     describe('chunk', function() {
         it('should return [] for (3, [])', function () {
             assert.deepEqual(util.chunk(3, []), []);
