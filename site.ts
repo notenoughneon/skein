@@ -49,6 +49,16 @@ var templateUtils = {
     truncate: truncate
 };
 
+interface Micropub {
+    name?: string,
+    content: string | {html: string},
+    replyTo?: string,
+    syndication?: string[],
+    photo?: {filename: string, tmpfile: string, mimetype: string},
+    audio?: {filename: string, tmpfile: string, mimetype: string},
+    category?: string[]
+}
+
 class Site {
     config: any;
     db: Db;
@@ -96,25 +106,26 @@ class Site {
         return card;
     }
 
-    publish(m: {
-        name?: string,
-        content: string,
-        replyTo?: string,
-        syndication?: string[],
-        photo?: {filename: string, tmpfile: string, mimetype: string},
-        audio?: {filename: string, tmpfile: string, mimetype: string},
-        category?: string[]})
+    publish(m: Micropub)
         : when.Promise<microformat.Entry> {
         var slug;
         var entry = new microformat.Entry();
         entry.author = this.getAuthor();
         if (m.content == null)
             m.content = '';
-        entry.name = m.name || m.content;
-        entry.content = {
-            value: m.content,
-            html: util.autoLink(util.escapeHtml(m.content))
-        };
+        if (typeof m.content === 'string') {
+            entry.name = m.name || m.content;
+            entry.content = {
+                value: m.content,
+                html: util.autoLink(util.escapeHtml(m.content))
+            };
+        } else {
+            entry.name = m.name;
+            entry.content = {
+                value: util.stripHtml(m.content.html),
+                html: m.content.html
+            };
+        }
         entry.published = new Date();
         if (m.category != null)
             entry.category = m.category;

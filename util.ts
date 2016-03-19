@@ -151,6 +151,11 @@ export function getLinks(html) {
     return $('a').toArray().map(a => a.attribs['href']);
 }
 
+export function stripHtml(html) {
+    var $ = cheerio.load(html);
+    return $.root().text();
+}
+
 export function isMentionOf(html, permalink) {
     return getLinks(html).some(function(l){return l === permalink;});
 }

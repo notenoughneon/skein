@@ -45,7 +45,8 @@ describe('site', function() {
     var post1: microformat.Entry,
     post2: microformat.Entry,
     post3: microformat.Entry,
-    post4: microformat.Entry;
+    post4: microformat.Entry,
+    post5: microformat.Entry;
 
     before(function(done) {
         var db = new Db(':memory:');
@@ -136,19 +137,36 @@ describe('site', function() {
             catch(done);
     });
 
+    it('can post an article', function(done) {
+        var m = {name: 'Title', content: {html: 'Hello <b>World</b>!'}};
+        site.publish(m).
+            then(entry => {
+                post5 = entry;
+                return site.db.get(entry.url);
+            }).
+            then(e => {
+                assert.equal(e.name, m.name);
+                assert.equal(e.content.html, m.content.html);
+                assert.equal(e.content.value, 'Hello World!');
+            }).
+            then(done).
+            catch(done);
+    });
+
+    //FIXME: brittle
     it('can generate an index', function(done) {
         site.generateIndex().
             then(() => parser.getAsync({html: fs.readFileSync(config.publisher.root + '/index.html')})).
             then(mf => {
                 var feed = mf.items[0];
                 assert.equal(feed.type[0], 'h-feed');
-                var entry1 = feed.children[2];
+                var entry1 = feed.children[3];
                 assert.equal(entry1.type[0], 'h-entry');
                 assert.equal(entry1.properties.url[0], post2.url);
                 assert.equal(entry1.properties.published[0], post2.published.toISOString());
                 assert.deepEqual(entry1.properties.content[0], post2.content);
                 assert.equal(entry1.properties.name[0], post2.name);
-                var entry2 = feed.children[3];
+                var entry2 = feed.children[4];
                 assert.equal(entry2.type[0], 'h-entry');
                 assert.equal(entry2.properties.url[0], post1.url);
                 assert.equal(entry2.properties.published[0], post1.published.toISOString());
@@ -185,11 +203,11 @@ describe('site', function() {
             then(() => site.reIndex()).
             then(() => site.db.getAllByDomain(config.url)).
             then(entries => {
-                assert.equal(entries.length, 4);
-                assert.equal(entries[2].url, post2.url);
-                assert.equal(entries[2].name, post2.name);
-                assert.equal(entries[3].url, post1.url);
-                assert.equal(entries[3].name, post1.name);
+                assert.equal(entries.length, 5);
+                assert.equal(entries[3].url, post2.url);
+                assert.equal(entries[3].name, post2.name);
+                assert.equal(entries[4].url, post1.url);
+                assert.equal(entries[4].name, post1.name);
             }).
             then(done).
             catch(done);
