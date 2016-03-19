@@ -77,11 +77,10 @@ export async function walkDir(d) {
     var stats = await stat(d);
     if (stats.isDirectory()) {
         var files = [];
-        var entries = await readdir(d);
-        for (var i in entries) {
-            files.push(await walkDir(path.join(d, entries[i])));
+        for (let file of await readdir(d)) {
+            files = files.concat(await walkDir(path.join(d, file)));
         }
-        return flatten(files);
+        return files;
     } else {
         return [d];
     }
