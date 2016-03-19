@@ -187,15 +187,6 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
     }
 });
 
-function getArrayProperty(req: any, name: string) {
-    if (req.post[name + '[]'] != null)
-        return req.post[name + '[]'];
-    else if (req.post[name] != null)
-        return [req.post[name]];
-    else
-        return null;
-}
-
 app.post('/micropub', requireAuth('post'), function(req, res) {
     var entry: microformat.Entry;
     var release;
@@ -209,8 +200,8 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             replyTo: req['post']['in-reply-to'],
             photo: req['files'].photo,
             audio: req['files'].audio,
-            syndication: getArrayProperty(req, 'syndication'),
-            category: getArrayProperty(req, 'category')
+            syndication: req['syndication'],
+            category: req['category']
         })).
         then(e => entry = e).
         then(() => site.generateIndex()).
