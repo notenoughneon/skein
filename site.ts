@@ -17,6 +17,8 @@ import GitPublisher = require('./gitpublisher');
 import Db = require('./db');
 import oembed = require('./oembed');
 
+var renderFile: (string, any) => Promise<string> = nodefn.lift(ejs.renderFile);
+
 function getPathForIndex(page) {
     return 'index' + (page == 1 ? '' : page);
 }
@@ -96,8 +98,7 @@ class Site {
         return card;
     }
 
-    publish(m: Micropub) {
-        var slug;
+    async publish(m: Micropub) {
         var entry = new microformat.Entry();
         entry.author = this.getAuthor();
         // workaround: type guards dont work with properties
@@ -121,48 +122,36 @@ class Site {
         entry.published = new Date();
         if (m.category != null)
             entry.category = m.category;
-        return this.getSlug(m.name, entry.published).
-            then(s => {
-                slug = s;
-                entry.url = this.config.url + slug;
-            }).
-            then(() => {
-                if (m.replyTo != null)
-                    return microformat.getHEntryFromUrl(m.replyTo).then(e => entry.replyTo.push(e));
-            }).
-            then(() => {
-                if (m.syndication != null)
-                    entry.syndication = m.syndication;
-            }).
-            then(() => {
-                if (m.photo != null) {
-                    var photoslug = path.join(path.dirname(slug),m.photo.filename);
-                    entry.content.html = '<p><img class="u-photo" src="' + photoslug + '"/></p>' + entry.content.html;
-                    return this.publisher.put(photoslug, fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
-                }
-            }).
-            then(() => {
-                if (m.audio != null) {
-                    var audioslug = path.join(path.dirname(slug),m.audio.filename);
-                    entry.content.html = '<p><audio class="u-audio" src="' + audioslug + '" controls>' +
-                    'Your browser does not support the audio tag.</audio></p>' + entry.content.html;
-                    return this.publisher.put(audioslug, fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
-                }
-            }).
-            then(() => when.map(entry.allLinks(), link => oembed(link).
-                    then(embed => {
-                        if (embed != null)
-                            entry.content.html = entry.content.html + '<p>' + embed + '</p>';
-                    }))
-            ).
-            then(() => this.db.storeTree(entry)).
-            then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
-                site: this.config,
-                entry: entry,
-                utils: templateUtils
-            })).
-            then(html => this.publisher.put(slug, html, 'text/html')).
-            then(() => entry);
+        var slug = await this.getSlug(m.name, entry.published);
+        entry.url = this.config.url + slug;
+        if (m.replyTo != null)
+            entry.replyTo.push(await microformat.getHEntryFromUrl(m.replyTo));
+        if (m.syndication != null)
+            entry.syndication = m.syndication;
+        if (m.photo != null) {
+            var photoslug = path.join(path.dirname(slug), m.photo.filename);
+            entry.content.html = '<p><img class="u-photo" src="' + photoslug + '"/></p>' + entry.content.html;
+            await this.publisher.put(photoslug, fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
+        }
+        if (m.audio != null) {
+            var audioslug = path.join(path.dirname(slug), m.audio.filename);
+            entry.content.html = '<p><audio class="u-audio" src="' + audioslug + '" controls>' +
+            'Your browser does not support the audio tag.</audio></p>' + entry.content.html;
+            await this.publisher.put(audioslug, fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
+        }
+        for (let link of entry.allLinks()) {
+            let embed = await oembed(link);
+            if (embed !== null)
+                entry.content.html = entry.content.html + '<p>' + embed + '</p>';
+        }
+        await this.db.storeTree(entry);
+        var html = await renderFile('template/entrypage.ejs', {
+            site: this.config,
+            entry: entry,
+            utils: templateUtils
+        });
+        await this.publisher.put(slug, html, 'text/html');
+        return entry;
     }
     
     update(entry: microformat.Entry) {
