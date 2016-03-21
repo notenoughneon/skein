@@ -100,19 +100,22 @@ class Site {
         var slug;
         var entry = new microformat.Entry();
         entry.author = this.getAuthor();
-        if (m.content == null)
-            m.content = '';
-        if (typeof m.content === 'string') {
-            entry.name = m.name || m.content;
+        // workaround: type guards dont work with properties
+        // https://github.com/Microsoft/TypeScript/issues/3812
+        var content = m.content;
+        if (content == null)
+            content = '';
+        if (typeof content === 'string') {
+            entry.name = m.name || content;
             entry.content = {
-                value: m.content,
+                value: content,
                 html: util.autoLink(util.escapeHtml(m.content))
             };
         } else {
             entry.name = m.name;
             entry.content = {
-                value: util.stripHtml(m.content.html),
-                html: m.content.html
+                value: util.stripHtml(content.html),
+                html: content.html
             };
         }
         entry.published = new Date();
