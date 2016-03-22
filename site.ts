@@ -154,24 +154,23 @@ class Site {
         return entry;
     }
     
-    update(entry: microformat.Entry) {
-        return this.db.store(entry).
-            then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
-                site: this.config,
-                entry: entry,
-                utils: templateUtils
-            })).
-            then(html => this.publisher.put(entry.getSlug(), html, 'text/html')).
-            then(() => entry);
+    async update(entry: microformat.Entry) {
+        await this.db.store(entry);
+        var html = await renderFile('template/entrypage.ejs', {
+            site: this.config,
+            entry: entry,
+            utils: templateUtils
+        });
+        await this.publisher.put(entry.getSlug(), html, 'text/html');
+        return entry;
     }
 
-    delete(url: string) {
-        return this.db.get(url).
-            then(entry => this.db.delete(url).
-                    then(() => this.publisher.delete(entry.getSlug(), 'text/html')).
-                    then(() => when.map(entry.category, c => this.generateTagIndex(c))).
-                    then(() => this.generateIndex())
-            );
+    async delete(url: string) {
+        var entry = await this.db.get(url);
+        await this.db.delete(url);
+        await this.publisher.delete(entry.getSlug(), 'text/html');
+        await when.map(entry.category, c => this.generateTagIndex(c));
+        await this.generateIndex();
     }
 
     generateIndex() {
