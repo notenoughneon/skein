@@ -252,17 +252,16 @@ class Site {
         debug('done regenerating');
     }
 
-    sendWebmentionsFor(entry) {
-        return when.map(entry.allLinks(), function (link) {
-            return util.sendWebmention(entry.url, link).
-                then(function () {
-                    debug('Sent webmention to ' + link);
-                }).
-                catch(function (err) {
-                    debug('Failed to send webmention to ' + link);
-                    debug(err.stack);
-                });
-        });
+    async sendWebmentionsFor(entry) {
+        for (let link of entry.allLinks()) {
+            try {
+                await util.sendWebmention(entry.url, link);
+                debug('Sent webmention to ' + link);
+            } catch (err) {
+                debug('Failed to send webmention to ' + link);
+                debug(err.stack);
+            }
+        }
     }
 
     receiveWebmention(sourceUrl: string, targetUrl: string): when.Promise<any> {
