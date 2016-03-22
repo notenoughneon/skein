@@ -252,7 +252,7 @@ class Site {
         debug('done regenerating');
     }
 
-    async sendWebmentionsFor(entry) {
+    async sendWebmentionsFor(entry: microformat.Entry) {
         for (let link of entry.allLinks()) {
             try {
                 await util.sendWebmention(entry.url, link);
@@ -264,34 +264,26 @@ class Site {
         }
     }
 
-    receiveWebmention(sourceUrl: string, targetUrl: string): when.Promise<any> {
+    async receiveWebmention(sourceUrl: string, targetUrl: string) {
         if (url.parse(targetUrl).host != url.parse(this.config.url).host)
             throw new Error("Target URL " + targetUrl + " doesn't match " + this.config.url);
-        return util.getPage(sourceUrl).
-            then(html => {
-                if (!util.isMentionOf(html, targetUrl)) {
-                    throw new Error('Didn\'t find mention on source page');
-                } else {
-                    var targetEntry;
-                    return this.db.getTree(targetUrl).
-                        then(entry => {
-                            targetEntry = entry;
-                            return microformat.getHEntryWithCard(html, sourceUrl);
-                        }).
-                        then(sourceEntry => {
-                            // TODO: handle non mf mentions
-                            targetEntry.children.push(sourceEntry);
-                            targetEntry.deduplicate();
-                        }).
-                        then(() => this.db.storeTree(targetEntry)).
-                        then(() => nodefn.call(ejs.renderFile, 'template/entrypage.ejs', {
-                            site: this.config,
-                            entry: targetEntry,
-                            utils: templateUtils
-                        })).
-                        then(html => this.publisher.put(url.parse(targetEntry.url).pathname, html, 'text/html'));
-                }
+        var sourceHtml = await util.getPage(sourceUrl);
+        if (!util.isMentionOf(sourceHtml, targetUrl)) {
+            throw new Error('Didn\'t find mention on source page');
+        } else {
+            var targetEntry = await this.db.getTree(targetUrl);
+            var sourceEntry = await microformat.getHEntryWithCard(sourceHtml, sourceUrl);
+            // TODO: handle non mf mentions
+            targetEntry.children.push(sourceEntry);
+            targetEntry.deduplicate();
+            await this.db.storeTree(targetEntry);
+            var targetHtml = await renderFile('template/entrypage.ejs', {
+                site: this.config,
+                entry: targetEntry,
+                utils: templateUtils
             });
+            await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
+        }
     }
 
     generateToken(client_id, scope) {
