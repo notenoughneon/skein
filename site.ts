@@ -169,14 +169,18 @@ class Site {
         var entry = await this.db.get(url);
         await this.db.delete(url);
         await this.publisher.delete(entry.getSlug(), 'text/html');
-        await when.map(entry.category, c => this.generateTagIndex(c));
+        for (let c of entry.category) {
+            await this.generateTagIndex(c);
+        }
         await this.generateIndex();
     }
 
     async generateIndex() {
         var limit = this.config.entriesPerPage;
         var entries = await this.db.getAllByDomain(this.config.url);
-        entries = await when.map(entries, entry => this.db.hydrate(entry));
+        for (let entry of entries) {
+            await this.db.hydrate(entry);
+        }
         var chunks = util.chunk(limit, entries);
         for (let index in chunks) {
             let chunk = chunks[index];
