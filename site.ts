@@ -236,24 +236,20 @@ class Site {
         debug('done reindexing');
     }
 
-    reGenerate() {
-        return this.db.getAllByDomain(this.config.url).
-            then(entries => when.map(entries, entry => this.db.hydrate(entry))).
-            then(entries =>
-                when.map(entries, entry =>
-                    nodefn.call(ejs.renderFile, 'template/entrypage.ejs',
-                        {site: this.config, entry: entry, utils: templateUtils}).
-                        then(html => this.publisher.put(url.parse(entry.url).pathname, html, 'text/html')).
-                        then(() => debug('regenerated '+ entry.url))
-                )
-            ).
-            then(() => this.generateIndex()).
-            then(() => {
-                return this.db.getAllCategories().
-                    then(categories => {
-                        return when.map(categories, category => this.generateTagIndex(category))})
-            }).
-            then(() => debug('done regenerating'));
+    async reGenerate() {
+        var entries = await this.db.getAllByDomain(this.config.url);
+        for (let entry of entries) {
+            await this.db.hydrate(entry);
+            let html = await renderFile('template/entrypage.ejs', {site: this.config, entry: entry, utils: templateUtils});
+            await this.publisher.put(url.parse(entry.url).pathname, html, 'text/html');
+            debug('regenerated '+ entry.url);
+        }
+        await this.generateIndex();
+        var categories = await this.db.getAllCategories();
+        for (let category of categories) {
+            await this.generateTagIndex(category);
+        }
+        debug('done regenerating');
     }
 
     sendWebmentionsFor(entry) {
