@@ -173,38 +173,38 @@ class Site {
         await this.generateIndex();
     }
 
-    generateIndex() {
+    async generateIndex() {
         var limit = this.config.entriesPerPage;
-        return this.db.getAllByDomain(this.config.url).
-            then(entries => when.map(entries, entry => this.db.hydrate(entry))).
-            then(entries => util.chunk(limit, entries)).
-            then(chunks =>
-                when.map(chunks, (chunk, index) =>
-                    nodefn.call(ejs.renderFile, 'template/indexpage.ejs',
-                        {
-                            site: this.config,
-                            entries: chunk,
-                            page: index + 1,
-                            totalPages: chunks.length,
-                            utils: templateUtils
-                        }).
-                        then(html => this.publisher.put(getPathForIndex(index + 1), html, 'text/html')).
-                        then(() => debug('generated ' + getPathForIndex(index + 1))))
-            ).
-            then(() => debug('done generating index'));
-    }
-    
-    generateTagIndex(category: string) {
-        return this.db.getByCategory(category).
-            then(entries => nodefn.call(ejs.renderFile, 'template/tagpage.ejs',
+        var entries = await this.db.getAllByDomain(this.config.url);
+        entries = await when.map(entries, entry => this.db.hydrate(entry));
+        var chunks = util.chunk(limit, entries);
+        for (let index in chunks) {
+            let chunk = chunks[index];
+            let html = await renderFile('template/indexpage.ejs',
             {
                 site: this.config,
-                category: category,
-                entries: entries,
+                entries: chunk,
+                page: index + 1,
+                totalPages: chunks.length,
                 utils: templateUtils
-            })).
-            then(html => this.publisher.put(getPathForCategory(category), html, 'text/html')).
-            then(() => debug('generated ' + getPathForCategory(category)));
+            });
+            await this.publisher.put(getPathForIndex(index + 1), html, 'text/html');
+            debug('generated ' + getPathForIndex(index + 1));
+        }
+        debug('done generating index');
+    }
+
+    async generateTagIndex(category: string) {
+        var entries = await this.db.getByCategory(category);
+        var html = await renderFile('template/tagpage.ejs',
+        {
+            site: this.config,
+            category: category,
+            entries: entries,
+            utils: templateUtils
+        });
+        await this.publisher.put(getPathForCategory(category), html, 'text/html');
+        debug('generated ' + getPathForCategory(category));
     }
 
     getSlug(name: string, date: Date) {
