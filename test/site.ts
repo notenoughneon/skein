@@ -23,11 +23,14 @@ var config = {
     "title": "Test Site",
     "url": "http://localhost:8000",
     "author": {
-    "name": "Test User",
+        "name": "Test User",
+        "photo": "/author.png",
+        "note": "Here is a bio",
         "elsewhere": [
-        {"name": "Twitter", "url": "https://twitter.com/testuser"}
-    ]
-},
+            {"name": "Twitter", "url": "https://twitter.com/testuser"},
+            {"name": "Instagram", "url": "https://instagram.com/testuser"},
+        ]
+    },
     "entriesPerPage": 10,
     "authUrl": "http://localhost:8000/auth",
     "tokenUrl": "http://localhost:8000/token",

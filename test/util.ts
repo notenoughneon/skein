@@ -26,6 +26,7 @@ describe('util', function() {
             util.walkDir('skel').
             then(elts => {
                 assert.deepEqual(elts, [
+                    'skel/author.png',
                     'skel/css/blog.css',
                     'skel/css/bootstrap.min.css',
                     'skel/js/blog.js',
