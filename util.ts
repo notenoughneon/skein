@@ -8,13 +8,24 @@ import cheerio = require('cheerio');
 import request = require('request');
 var parser = require('microformat-node');
 
-async function readdir(d: string) {
-    return new Promise<string[]>((res, rej) => fs.readdir(d, (err, files) => err !== null ? rej(err) : res(files)));
+export function promisify<T>(f: (cb: (err: NodeJS.ErrnoException, res: T) => void) => void): () => Promise<T>;
+export function promisify<A,T>(f: (arg: A, cb: (err: NodeJS.ErrnoException, res: T) => void) => void): (arg: A) => Promise<T>;
+export function promisify<A,A2,T>(f: (arg: A, arg2: A2, cb: (err: NodeJS.ErrnoException, res: T) => void) => void): (arg: A, arg2: A2) => Promise<T>;
+export function promisify<A,A2,A3,T>(f: (arg: A, arg2: A2, arg3: A3, cb: (err: NodeJS.ErrnoException, res: T) => void) => void): (arg: A, arg2: A2, arg3: A3) => Promise<T>;
+export function promisify<A,A2,A3,A4,T>(f: (arg: A, arg2: A2, arg3: A3, arg4: A4, cb: (err: NodeJS.ErrnoException, res: T) => void) => void): (arg: A, arg2: A2, arg3: A3, arg4: A4) => Promise<T>;
+
+export function promisify(f) {
+    return function() {
+        return new Promise((resolve, reject) => {
+            var args = Array.prototype.slice.call(arguments);
+            args.push((err, result) => err !== null ? reject(err) : resolve(result));
+            f.apply(null, args);
+        });
+    }
 }
 
-async function stat(d: string) {
-    return new Promise<fs.Stats>((res, rej) => fs.stat(d, (err, stats) => err !== null ? rej(err) : res(stats)));
-}
+var stat = promisify(fs.stat);
+var readdir = promisify(fs.readdir);
 
 export function dump(data) {
     console.log(util.inspect(data, {depth: null}));
