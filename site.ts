@@ -182,7 +182,7 @@ class Site {
             await this.db.hydrate(entry);
         }
         var chunks = util.chunk(limit, entries);
-        for (let index in chunks) {
+        for (let index = 0; index < chunks.length; index++) {
             let chunk = chunks[index];
             let html = await renderFile('template/indexpage.ejs',
             {
