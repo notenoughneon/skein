@@ -112,6 +112,7 @@ export class Entry {
     name: string = null;
     published: Date = null;
     content: {value: string, html: string} = null;
+    summary: string = null;
     url: string = null;
     author: Card = null;
     category: string[] = [];
@@ -130,6 +131,7 @@ export class Entry {
             this.name = firstProp(mf, 'name');
             this.published = firstProp(mf, 'published', p => new Date(p));
             this.content = firstProp(mf, 'content');
+            this.summary = firstProp(mf, 'summary');
             this.url = firstProp(mf, 'url');
             this.author = firstProp(mf, 'author', a => new Card(a));
             this.category = prop(mf, 'category');
@@ -242,6 +244,7 @@ export class Entry {
                 entry.name = val.name;
                 entry.published = val.published ? new Date(val.published) : null;
                 entry.content = val.content;
+                entry.summary = val.summary;
                 entry.url = val.url;
                 entry.author = val.author;
                 entry.category = val.category;

@@ -43,6 +43,7 @@ describe('entry', function() {
     serializeEntry.name = 'Hello World!';
     serializeEntry.published = new Date('2015-08-28T08:00:00Z');
     serializeEntry.content = {"value":"Hello World!","html":"Hello <b>World!</b>"};
+    serializeEntry.summary = "Summary";
     serializeEntry.category = ['indieweb'];
     serializeEntry.author = new microformat.Card();
     serializeEntry.author.name = 'Test User';
@@ -53,6 +54,7 @@ describe('entry', function() {
     var serializeJson = '{"name":"Hello World!",\
 "published":"2015-08-28T08:00:00.000Z",\
 "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},\
+"summary":"Summary",\
 "url":"http://testsite/2015/8/28/2",\
 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},\
 "category":["indieweb"],\
@@ -113,6 +115,7 @@ describe('entry', function() {
                     "name":"Hello World!",
                     "published":new Date("2015-08-28T08:00:00Z"),
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
+                    "summary":null,
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":["indieweb"],
@@ -142,6 +145,7 @@ describe('entry', function() {
                     "name":"Here is a reply",
                     "published":new Date("2015-08-28T08:10:00Z"),
                     "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
+                    "summary":null,
                     "url":"http://testsite/2015/8/28/2",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
@@ -150,6 +154,7 @@ describe('entry', function() {
                         "name":null,
                         "published":null,
                         "content":null,
+                        "summary":null,
                         "url":"http://testsite/2015/8/28/1",
                         "author":null,
                         "category":[],
@@ -168,21 +173,22 @@ describe('entry', function() {
             catch(done);
     });
 
-    it('can load an article', function(done) {
+    it.only('can load an article', function(done) {
         var html =
             '<div class="h-entry">\
                 <h1 class="p-name">First Post</h1>\
                 <a class="u-url" href="/2015/8/28/1"></a>\
                 <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
-                <div class="p-name e-content">Hello <b>World!</b></div>\
+                <div class="p-name e-content"><div class="p-summary">Summary</div> Hello <b>World!</b></div>\
             </div>';
         microformat.getHEntry(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"First Post",
                     "published":new Date("2015-08-28T08:00:00Z"),
-                    "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
+                    "content":{"value":"Summary Hello World!","html":"<div class=\"p-summary\">Summary</div> Hello <b>World!</b>"},
+                    "summary":"Summary",
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
@@ -211,6 +217,7 @@ describe('entry', function() {
                     "name":"Hello World!",
                     "published":new Date("2015-08-28T08:00:00Z"),
                     "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
+                    "summary":null,
                     "url":"http://testsite/2015/8/28/1",
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
@@ -249,6 +256,7 @@ describe('entry', function() {
                         "name":"Hello World!",
                         "published":new Date("2015-08-28T08:00:00Z"),
                         "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
+                        "summary":null,
                         "url":"http://testsite/2015/8/28/1",
                         "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                         "category":[],
@@ -257,6 +265,7 @@ describe('entry', function() {
                             "name":null,
                             "published":null,
                             "content":null,
+                            "summary":null,
                             "url":"http://othersite/somepost",
                             "author":null,
                             "category":[],
@@ -273,6 +282,7 @@ describe('entry', function() {
                                 "name":"Here is a reply",
                                 "published":new Date("2015-08-28T08:10:00Z"),
                                 "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
+                                "summary":null,
                                 "url":"http://testsite/2015/8/28/2",
                                 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                                 "category":[],
@@ -281,6 +291,7 @@ describe('entry', function() {
                                     "name":null,
                                     "published":null,
                                     "content":null,
+                                    "summary":null,
                                     "url":"http://testsite/2015/8/28/1",
                                     "author":null,
                                     "category":[],
@@ -300,6 +311,7 @@ describe('entry', function() {
                         "name":null,
                         "published":null,
                         "content":null,
+                        "summary":null,
                         "url":"http://othersite/somepost",
                         "author":null,
                         "category":[],
@@ -313,6 +325,7 @@ describe('entry', function() {
                         "name":"Here is a reply",
                         "published":new Date("2015-08-28T08:10:00Z"),
                         "content":{"value":"Here is a reply","html":"Here is a <i>reply</i>"},
+                        "summary":null,
                         "url":"http://testsite/2015/8/28/2",
                         "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                         "category":[],
@@ -321,6 +334,7 @@ describe('entry', function() {
                             "name":null,
                             "published":null,
                             "content":null,
+                            "summary":null,
                             "url":"http://testsite/2015/8/28/1",
                             "author":null,
                             "category":[],
