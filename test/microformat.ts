@@ -173,7 +173,7 @@ describe('entry', function() {
             catch(done);
     });
 
-    it.only('can load an article', function(done) {
+    it('can load an article', function(done) {
         var html =
             '<div class="h-entry">\
                 <h1 class="p-name">First Post</h1>\
