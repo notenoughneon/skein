@@ -200,8 +200,8 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
             replyTo: req['post']['in-reply-to'],
             photo: req['files'].photo,
             audio: req['files'].audio,
-            syndication: req['syndication'],
-            category: req['category']
+            syndication: req['post'].syndication,
+            category: req['post'].category
         })).
         then(e => entry = e).
         then(() => site.generateIndex()).
