@@ -117,7 +117,7 @@ describe('site', function() {
             then(e => {
                 assert.equal(e.content.value, m.content);
                 var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
-                assert.deepEqual(e.getPhotos(),[photoSlug]);
+                assert.deepEqual(e.getPhotos(),[config.url + photoSlug]);
                 assert(fs.existsSync(path.join(config.publisher.root, photoSlug)));
             }).
             then(done).

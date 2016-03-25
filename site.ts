@@ -144,12 +144,15 @@ class Site {
             if (embed !== null)
                 entry.content.html = entry.content.html + '<p>' + embed + '</p>';
         }
-        await this.db.storeTree(entry);
+        //ISSUE: some properties may be embedded mf in the content (e.g. summary)
+        //so we render and then re-parse it to get all properties
         var html = await renderFile('template/entrypage.ejs', {
             site: this.config,
             entry: entry,
             utils: templateUtils
         });
+        entry = await microformat.getHEntryWithCard(html, this.config.url);
+        await this.db.storeTree(entry);
         await this.publisher.put(slug, html, 'text/html');
         return entry;
     }
