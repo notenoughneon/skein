@@ -222,7 +222,7 @@ class Site {
 
     async reIndex() {
         var keys = await this.publisher.list();
-        for (var key of keys) {
+        await when.map(keys, async (key) => {
             var u = url.resolve(this.config.url, key);
             var obj = await this.publisher.get(key);
             if (obj.ContentType == 'text/html') {
@@ -232,7 +232,7 @@ class Site {
                     debug('indexed ' + entry.url);
                 }
             }
-        }
+        });
         debug('done reindexing');
     }
 
