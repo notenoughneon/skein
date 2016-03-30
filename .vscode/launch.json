@@ -4,6 +4,8 @@
 	// ONLY "node" and "mono" are supported, change "type" to switch.
 	"configurations": [
 		{
+            "externalConsole": true,
+            "request": "launch",
 			// Name of configuration; appears in the launch configuration drop down menu.
 			"name": "apiserver",
 			// Type of configuration. Possible values: "node", "mono".
@@ -11,9 +13,9 @@
 			// Workspace relative or absolute path to the program.
 			"program": "${workspaceRoot}/build/apiserver.js",
 			// Automatically stop program after launch.
-			"stopOnEntry": false,
+			"stopOnEntry": true,
 			// Command line arguments passed to the program.
-			"args": ["8001","config.json"],
+			"args": ["8001","neon.json","-i"],
 			// Workspace relative or absolute path to the working directory of the program being debugged. Default is the current workspace.
 			"cwd": "${workspaceRoot}",
 			// Workspace relative or absolute path to the runtime executable to be used. Default is the runtime executable on the PATH.
@@ -29,9 +31,10 @@
 		},
 		{
 			"name": "mocha",
+            "request": "launch",
 			"type": "node",
 			"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-			"stopOnEntry": false,
+			"stopOnEntry": true,
 			"args": ["build/test","-t 0"],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
