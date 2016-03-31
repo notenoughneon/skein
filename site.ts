@@ -16,6 +16,7 @@ import FilePublisher = require('./filepublisher');
 import GitPublisher = require('./gitpublisher');
 import Db = require('./db');
 import oembed = require('./oembed');
+import assert = require('assert');
 
 var renderFile: (string, any) => Promise<string> = nodefn.lift(ejs.renderFile);
 
@@ -253,6 +254,30 @@ class Site {
             await this.generateTagIndex(category);
         }
         debug('done regenerating');
+    }
+
+    async validate() {
+        var keys = await this.publisher.list();
+        for (let key of keys) {
+            try {
+                var u = url.resolve(this.config.url, key);
+                var obj = await this.publisher.get(key);
+                if (obj.ContentType == 'text/html') {
+                    var expected = await microformat.getHEntryWithCard(obj.Body, u);
+                    if (expected != null && (expected.url === u || expected.url + '.html' === u)) {
+                        let html = await renderFile('template/entrypage.ejs', {site: this.config, entry: expected, utils: templateUtils});
+                        var actual = await microformat.getHEntryWithCard(html, expected.url);
+                        assert.deepEqual(actual, expected);
+                        debug('pass ' + expected.url);
+                    }
+                }
+            } catch (err) {
+                debug('fail ' + expected.url);
+                return {expected: expected, actual: actual};
+            }
+        }
+        debug('all entries passed');
+        return null;
     }
 
     async sendWebmentionsFor(entry: microformat.Entry) {
