@@ -8,7 +8,6 @@ import express = require('express');
 var Busboy = require('busboy');
 var bodyParser = require('body-parser');
 var app = express();
-var ejs = require('ejs');
 import crypto = require('crypto');
 import when = require('when');
 import nodefn = require('when/node');
@@ -27,7 +26,7 @@ var config = JSON.parse(fs.readFileSync(process.argv[3]).toString());
 var site = new Site(config, db);
 
 app.set('views', './template');
-app.set('view engine', 'ejs');
+app.set('view engine', 'jade');
 
 // store the last code issued by the auth endpoint in memory
 var lastIssuedCode = null;

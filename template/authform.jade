@@ -3,8 +3,8 @@ html(lang="en")
     body
         h1 Authorization Request
         form(method="post" action="/auth" enctype="application/x-www-form-urlencoded")
-            h2 = client_id
-            p is requesting <b>#{scope}</b> access to <b><#{me}</b>.
+            h2= client_id
+            p is requesting <b>#{scope}</b> access to <b>#{me}</b>.
             input(type="hidden" name="me" value=me)
             input(type="hidden" name="client_id" value=client_id)
             input(type="hidden" name="redirect_uri" value=redirect_uri)
