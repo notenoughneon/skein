@@ -1,11 +1,11 @@
+extends ./page
 - var title = site.title;
-include header
-h2 Posts tagged
-    i = category
-ul(class="h-feed")
-    each entry in entries
-        li(class="h-cite")
-            - var dateString = utils.formatDate(entry.published);
-            time(class="dt-published" datetime=entry.published.toISOString() title=dateString) = dateString
-            a(class="u-url p-name" href=entry.url) = utils.truncate(entry.name, 64)
-include entryfooter
+block content
+    h2 Posts tagged
+        i= category
+    ul(class="h-feed")
+        each entry in entries
+            li(class="h-cite")
+                - var dateString = utils.formatDate(entry.published);
+                time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
+                a(class="u-url p-name" href=entry.url)= utils.truncate(entry.name, 64)

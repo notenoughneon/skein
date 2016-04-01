@@ -1,21 +1,22 @@
-include cite
+include ./cite
 div(class="h-entry")
     each replyTo in entry.replyTo
         i(class="fa fa-reply") In reply to:
         +cite(replyTo, ' p-in-reply-to')
     div(class="blog-post-larger")
-    if entry.isArticle()
-        h2(class="blog-post-title p-name") = entry.name
-    - var hideAuthor = false
-    include meta
-    if entry.content != null
-        div(class="e-content" + (entry.isArticle() ? '' : ' p-name note-content')) != entry.content.html
-    else if entry.name != null
-        div(class="p-name") = entry.name
-    include actions
-    each likeOf in entry.likeOf
-        +cite(likeOf, ' p-like-of')
-    each repostOf in entry.repostOf
-        +cite(repostOf, ' p-repost-of')
-each child in entry.children
-    +cite(child, '')
+        if entry.isArticle()
+            h2(class="blog-post-title p-name")= entry.name
+        - var hideAuthor = false;
+        include ./meta
+        if entry.content != null
+            - var contentClass = "e-content" + (entry.isArticle() ? '' : ' p-name note-content');
+            div(class=contentClass)!= entry.content.html
+        else if entry.name != null
+            div(class="p-name")= entry.name
+        include ./actions
+        each likeOf in entry.likeOf
+            +cite(likeOf, ' p-like-of')
+        each repostOf in entry.repostOf
+            +cite(repostOf, ' p-repost-of')
+    each child in entry.children
+        +cite(child, '')

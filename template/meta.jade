@@ -5,12 +5,12 @@ p(class="blog-post-meta")
                 img(src=entry.author.photo)
             = entry.author.name
     if !hideAuthor && entry.published != null
-        | -
+        |  - 
     a(class="u-url" href=entry.url)
         if entry.published != null
-            - var dateString =utils.formatDate(entry.published)
-            time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
-                = dateString
+            - var dateString = utils.formatDate(entry.published);
+            time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
     each category in entry.category
         a(href=utils.getPathForCategory(category))
-            span(class="label label-default p-category") = category
+            |  
+            span(class="label label-default p-category")= category

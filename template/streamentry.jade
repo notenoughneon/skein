@@ -1,27 +1,34 @@
+include ./cite
 div(class="h-entry")
 
     each replyTo in entry.replyTo
         i(class="fa fa-reply") In reply to
-        a(class="u-in-reply-to" href=replyTo.url) = utils.truncate(replyTo.name, 70)
+        |  
+        a(class="u-in-reply-to" href=replyTo.url)= utils.truncate(replyTo.name, 70)
 
     if entry.likeOf.length > 0
         i(class="fa fa-star")
-        a(class="p-author h-card" href=entry.author.url) = entry.author.name
+        a(class="p-author h-card" href=entry.author.url)= entry.author.name
         | liked this.
 
     if entry.repostOf.length > 0
         i(class="fa fa-retweet")
-        a(class="p-author h-card" href=entry.author.url) = entry.author.name
+        a(class="p-author h-card" href=entry.author.url)= entry.author.name
         | reposted this.
 
     if !entry.isLike() && !entry.isRepost()
         div(class="blog-post")
             if entry.isArticle()
-                h2(class="blog-post-title p-name") = entry.name
+                h2(class="blog-post-title p-name")= entry.name
             - var hideAuthor = true;
-            include meta
-            div(class="e-content" + (entry.isArticle() ? '' : ' p-name note-content')) != entry.content.html
-            include actions
+            include ./meta
+            if entry.summary !== null
+                div(class="p-summary")= entry.summary
+                a(href=entry.url) More...
+            else
+                - var contentClass = "e-content" + (entry.isArticle() ? '' : ' p-name note-content');
+                div(class=contentClass)!= entry.content.html
+            include ./actions
 
     each likeOf in entry.likeOf
         +cite(likeOf, ' p-like-of')

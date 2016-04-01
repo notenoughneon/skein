@@ -14,7 +14,6 @@
     "busboy": "^0.2.9",
     "cheerio": "^0.19.0",
     "debug": "^2.2.0",
-    "ejs": "^2.3.1",
     "express": "^4.13.0",
     "jade": "^1.11.0",
     "microformat-node": "^1.0.0",
