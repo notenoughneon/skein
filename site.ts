@@ -99,6 +99,35 @@ class Site {
         return card;
     }
 
+    async renderEntry(entry: microformat.Entry) {
+        return await renderFile('template/entrypage.ejs', {
+            site: this.config,
+            entry: entry,
+            utils: templateUtils
+        });
+    }
+
+    async renderStreamPage(entries: microformat.Entry[], page: number, totalPages: number) {
+        return await renderFile('template/indexpage.ejs',
+        {
+            site: this.config,
+            entries: entries,
+            page: page,
+            totalPages: totalPages,
+            utils: templateUtils
+        });
+    }
+
+    async renderTagPage(entries: microformat.Entry[], category: string) {
+        return await renderFile('template/tagpage.ejs',
+        {
+            site: this.config,
+            category: category,
+            entries: entries,
+            utils: templateUtils
+        });
+    }
+
     async publish(m: Micropub) {
         var entry = new microformat.Entry();
         entry.author = this.getAuthor();
@@ -147,11 +176,7 @@ class Site {
         }
         //ISSUE: some properties may be embedded mf in the content (e.g. summary)
         //so we render and then re-parse it to get all properties
-        var html = await renderFile('template/entrypage.ejs', {
-            site: this.config,
-            entry: entry,
-            utils: templateUtils
-        });
+        var html = await this.renderEntry(entry);
         entry = await microformat.getHEntryWithCard(html, this.config.url);
         await this.db.storeTree(entry);
         await this.publisher.put(slug, html, 'text/html');
@@ -160,11 +185,7 @@ class Site {
     
     async update(entry: microformat.Entry) {
         await this.db.store(entry);
-        var html = await renderFile('template/entrypage.ejs', {
-            site: this.config,
-            entry: entry,
-            utils: templateUtils
-        });
+        var html = await this.renderEntry(entry);
         await this.publisher.put(entry.getSlug(), html, 'text/html');
         return entry;
     }
@@ -188,14 +209,7 @@ class Site {
         var chunks = util.chunk(limit, entries);
         for (let index = 0; index < chunks.length; index++) {
             let chunk = chunks[index];
-            let html = await renderFile('template/indexpage.ejs',
-            {
-                site: this.config,
-                entries: chunk,
-                page: index + 1,
-                totalPages: chunks.length,
-                utils: templateUtils
-            });
+            let html = await this.renderStreamPage(chunk, index + 1, chunks.length);
             await this.publisher.put(getPathForIndex(index + 1), html, 'text/html');
             debug('generated ' + getPathForIndex(index + 1));
         }
@@ -204,13 +218,7 @@ class Site {
 
     async generateTagIndex(category: string) {
         var entries = await this.db.getByCategory(category);
-        var html = await renderFile('template/tagpage.ejs',
-        {
-            site: this.config,
-            category: category,
-            entries: entries,
-            utils: templateUtils
-        });
+        var html = await this.renderTagPage(entries, category);
         await this.publisher.put(getPathForCategory(category), html, 'text/html');
         debug('generated ' + getPathForCategory(category));
     }
@@ -244,7 +252,7 @@ class Site {
         var entries = await this.db.getAllByDomain(this.config.url);
         for (let entry of entries) {
             await this.db.hydrate(entry);
-            let html = await renderFile('template/entrypage.ejs', {site: this.config, entry: entry, utils: templateUtils});
+            let html = await this.renderEntry(entry);
             await this.publisher.put(url.parse(entry.url).pathname, html, 'text/html');
             debug('regenerated '+ entry.url);
         }
@@ -265,7 +273,7 @@ class Site {
                 if (obj.ContentType == 'text/html') {
                     var expected = await microformat.getHEntryWithCard(obj.Body, u);
                     if (expected != null && (expected.url === u || expected.url + '.html' === u)) {
-                        let html = await renderFile('template/entrypage.ejs', {site: this.config, entry: expected, utils: templateUtils});
+                        let html = await this.renderEntry(expected);
                         var actual = await microformat.getHEntryWithCard(html, expected.url);
                         assert.deepEqual(actual, expected);
                         debug('pass ' + expected.url);
@@ -305,11 +313,7 @@ class Site {
             targetEntry.children.push(sourceEntry);
             targetEntry.deduplicate();
             await this.db.storeTree(targetEntry);
-            var targetHtml = await renderFile('template/entrypage.ejs', {
-                site: this.config,
-                entry: targetEntry,
-                utils: templateUtils
-            });
+            var targetHtml = await this.renderEntry(targetEntry);
             await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
         }
     }
