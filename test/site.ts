@@ -7,7 +7,6 @@ import child_process = require('child_process');
 import nodefn = require('when/node');
 var parser = require('microformat-node');
 import microformat = require('../microformat');
-import Db = require('../db');
 import Site = require('../site');
 import util = require('../util');
 
@@ -52,13 +51,11 @@ describe('site', function() {
     post5: microformat.Entry;
 
     before(function(done) {
-        var db = new Db(':memory:');
-        db.init().
-            then(() => exec('rm -rf ' + config.publisher.root)).
+        exec('rm -rf ' + config.publisher.root).
             then(() => exec('cp -R skel ' + config.publisher.root)).
             then(() => done()).
             catch(done);
-        site = new Site(config, db);
+        site = new Site(config);
         var server = http.listen(8000);
     });
 
@@ -67,7 +64,7 @@ describe('site', function() {
         site.publish(m).
             then(entry => {
                 post1 = entry;
-                return site.db.get(entry.url);
+                return site.get(entry.url);
             }).
             then(e => {
                 assert.equal(e.content.value, m.content);
@@ -81,7 +78,7 @@ describe('site', function() {
         site.publish(m).
             then(entry => {
                 post2 = entry;
-                return site.db.get(entry.url);
+                return site.get(entry.url);
             }).
             then(e => {
                 assert.equal(e.content.value, m.content);
@@ -93,7 +90,7 @@ describe('site', function() {
 
     it('can update post with reply', function(done) {
         site.receiveWebmention(post2.url, post1.url).
-            then(() => site.db.getTree(post1.url)).
+            then(() => site.get(post1.url)).
             then(e => {
                 assert.equal(e.children.length, 1);
                 assert.equal(e.children[0].url, post2.url);
@@ -112,7 +109,7 @@ describe('site', function() {
         site.publish(m).
             then(entry => {
                 post3 = entry;
-                return site.db.get(entry.url);
+                return site.get(entry.url);
             }).
             then(e => {
                 assert.equal(e.content.value, m.content);
@@ -130,7 +127,7 @@ describe('site', function() {
         site.publish(m).
             then(entry => {
                 post4 = entry;
-                return site.db.get(entry.url);
+                return site.get(entry.url);
             }).
             then(e => {
                 assert.equal(e.content.value, m.content);
@@ -145,7 +142,7 @@ describe('site', function() {
         site.publish(m).
             then(entry => {
                 post5 = entry;
-                return site.db.get(entry.url);
+                return site.get(entry.url);
             }).
             then(e => {
                 assert.equal(e.name, m.name);
@@ -195,22 +192,6 @@ describe('site', function() {
                 assert.equal(entry1.properties.url[0], post4.url);
                 assert.equal(entry1.properties.published[0], post4.published.toISOString());
                 assert.equal(entry1.properties.name[0], post4.name);
-            }).
-            then(done).
-            catch(done);
-    });
-
-    it('reindex works', function(done) {
-        site.db = new Db(':memory:');
-        site.db.init().
-            then(() => site.reIndex()).
-            then(() => site.db.getAllByDomain(config.url)).
-            then(entries => {
-                assert.equal(entries.length, 5);
-                assert.equal(entries[3].url, post2.url);
-                assert.equal(entries[3].name, post2.name);
-                assert.equal(entries[4].url, post1.url);
-                assert.equal(entries[4].name, post1.name);
             }).
             then(done).
             catch(done);

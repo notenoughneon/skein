@@ -39,6 +39,33 @@ describe('util', function() {
         });
     });
 
+    describe('flatten', function() {
+        it('should return [] for ([])', function() {
+            assert.deepEqual(util.flatten([]), []);
+        });
+        it('should return [] for ([[]])', function() {
+            assert.deepEqual(util.flatten([[]]), []);
+        });
+        it('should return [1,2] for ([[1,2]])', function() {
+            assert.deepEqual(util.flatten([[1,2]]), [1,2]);
+        });
+        it('should return [1,2,3] for ([[1,2],[3]])', function() {
+            assert.deepEqual(util.flatten([[1,2],[3]]), [1,2,3]);
+        });
+    });
+
+    describe('unique', function() {
+        it('should return [] for ([])', function() {
+            assert.deepEqual(util.unique([]), []);
+        });
+        it('should return [1,2,3] for ([1,2,3])', function() {
+            assert.deepEqual(util.unique([1,2,3]), [1,2,3]);
+        });
+        it('should return [1,2,3] for ([1,2,1,3,3])', function() {
+            assert.deepEqual(util.unique([1,2,1,3,3]), [1,2,3]);
+        });
+    });
+
     describe('chunk', function() {
         it('should return [] for (3, [])', function () {
             assert.deepEqual(util.chunk(3, []), []);

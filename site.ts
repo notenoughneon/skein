@@ -1,7 +1,6 @@
 ///<reference path="typings/main.d.ts"/>
 import fs = require('fs');
 import url = require('url');
-import crypto = require('crypto');
 import path = require('path');
 import when = require('when');
 import nodefn = require('when/node');
@@ -13,7 +12,6 @@ import Publisher = require('./publisher');
 import S3Publisher = require('./s3publisher');
 import FilePublisher = require('./filepublisher');
 import GitPublisher = require('./gitpublisher');
-import Db = require('./db');
 import oembed = require('./oembed');
 import assert = require('assert');
 import jade = require('jade');
@@ -67,12 +65,10 @@ interface Micropub {
 
 class Site {
     config: any;
-    db: Db;
     publisher: Publisher;
 
-    constructor(config, db: Db) {
+    constructor(config) {
         this.config = config;
-        this.db = db;
         switch(config.publisher.type) {
             case 's3':
                 this.publisher = new S3Publisher(config.publisher);
@@ -179,21 +175,43 @@ class Site {
         //so we render and then re-parse it to get all properties
         var html = this.renderEntry(entry);
         entry = await microformat.getHEntryWithCard(html, this.config.url);
-        await this.db.storeTree(entry);
         await this.publisher.put(slug, html, 'text/html');
         return entry;
     }
-    
+
+    async get(u: string) {
+        u = url.parse(u).pathname;
+        var obj = await this.publisher.get(u);
+        debug('got ' + obj);
+        return await microformat.getHEntryWithCard(obj.Body, url.resolve(this.config.url, u));
+    }
+
+    async getAll() {
+        var keys = await this.publisher.list();
+        var seen = {};
+        var entries: microformat.Entry[] = [];
+        for (let key of keys) {
+            let obj = await this.publisher.get(key);
+            if (obj.ContentType === 'text/html') {
+                let u = url.resolve(this.config.url, key);
+                let entry = await microformat.getHEntryWithCard(obj.Body, u);
+                if (entry != null && !seen[entry.url] && (entry.url === u || entry.url + '.html' === u)) {
+                    seen[entry.url] = true;
+                    entries.push(entry);
+                }
+            }
+        }
+        return entries;
+    }
+
     async update(entry: microformat.Entry) {
-        await this.db.store(entry);
         var html = this.renderEntry(entry);
         await this.publisher.put(entry.getSlug(), html, 'text/html');
         return entry;
     }
 
     async delete(url: string) {
-        var entry = await this.db.get(url);
-        await this.db.delete(url);
+        var entry = await this.get(url);
         await this.publisher.delete(entry.getSlug(), 'text/html');
         for (let c of entry.category) {
             await this.generateTagIndex(c);
@@ -203,10 +221,8 @@ class Site {
 
     async generateIndex() {
         var limit = this.config.entriesPerPage;
-        var entries = await this.db.getAllByDomain(this.config.url);
-        for (let entry of entries) {
-            await this.db.hydrate(entry);
-        }
+        var entries = await this.getAll();
+        entries.sort((a,b) => b.published.getTime() - a.published.getTime());
         var chunks = util.chunk(limit, entries);
         for (let index = 0; index < chunks.length; index++) {
             let chunk = chunks[index];
@@ -218,7 +234,9 @@ class Site {
     }
 
     async generateTagIndex(category: string) {
-        var entries = await this.db.getByCategory(category);
+        var entries = await this.getAll();
+        entries = entries.filter(e => e.category.indexOf(category) > -1);
+        entries.sort((a, b) => b.published.getTime() - a.published.getTime());
         var html = this.renderTagPage(entries, category);
         await this.publisher.put(getPathForCategory(category), html, 'text/html');
         debug('generated ' + getPathForCategory(category));
@@ -233,32 +251,15 @@ class Site {
         }
     }
 
-    async reIndex() {
-        var keys = await this.publisher.list();
-        await when.map(keys, async (key) => {
-            var u = url.resolve(this.config.url, key);
-            var obj = await this.publisher.get(key);
-            if (obj.ContentType == 'text/html') {
-                var entry = await microformat.getHEntryWithCard(obj.Body, u);
-                if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
-                    await this.db.storeTree(entry);
-                    debug('indexed ' + entry.url);
-                }
-            }
-        });
-        debug('done reindexing');
-    }
-
     async reGenerate() {
-        var entries = await this.db.getAllByDomain(this.config.url);
+        var entries = await this.getAll();
         for (let entry of entries) {
-            await this.db.hydrate(entry);
             let html = this.renderEntry(entry);
             await this.publisher.put(url.parse(entry.url).pathname, html, 'text/html');
             debug('regenerated '+ entry.url);
         }
         await this.generateIndex();
-        var categories = await this.db.getAllCategories();
+        var categories = util.unique(util.flatten(entries.map(e => e.category)));
         for (let category of categories) {
             await this.generateTagIndex(category);
         }
@@ -308,24 +309,16 @@ class Site {
         if (!util.isMentionOf(sourceHtml, targetUrl)) {
             throw new Error('Didn\'t find mention on source page');
         } else {
-            var targetEntry = await this.db.getTree(targetUrl);
+            var targetEntry = await this.get(targetUrl);
             var sourceEntry = await microformat.getHEntryWithCard(sourceHtml, sourceUrl);
             // TODO: handle non mf mentions
             targetEntry.children.push(sourceEntry);
             targetEntry.deduplicate();
-            await this.db.storeTree(targetEntry);
             var targetHtml = this.renderEntry(targetEntry);
             await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
         }
     }
 
-    generateToken(client_id, scope) {
-        return nodefn.call(crypto.randomBytes, 18).
-            then(buf => {
-                var token = buf.toString('base64');
-                return this.db.storeToken(token, client_id, scope);
-            });
-    }
 }
 
 export = Site;

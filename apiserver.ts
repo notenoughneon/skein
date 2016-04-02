@@ -16,23 +16,31 @@ var inspect = require('util').inspect;
 import Debug = require('debug');
 var debug = Debug('api');
 import microformat = require('./microformat');
-import Db = require('./db');
 import Site = require('./site');
 import util = require('./util');
 
-var db = new Db('index.db');
-db.init();
 var config = JSON.parse(fs.readFileSync(process.argv[3]).toString());
-var site = new Site(config, db);
+var site = new Site(config);
 
 app.set('views', './template');
 app.set('view engine', 'jade');
 
+// in-memory list of issued tokens
+var tokens: {token: string, client_id: string, scope: string}[] = [];
 // store the last code issued by the auth endpoint in memory
-var lastIssuedCode = null;
+var lastIssuedCode: {code: string, client_id: string, scope: string, date: number} = null;
 
 var publishMutex = new util.Mutex();
 var publishLock = callbacks.lift(publishMutex.lock.bind(publishMutex));
+
+function generateToken(client_id: string, scope: string) {
+    return nodefn.call(crypto.randomBytes, 18).
+        then(buf => {
+            var token = {token: buf.toString('base64'), client_id: client_id, scope: scope};
+            tokens.push(token);
+            return token;
+        });
+}
 
 function parsePost(req, res, next) {
     if (req.method === 'POST') {
@@ -88,13 +96,10 @@ function requireAuth(scope) {
         } else {
             return denyAccess(req, res);
         }
-        site.db.getToken(token).
-            then(function (row) {
-                if (row === undefined || !row.scope.split(' ').some(function(s) {return s === scope;}))
-                    return denyAccess(req, res);
-                next();
-            });
-
+        var found = tokens.find(t => t.token === token);
+        if (found === undefined || !found.scope.split(' ').some(function(s) {return s === scope;}))
+            return denyAccess(req, res);
+        next();
     };
 }
 
@@ -167,7 +172,7 @@ app.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
     if (lastIssuedCode !== null &&
         lastIssuedCode.code === req['post'].code &&
         ((Date.now() - lastIssuedCode.date) < 60 * 1000)) {
-        site.generateToken(lastIssuedCode.client_id, lastIssuedCode.scope).
+        generateToken(lastIssuedCode.client_id, lastIssuedCode.scope).
             then(function (result) {
                 lastIssuedCode = null;
                 if (result === undefined) {
@@ -238,7 +243,7 @@ app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
 
 app.get('/entries/*', requireAuth('post'), function(req, res) {
     var url = req.params[0];
-    site.db.get(url).
+    site.get(url).
         then(entry => {
             res.type('application/json');
             res.send(entry.serialize());
@@ -248,8 +253,7 @@ app.get('/entries/*', requireAuth('post'), function(req, res) {
 
 app.put('/entries', requireAuth('post'), bodyParser.json(), function(req, res) {
     var entry = req.body;
-    return db.hydrate(entry).
-        then(e => site.update(e)).
+    return site.update(entry).
         catch(e => handleError(res, e));
 });
 
@@ -258,22 +262,6 @@ app.delete('/entries/*', requireAuth('post'), function(req, res) {
     site.delete(url).
         then(() => res.sendStatus(204)).
         catch(e => handleError(res, e));
-});
-
-app.get('/tokens', requireAuth('admin'), function(req, res) {
-    site.db.listTokens().
-        then(res.json.bind(res)).
-        catch(function (e) {
-            handleError(res, e);
-        });
-});
-
-app.delete('/tokens/*', requireAuth('admin'), function(req, res) {
-    site.db.deleteToken(req.params[0]).
-        then(res.json.bind(res)).
-        catch(function (e) {
-            handleError(res, e);
-        });
 });
 
 var server = app.listen(process.argv[2], function (){

@@ -18,7 +18,6 @@
     "jade": "^1.11.0",
     "microformat-node": "^1.0.0",
     "request": "^2.58.0",
-    "sqlite3": "^3.0.8",
     "when": "^3.7.3"
   },
   "devDependencies": {

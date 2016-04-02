@@ -63,11 +63,22 @@ export function writeFile(filename, data) {
         });
 }
 
-/* flatten an array of arrays */
-export function flatten(arrarr) {
+export function flatten<T>(arrarr: T[][]) {
     if (arrarr.length == 0)
         return [];
     return arrarr.reduce(function(a, b) { return a.concat(b); });
+}
+
+export function unique<T>(elts: T[]) {
+    var tmp: T[] = [];
+    var seen = {};
+    for (let elt of elts) {
+        if (!seen[elt]) {
+            seen[elt] = true;
+            tmp.push(elt);
+        }
+    }
+    return tmp;
 }
 
 export function chunk(size, arr) {
