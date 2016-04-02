@@ -123,19 +123,14 @@ export function inferMimetype(filename) {
         case '.jpg':
         case '.jpeg':
             return 'image/jpeg';
-            break;
         case '.gif':
             return 'image/gif';
-            break;
         case '.png':
             return 'image/png';
-            break;
         case '.mp3':
             return 'audio/mpeg';
-            break;
         case '.ogg':
             return 'audio/ogg';
-            break;
 
         default:
             return 'application/octet-stream';
