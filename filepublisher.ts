@@ -7,8 +7,8 @@ var guard = require('when/guard');
 import util = require('./util');
 import Publisher = require('./publisher');
 
-var readFile = guard(guard.n(1), nodefn.lift(fs.readFile));
-var stat = guard(guard.n(1), nodefn.lift(fs.stat));
+var readFile = nodefn.lift(fs.readFile);
+var stat = nodefn.lift(fs.stat);
 
 class FilePublisher implements Publisher {
     root: string;
@@ -38,17 +38,16 @@ class FilePublisher implements Publisher {
             });
     }
 
-    put(path, obj, contentType): Promise<{}> {
+    put(path, obj, contentType): Promise<void> {
         if (contentType === 'text/html')
             path = path + '.html';
         return util.writeFile(pathlib.join(this.root, path), obj);
     }
     
-    delete(path, contentType): Promise<{}> {
+    async delete(path, contentType) {
         if (contentType === 'text/html')
             path = path + '.html';
-        return nodefn.call(fs.unlink, pathlib.join(this.root, path)).
-            then(() => undefined);
+        await nodefn.call(fs.unlink, pathlib.join(this.root, path));
     }
 
     get(path): Promise<{Body: Buffer, ContentType: string}> {
@@ -64,12 +63,12 @@ class FilePublisher implements Publisher {
             then(paths => paths.map(p => pathlib.relative(this.root, p)));
     }
 
-    rollback(): Promise<{}> {
+    rollback(): Promise<void> {
         // NOOP
-        return when(undefined);
+        return new Promise(null);
     }
 
-    commit(msg): Promise<{}> {
+    commit(msg): Promise<void> {
         return this.exists('log.txt').
             then(exists => exists ? this.get('log.txt').then(obj => obj.Body.toString()) : '').
             then(text => {

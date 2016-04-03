@@ -31,7 +31,7 @@ class S3Publisher implements Publisher {
         this.listObjects = guard(guard.n(1), nodefn.lift(s3.listObjects.bind(s3)));
     }
 
-    put(path, obj, contentType): Promise<{}> {
+    put(path, obj, contentType): Promise<void> {
         var params = {
             Bucket: this.bucket,
             Key: normalizePath(path),
@@ -49,7 +49,7 @@ class S3Publisher implements Publisher {
             });
     }
     
-    delete(path, contentType): Promise<{}> {
+    delete(path, contentType): Promise<void> {
         return this.deleteObject({Bucket: this.bucket, Key: path}).
             then(() => {
                 if (contentType == 'text/html' && !/\.html$/.test(path))
@@ -82,12 +82,12 @@ class S3Publisher implements Publisher {
             })
     }
 
-    rollback(): Promise<{}> {
+    rollback(): Promise<void> {
         // NOOP
         return when(undefined);
     }
 
-    commit(msg): Promise<{}> {
+    commit(msg): Promise<void> {
         return this.exists('log.txt').
             then(exists => exists ? this.get('log.txt').then(obj => obj.Body.toString()) : '').
             then(text => {
