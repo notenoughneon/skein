@@ -16,7 +16,7 @@ export function getHEntryFromUrl(url: string): when.Promise<Entry> {
         });
 }
 
-export function getHEntryWithCard(html: string, url: string): when.Promise<Entry> {
+export function getHEntryWithCard(html: string | Buffer, url: string): when.Promise<Entry> {
     return getHEntry(html, url).
         then(function(entry) {
             if (entry && entry.author == null) {
@@ -30,7 +30,7 @@ export function getHEntryWithCard(html: string, url: string): when.Promise<Entry
         });
 }
 
-export function getHEntry(html: string, url: string): when.Promise<Entry> {
+export function getHEntry(html: string | Buffer, url: string): when.Promise<Entry> {
     return parser.getAsync({html: html, baseUrl: url}).
         then(function(mf) {
             var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
@@ -40,7 +40,7 @@ export function getHEntry(html: string, url: string): when.Promise<Entry> {
         });
 }
 
-export function getRepHCard(html: string, url: string): when.Promise<Card> {
+export function getRepHCard(html: string | Buffer, url: string): when.Promise<Card> {
     return parser.getAsync({html: html, baseUrl: url}).
         then(function(mf) {
             var cards = mf.items.

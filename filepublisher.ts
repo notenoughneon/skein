@@ -17,7 +17,7 @@ class FilePublisher implements Publisher {
         this.root = config.root;
     }
 
-    private readWithFallback(filepath, extensions): when.Promise<{Body: Buffer, ContentType: string}> {
+    private readWithFallback(filepath, extensions): Promise<{Body: Buffer, ContentType: string}> {
         return when.any(extensions.map(function (ext) {
             return readFile(filepath + ext).
                 then(function (data) {
@@ -26,7 +26,7 @@ class FilePublisher implements Publisher {
         }));
     }
 
-    private existsWithFallback(filepath, extensions): when.Promise<boolean> {
+    private existsWithFallback(filepath, extensions): Promise<boolean> {
         return when.any(extensions.map(function (ext) {
             return stat(filepath + ext);
         })).
@@ -38,24 +38,24 @@ class FilePublisher implements Publisher {
             });
     }
 
-    put(path, obj, contentType): when.Promise<{}> {
+    put(path, obj, contentType): Promise<{}> {
         if (contentType === 'text/html')
             path = path + '.html';
         return util.writeFile(pathlib.join(this.root, path), obj);
     }
     
-    delete(path, contentType): when.Promise<{}> {
+    delete(path, contentType): Promise<{}> {
         if (contentType === 'text/html')
             path = path + '.html';
         return nodefn.call(fs.unlink, pathlib.join(this.root, path)).
             then(() => undefined);
     }
 
-    get(path): when.Promise<{Body: Buffer, ContentType: string}> {
+    get(path): Promise<{Body: Buffer, ContentType: string}> {
         return this.readWithFallback(pathlib.join(this.root, path), ['', '.html']);
     }
 
-    exists(path): when.Promise<boolean> {
+    exists(path): Promise<boolean> {
         return this.existsWithFallback(pathlib.join(this.root, path), ['', '.html'])
     }
 
@@ -64,12 +64,12 @@ class FilePublisher implements Publisher {
             then(paths => paths.map(p => pathlib.relative(this.root, p)));
     }
 
-    rollback(): when.Promise<{}> {
+    rollback(): Promise<{}> {
         // NOOP
         return when(undefined);
     }
 
-    commit(msg): when.Promise<{}> {
+    commit(msg): Promise<{}> {
         return this.exists('log.txt').
             then(exists => exists ? this.get('log.txt').then(obj => obj.Body.toString()) : '').
             then(text => {

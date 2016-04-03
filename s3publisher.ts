@@ -31,7 +31,7 @@ class S3Publisher implements Publisher {
         this.listObjects = guard(guard.n(1), nodefn.lift(s3.listObjects.bind(s3)));
     }
 
-    put(path, obj, contentType): when.Promise<{}> {
+    put(path, obj, contentType): Promise<{}> {
         var params = {
             Bucket: this.bucket,
             Key: normalizePath(path),
@@ -49,7 +49,7 @@ class S3Publisher implements Publisher {
             });
     }
     
-    delete(path, contentType): when.Promise<{}> {
+    delete(path, contentType): Promise<{}> {
         return this.deleteObject({Bucket: this.bucket, Key: path}).
             then(() => {
                 if (contentType == 'text/html' && !/\.html$/.test(path))
@@ -58,11 +58,11 @@ class S3Publisher implements Publisher {
             then(() => undefined);
     }
 
-    get(path): when.Promise<{Body: Buffer, ContentType: string}> {
+    get(path): Promise<{Body: Buffer, ContentType: string}> {
         return this.getObject({Bucket: this.bucket, Key: normalizePath(path)});
     }
 
-    exists(path): when.Promise<boolean> {
+    exists(path): Promise<boolean> {
         return this.headObject({Bucket: this.bucket, Key: normalizePath(path)}).
             then(function () {
                 return true;
@@ -72,7 +72,7 @@ class S3Publisher implements Publisher {
             });
     }
 
-    list(): when.Promise<string[]> {
+    list(): Promise<string[]> {
         // FIXME: handle truncated results
         return this.listObjects({Bucket: this.bucket}).
             then(function (data) {
@@ -82,12 +82,12 @@ class S3Publisher implements Publisher {
             })
     }
 
-    rollback(): when.Promise<{}> {
+    rollback(): Promise<{}> {
         // NOOP
         return when(undefined);
     }
 
-    commit(msg): when.Promise<{}> {
+    commit(msg): Promise<{}> {
         return this.exists('log.txt').
             then(exists => exists ? this.get('log.txt').then(obj => obj.Body.toString()) : '').
             then(text => {

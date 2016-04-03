@@ -16,13 +16,13 @@ class GitPublisher extends FilePublisher {
         super(config);
         this.push = config.push;
     }
-    rollback(): when.Promise<{}> {
+    rollback(): Promise<{}> {
         var gitcheckout = 'git -C ' + this.root + ' checkout .';
         return exec(gitcheckout).
             then(() => undefined);
     }
 
-    commit(msg): when.Promise<{}> {
+    commit(msg): Promise<{}> {
         var gitcommit = 'git -C ' + this.root + ' commit -a -m \'' + msg + '\'';
         var gitpush = 'git -C ' + this.root + ' push';
         return exec(gitcommit).
