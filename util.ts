@@ -80,10 +80,10 @@ function mkdirRecursive(dir) {
 }
 
 /* writeFile with recursive parent dir creation */
-export function writeFile(filename, data) {
+export function writeFile(filename: string, data: string | NodeJS.ReadableStream) {
     return _try(mkdirRecursive, path.dirname(filename)).
         then(() => {
-            if (data.readable)
+            if (typeof data !== "string" && data.readable)
                 data.pipe(fs.createWriteStream(filename));
             else
                 return _writeFile(filename, data);
