@@ -32,8 +32,10 @@ export function map(elts, f) {
 }
 
 export function _try<T>(f: () => T): Promise<T>;
-export function _try<T>(f: (arg: any) => T): Promise<T>;
-export function _try<T>(f: (arg: any, arg2: any) => T): Promise<T>;
+export function _try<T>(f: (arg: any) => T, arg: any): Promise<T>;
+export function _try<T>(f: (arg: any, arg2: any) => T, arg: any, arg2: any): Promise<T>;
+export function _try<T>(f: (arg: any, arg2: any, arg3: any) => T, arg: any, arg2: any, arg3: any): Promise<T>;
+export function _try<T>(f: (arg: any, arg2: any, arg3: any, arg4: any) => T, arg: any, arg2: any, arg3: any, arg4: any): Promise<T>;
 export function _try(f) {
     return new Promise((res, rej) => {
         try {
