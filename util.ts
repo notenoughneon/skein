@@ -27,8 +27,8 @@ export function map<T,U>(elts: PromiseLike<T[]>, f: (T) => U | PromiseLike<U>): 
 export function map<T,U>(elts: PromiseLike<T>[], f: (T) => U | PromiseLike<U>): Promise<U[]>;
 export function map<T,U>(elts: T[], f: (T) => U | PromiseLike<U>): Promise<U[]>;
 export function map(elts, f) {
-    var apply = elts => Promise.all(elts.map(elt => (typeof elt.then === 'function') ? elt.then(f) : f(elt)));
-    return (typeof elts.then) === 'function' ? elts.then(apply) : apply(elts);
+    var apply = elts => Promise.all(elts.map(elt => typeof elt.then === 'function' ? elt.then(f) : f(elt)));
+    return typeof elts.then === 'function' ? elts.then(apply) : apply(elts);
 }
 
 export function _try<T>(f: () => T): Promise<T>;
