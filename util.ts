@@ -2,10 +2,8 @@
 import fs = require('fs');
 import path = require('path');
 import util = require('util');
-import when = require('when');
-import nodefn = require('when/node');
 import cheerio = require('cheerio');
-import request = require('request');
+import Request = require('request');
 var parser = require('microformat-node');
 
 export function promisify<T>(f: (cb: (err: NodeJS.ErrnoException, res: T) => void) => void): () => Promise<T>;
@@ -24,8 +22,35 @@ export function promisify(f) {
     }
 }
 
+export function map<T,U>(elts: PromiseLike<PromiseLike<T>[]>, f: (T) => U | PromiseLike<U>): Promise<U[]>;
+export function map<T,U>(elts: PromiseLike<T[]>, f: (T) => U | PromiseLike<U>): Promise<U[]>;
+export function map<T,U>(elts: PromiseLike<T>[], f: (T) => U | PromiseLike<U>): Promise<U[]>;
+export function map<T,U>(elts: T[], f: (T) => U | PromiseLike<U>): Promise<U[]>;
+export function map(elts, f) {
+    var apply = elts => Promise.all(elts.map(elt => (typeof elt.then === 'function') ? elt.then(f) : f(elt)));
+    return (typeof elts.then) === 'function' ? elts.then(apply) : apply(elts);
+}
+
+export function _try<T>(f: () => T): Promise<T>;
+export function _try<T>(f: (arg: any) => T): Promise<T>;
+export function _try<T>(f: (arg: any, arg2: any) => T): Promise<T>;
+export function _try(f) {
+    return new Promise((res, rej) => {
+        try {
+            var args = Array.prototype.slice.call(arguments);
+            args.shift();
+            res(f.apply(null, args));
+        } catch (err) {
+            rej(err);
+        }
+    });
+}
+
 var stat = promisify(fs.stat);
 var readdir = promisify(fs.readdir);
+var _writeFile = promisify(fs.writeFile);
+
+var request = promisify(Request.get);
 
 export function dump(data) {
     console.log(util.inspect(data, {depth: null}));
@@ -54,12 +79,12 @@ function mkdirRecursive(dir) {
 
 /* writeFile with recursive parent dir creation */
 export function writeFile(filename, data) {
-    return when.try(mkdirRecursive, path.dirname(filename)).
+    return _try(mkdirRecursive, path.dirname(filename)).
         then(() => {
             if (data.readable)
                 data.pipe(fs.createWriteStream(filename));
             else
-                return nodefn.call(fs.writeFile, filename, data);
+                return _writeFile(filename, data);
         });
 }
 
@@ -177,7 +202,7 @@ export function isMentionOf(html, permalink) {
 }
 
 function getWebmentionEndpoint(target) {
-    return nodefn.call(request, target).
+    return request(target).
         then(function (res) {
             return parser.getAsync({html: res[1], baseUrl: target});
         }).
@@ -194,7 +219,7 @@ function getWebmentionEndpoint(target) {
 export function sendWebmention(source, target) {
     return getWebmentionEndpoint(target).
         then(function (endpoint) {
-            return nodefn.call(request, {uri:endpoint, method:'POST', form:{source:source, target:target}}).
+            return request({uri:endpoint, method:'POST', form:{source:source, target:target}}).
                 then(function (res) {
                     var status = res[0].statusCode;
                     if (status !== 200 && status !== 202)
@@ -205,7 +230,7 @@ export function sendWebmention(source, target) {
 }
 
 export function getPage(permalink) {
-    return nodefn.call(request, {uri: permalink}).
+    return request({uri: permalink}).
         then(function (res) {
             var status = res[0].statusCode;
             if (status >= 200 && status <= 299)

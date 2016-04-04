@@ -5,6 +5,39 @@ import fs = require('fs');
 import callbacks = require('when/callbacks');
 
 describe('util', function() {
+    describe('map', function() {
+        var elts = [1, 2, 3];
+        var f: (n) => Promise<number> = n => new Promise((res,rej) => res(n * n));
+        var expected = [1, 4, 9];
+
+        it('array of values', function(done) {
+            util.map(elts, f)
+            .then(res => assert.deepEqual(res, expected))
+            .then(done);
+        });
+
+        it('array of promises', function(done) {
+            var eltps = elts.map(elt => new Promise((res, rej) => res(elt)));
+            util.map(eltps, f)
+            .then(res => assert.deepEqual(res, expected))
+            .then(done);
+        });
+
+        it('promise of array of values', function(done) {
+            var pelts = new Promise((res,rej) => res(elts));
+            util.map(pelts, f)
+            .then(res => assert.deepEqual(res, expected))
+            .then(done);
+        });
+
+        it('promise of array of promises', function(done) {
+            var peltps = new Promise((res,rej) => res(elts.map(elt => new Promise((res, rej) => res(elt)))));
+            util.map(peltps, f)
+            .then(res => assert.deepEqual(res, expected))
+            .then(done);
+        });
+    });
+
     describe('writeFile', function() {
         before(function() {
             util.tryDelete('build/test/foo/bar/baz.txt');
