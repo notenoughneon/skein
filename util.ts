@@ -204,7 +204,7 @@ export function isMentionOf(html, permalink) {
 function getWebmentionEndpoint(target) {
     return request(target).
         then(function (res) {
-            return parser.getAsync({html: res[1], baseUrl: target});
+            return parser.getAsync({html: res.body, baseUrl: target});
         }).
         then(function (mf) {
             if (mf.rels['webmention'] !== undefined)
@@ -221,7 +221,7 @@ export function sendWebmention(source, target) {
         then(function (endpoint) {
             return request({uri:endpoint, method:'POST', form:{source:source, target:target}}).
                 then(function (res) {
-                    var status = res[0].statusCode;
+                    var status = res.statusCode;
                     if (status !== 200 && status !== 202)
                         throw new Error('Webmention endpoint returned status ' + status);
                     return;
@@ -232,9 +232,9 @@ export function sendWebmention(source, target) {
 export function getPage(permalink) {
     return request({uri: permalink}).
         then(function (res) {
-            var status = res[0].statusCode;
+            var status = res.statusCode;
             if (status >= 200 && status <= 299)
-                return res[1];
+                return res.body;
             throw new Error('Got statusCode ' + status);
         })
 }
