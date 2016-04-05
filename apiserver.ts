@@ -31,7 +31,6 @@ var tokens: {token: string, client_id: string, scope: string}[] = [];
 var lastIssuedCode: {code: string, client_id: string, scope: string, date: number} = null;
 
 var publishMutex = new util.Mutex();
-var publishLock = callbacks.lift(publishMutex.lock.bind(publishMutex));
 
 function generateToken(client_id: string, scope: string) {
     return nodefn.call(crypto.randomBytes, 18).
@@ -196,7 +195,7 @@ app.post('/micropub', requireAuth('post'), function(req, res) {
     var release;
     if (req['post'].h != 'entry')
         return res.sendStatus(400);
-    publishLock().
+    publishMutex.lock().
         then(r => release = r).
         then(() => site.publish({
             content: req['post'].content,
@@ -229,7 +228,7 @@ app.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
     var target = req['post'].target;
     if (source === undefined || target === undefined)
         return res.status(400).send('"source" and "target" parameters are required');
-    publishLock().
+    publishMutex.lock().
         then(r => release = r).
         then(() => site.receiveWebmention(source, target)).
         then(() => site.publisher.commit('webmention from ' + source + ' to ' + target)).

@@ -124,10 +124,9 @@ describe('util', function() {
     describe('mutex', function() {
         it('tasks do not overlap', function(done) {
             var m = new util.Mutex();
-            var lock = callbacks.lift(m.lock.bind(m));
             var task1running = false;
             var task2running = false;
-            lock().then(release => {
+            m.lock().then(release => {
                 task1running = true;
                 setTimeout(() => {
                     assert(!task2running);
@@ -135,7 +134,7 @@ describe('util', function() {
                     release();
                 }, 10);
             });
-            lock().then(release => {
+            m.lock().then(release => {
                 assert(!task1running);
                 task2running = true;
                 setTimeout(() => {
@@ -143,7 +142,7 @@ describe('util', function() {
                     release();
                 }, 50);
             });
-            lock().then(release => {
+            m.lock().then(release => {
                 assert(!task1running);
                 assert(!task2running);
                 done();
@@ -154,12 +153,11 @@ describe('util', function() {
         it('double release ok', function(done) {
             var release;
             var m = new util.Mutex();
-            var lock = callbacks.lift(m.lock.bind(m));
-            lock().
+            m.lock().
                 then(r => release = r).
                 then(() => release()).
                 then(() => release());
-            lock().
+            m.lock().
                 then(r => done());
         });
     });
