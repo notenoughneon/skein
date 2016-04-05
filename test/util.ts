@@ -150,6 +150,15 @@ describe('util', function() {
             assert(!task1running);
             assert(!task2running);
         });
+        it('double lock deadlocks', function(done) {
+            var m = new util.Mutex();
+            m.lock()
+            .then(r => m.lock())
+            .then(r => assert(false))
+            .catch(done);
+            util.delay(60)
+            .then(done);
+        });
         it('double release ok', function(done) {
             var release;
             var m = new util.Mutex();
