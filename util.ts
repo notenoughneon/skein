@@ -245,19 +245,41 @@ export function delay(ms: number) {
     return new Promise<void>((res, rej) => setTimeout(() => res(), ms));
 }
 
-export class Mutex {
+export class Semaphore {
     private tasks: (() => void)[] = [];
+    capacity: number;
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+    }
+
+    private sched() {
+        if (this.capacity > 0 && this.tasks.length > 0) {
+            this.capacity--;
+            this.tasks.shift()();
+        }
+    }
 
     public lock() {
         return new Promise<() => void>((res, rej) => {
-            this.tasks.push(() =>
+            var task = () => {
+                var released = false;
                 res(() => {
-                    this.tasks.shift();
-                    if (this.tasks.length > 0)
-                        this.tasks[0]();
-                }));
-            if (this.tasks.length == 1)
-                process.nextTick(this.tasks[0]);
+                    if (!released) {
+                        released = true;
+                        this.capacity++;
+                        this.sched();
+                    }
+                });
+            };
+            this.tasks.push(task);
+            process.nextTick(this.sched.bind(this));
         });
+    }
+}
+
+export class Mutex extends Semaphore {
+    constructor() {
+        super(1);
     }
 }

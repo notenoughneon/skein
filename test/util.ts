@@ -126,29 +126,40 @@ describe('util', function() {
             var m = new util.Mutex();
             var task1running = false;
             var task2running = false;
-            m.lock().then(release => {
-                task1running = true;
-                setTimeout(() => {
-                    assert(!task2running);
-                    task1running = false;
-                    release();
-                }, 10);
-            });
-            m.lock().then(release => {
-                assert(!task1running);
-                task2running = true;
-                setTimeout(() => {
-                    task2running = false;
-                    release();
-                }, 50);
-            });
-            m.lock().then(release => {
+            var task1ran = false;
+            var task2ran = false;
+            Promise.all([
+                m.lock()
+                .then(release => {
+                    task1running = true;
+                    task1ran = true;
+                    return util.delay(10)
+                    .then(() => {
+                        assert(!task2running);
+                        task1running = false;
+                        release();
+                    });
+                }),
+                m.lock().
+                then(release => {
+                    assert(!task1running);
+                    task2running = true;
+                    task2ran = true;
+                    return util.delay(10)
+                    .then(() => {
+                        task2running = false;
+                        release();
+                    });
+                })
+            ])
+            .then(() => {
                 assert(!task1running);
                 assert(!task2running);
+                assert(task1ran);
+                assert(task2ran);
                 done();
-            });
-            assert(!task1running);
-            assert(!task2running);
+            })
+            .catch(done);
         });
         it('double lock deadlocks', function(done) {
             var m = new util.Mutex();
@@ -156,7 +167,7 @@ describe('util', function() {
             .then(r => m.lock())
             .then(r => assert(false))
             .catch(done);
-            util.delay(60)
+            util.delay(10)
             .then(done);
         });
         it('double release ok', function(done) {
