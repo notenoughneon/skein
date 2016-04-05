@@ -53,6 +53,41 @@ var templateUtils = {
     truncate: truncate
 };
 
+interface SiteConfig {
+    title: string;
+    url: string;
+    author: {
+        name: string;
+        photo?: string;
+        note?: string;
+        elsewhere: {
+            name: string;
+            url: string;
+        }[];
+    }
+    entriesPerPage: number;
+    authUrl: string;
+    tokenUrl: string;
+    micropubUrl: string;
+    webmentionUrl: string;
+    publisher:
+    {
+        type: "file";
+        root: string;
+    } |
+    {
+       type: "git";
+       root: string;
+       push: boolean;
+    } |
+    {
+        type: "s3";
+        region: string;
+        bucket: string;
+    };
+    password: string;
+}
+
 interface Micropub {
     name?: string,
     content: string | {html: string},
@@ -64,10 +99,10 @@ interface Micropub {
 }
 
 class Site {
-    config: any;
+    config: SiteConfig;
     publisher: Publisher;
 
-    constructor(config) {
+    constructor(config: SiteConfig) {
         this.config = config;
         switch(config.publisher.type) {
             case 's3':
