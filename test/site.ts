@@ -18,29 +18,7 @@ var app = express();
 var http = require('http').Server(app);
 app.use(express.static('build/test/static', {extensions: ['html']}));
 
-var config = {
-    "title": "Test Site",
-    "url": "http://localhost:8000",
-    "author": {
-        "name": "Test User",
-        "photo": "/author.png",
-        "note": "Here is a bio",
-        "elsewhere": [
-            {"name": "Twitter", "url": "https://twitter.com/testuser"},
-            {"name": "Instagram", "url": "https://instagram.com/testuser"},
-        ]
-    },
-    "entriesPerPage": 10,
-    "authUrl": "http://localhost:8000/auth",
-    "tokenUrl": "http://localhost:8000/token",
-    "micropubUrl": "http://localhost:8000/micropub",
-    "webmentionUrl": "http://localhost:8000/webmention",
-    "publisher": {
-        "type": "file",
-        "root": "build/test/static"
-},
-    "password": "xxxxxxxx"
-};
+var config = JSON.parse(fs.readFileSync('test/config.json').toString());
 
 describe('site', function() {
     var site: Site;
