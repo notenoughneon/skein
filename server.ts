@@ -27,6 +27,7 @@ app.use('/api', api.router);
 if (config.staticSiteRoot != null)
     app.use(express.static(config.staticSiteRoot, {extensions: ['html']}));
 
+app.disable('x-powered-by');
 app.set('views', './template');
 app.set('view engine', 'jade');
 
