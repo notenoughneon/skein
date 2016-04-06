@@ -2,12 +2,12 @@ import fs = require('fs');
 import repl = require('repl');
 import express = require('express');
 import Site = require('./site');
-import ApiServer = require('./apiserver');
+import Api = require('./api');
 
 var app = express();
 var config = JSON.parse(fs.readFileSync(process.argv[2]).toString());
 var site = new Site(config);
-var api = new ApiServer(site);
+var api = new Api(site);
 
 app.use('/api', api.router);
 

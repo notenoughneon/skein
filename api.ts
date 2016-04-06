@@ -85,7 +85,7 @@ function handleError(res, error) {
     res.sendStatus(500);
 }
 
-class ApiServer {
+class Api {
     site: Site;
     router: express.Router;
     // in-memory list of issued tokens
@@ -267,4 +267,4 @@ class ApiServer {
     }
 }
 
-export = ApiServer;
+export = Api;
