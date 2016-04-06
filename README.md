@@ -23,5 +23,5 @@ Indieweb static site generator
 ## Running
 
 ```
-node apiserver.js config.json
+node server.js config.json
 ```
