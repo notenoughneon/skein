@@ -4,14 +4,24 @@ Indieweb static site generator
 
 ## Features
 
-* Publish to Amazon S3 or local filesystem
-* Micropub endpoint
-    * Post notes and photos
-    * Self-contained oauth2 auth/token server
-* Webmention endpoint
+* Publish to Amazon S3, git, or local filesystem
+* Supported post types:
+  * Notes
+    * Autolinked urls
+    * OEmbedded youtube and soundcloud links
+  * Replies
+  * Likes
+  * Reposts
+  * Articles
+    * Summary view in stream
+  * Photos
+  * Audio
+* Tags
+* Micropub
+* Webmentions
 
 ## Running
 
 ```
-node apiserver.js [portnumber] [configfile]
+node apiserver.js config.json
 ```

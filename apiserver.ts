@@ -19,7 +19,7 @@ import microformat = require('./microformat');
 import Site = require('./site');
 import util = require('./util');
 
-var config = JSON.parse(fs.readFileSync(process.argv[3]).toString());
+var config = JSON.parse(fs.readFileSync(process.argv[2]).toString());
 var site = new Site(config);
 
 app.set('views', './template');
@@ -263,10 +263,10 @@ app.delete('/entries/*', requireAuth('post'), function(req, res) {
         catch(e => handleError(res, e));
 });
 
-var server = app.listen(process.argv[2], function (){
+var server = app.listen(config.port, function (){
     var address = server.address();
     debug('Listening on %s:%s', address.address, address.port);
 });
 
-if (process.argv[4] == '-i')
+if (process.argv[3] == '-i')
     repl.start('> ').context.site = site;

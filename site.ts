@@ -66,6 +66,7 @@ interface SiteConfig {
         }[];
     }
     entriesPerPage: number;
+    port: number;
     authUrl: string;
     tokenUrl: string;
     micropubUrl: string;

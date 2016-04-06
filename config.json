@@ -10,6 +10,7 @@
     ]
   },
   "entriesPerPage": 10,
+  "port": 8001,
   "authUrl": "http://localhost:8001/auth",
   "tokenUrl": "http://localhost:8001/token",
   "micropubUrl": "http://localhost:8001/micropub",
