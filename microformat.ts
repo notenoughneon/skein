@@ -1,13 +1,13 @@
 ///<reference path="typings/main.d.ts"/>
 var parser = require('microformat-node');
-import when = require('when');
-import nodefn = require('when/node');
-import request = require('request');
+import Request = require('request');
 import cheerio = require('cheerio');
 import util = require('./util');
 import url = require('url');
 import Debug = require('debug');
 var debug = Debug('microformat');
+
+var request = util.promisify(Request);
 
 export async function crawlHEntryThread(seed: string) {
     var boundary: string[] = [];
@@ -35,16 +35,16 @@ export async function crawlHEntryThread(seed: string) {
     return entryDict;
 }
 
-export function getHEntryFromUrl(url: string): when.Promise<Entry> {
-    return nodefn.call(request, url).
+export function getHEntryFromUrl(url: string): Promise<Entry> {
+    return request(url).
         then(res => {
-            if (res[0].statusCode != 200)
-                throw new Error(url + ' returned status ' + res[0].statusCode);
-            return getHEntryWithCard(res[1], url);
+            if (res.statusCode != 200)
+                throw new Error('Server returned status ' + res.statusCode);
+            return getHEntryWithCard(res.body, url);
         });
 }
 
-export function getHEntryWithCard(html: string | Buffer, url: string): when.Promise<Entry> {
+export function getHEntryWithCard(html: string | Buffer, url: string): Promise<Entry> {
     return getHEntry(html, url).
         then(function(entry) {
             if (entry && entry.author == null) {
@@ -58,17 +58,19 @@ export function getHEntryWithCard(html: string | Buffer, url: string): when.Prom
         });
 }
 
-export function getHEntry(html: string | Buffer, url: string): when.Promise<Entry> {
+export function getHEntry(html: string | Buffer, url: string): Promise<Entry> {
     return parser.getAsync({html: html, baseUrl: url}).
         then(function(mf) {
             var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
             if (entries.length == 0)
-                return null;
+                throw new Error('No h-entry found');
+            else if (entries.length > 1)
+                throw new Error('Multiple h-entries found');
             return new Entry(entries[0]);
         });
 }
 
-export function getRepHCard(html: string | Buffer, url: string): when.Promise<Card> {
+export function getRepHCard(html: string | Buffer, url: string): Promise<Card> {
     return parser.getAsync({html: html, baseUrl: url}).
         then(function(mf) {
             var cards = mf.items.

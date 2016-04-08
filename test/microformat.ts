@@ -91,13 +91,16 @@ describe('entry', function() {
         assert.equal(entry.author, null);
     });
 
-    it('returns null for no entry', function(done) {
-       microformat.getHEntryWithCard('<html></html>', 'http://testsite').
-        then(entry => {
-            assert.equal(entry, null);
-        }).
-        then(done).
-        catch(done);
+    it('err for no entry', function(done) {
+       microformat.getHEntryWithCard('<html></html>', 'http://testsite')
+       .then(() => assert(false))
+       .catch(err => done(err.message == 'No h-entry found' ? null : err));
+    });
+
+    it('err for multiple entries', function(done) {
+       microformat.getHEntryWithCard('<html><div class="h-entry"></div><div class="h-entry"></div></html>', 'http://testsite')
+       .then(() => assert(false))
+       .catch(err => done(err.message === 'Multiple h-entries found' ? null : err));
     });
 
     it('can load a note', function(done) {

@@ -231,11 +231,13 @@ class Site {
             let obj = await this.publisher.get(key);
             if (obj.ContentType === 'text/html') {
                 let u = url.resolve(this.config.url, key);
-                let entry = await microformat.getHEntryWithCard(obj.Body, u);
-                if (entry != null && !seen[entry.url] && (entry.url === u || entry.url + '.html' === u)) {
-                    seen[entry.url] = true;
-                    entries.push(entry);
-                }
+                try {
+                    let entry = await microformat.getHEntryWithCard(obj.Body, u);
+                    if (entry != null && !seen[entry.url] && (entry.url === u || entry.url + '.html' === u)) {
+                        seen[entry.url] = true;
+                        entries.push(entry);
+                    }
+                } catch (err) {}
             }
         }
         return entries;
