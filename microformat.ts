@@ -6,6 +6,34 @@ import request = require('request');
 import cheerio = require('cheerio');
 import util = require('./util');
 import url = require('url');
+import Debug = require('debug');
+var debug = Debug('microformat');
+
+export async function crawlHEntryThread(seed: string) {
+    var boundary: string[] = [];
+    var entryDict: Map<string, Entry> = new Map();
+    boundary.push(seed);
+    while (boundary.length > 0) {
+        let url = boundary.shift();
+        try {
+            debug('Fetching ' + url);
+            let entry = await getHEntryFromUrl(url);
+            entryDict.set(url, entry);
+            let references = entry
+                .replyTo
+                .concat(entry.likeOf)
+                .concat(entry.repostOf)
+                .concat(entry.children)
+                .map(r => r.url)
+                .filter(r => r !== '' && !entryDict.has(r));
+            boundary = boundary.concat(references);
+        } catch (err) {
+            debug('Broken link: ' + err);
+            entryDict.set(url, new Entry(url));
+        }
+    }
+    return entryDict;
+}
 
 export function getHEntryFromUrl(url: string): when.Promise<Entry> {
     return nodefn.call(request, url).
