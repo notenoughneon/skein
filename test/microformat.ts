@@ -413,4 +413,17 @@ describe('entry', function() {
             then(done).
             catch(done);
     });
+    it('filters non-cite from children', function(done) {
+        var html = '<div class="h-entry">\
+        <div class="h-cite"><a class="u-url" href="http://othersite/123"></a>a comment</div>\
+        <div class="h-card"><a class="u-url" href="http://testsite"></a>a card</div>\
+        </div>';
+        microformat.getHEntry(html, 'http://testsite')
+        .then(e => {
+            assert(e.children.length === 1);
+            assert(e.children[0].name === 'a comment');
+        })
+        .then(done)
+        .catch(done);
+    });
 });

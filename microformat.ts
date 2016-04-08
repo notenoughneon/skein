@@ -134,6 +134,7 @@ function firstProp(mf, name, f?) {
 function children(mf) {
     return (mf.children || []).
         concat(mf.properties['comment'] || []).
+        filter(i => i.type.some(t => t === 'h-cite')).
         map(e => new Entry(e)).
         filter(e => e.url != null);
 }
@@ -158,6 +159,8 @@ export class Entry {
             this.url = mf;
         } else if (mf != null && mf.properties !== undefined) {
             // mf parser output
+            if (!mf.type.some(t => t === 'h-entry' || t === 'h-cite'))
+                throw new Error('Attempt to parse ' + mf.type + ' as Entry');
             this.name = firstProp(mf, 'name');
             this.published = firstProp(mf, 'published', p => new Date(p));
             this.content = firstProp(mf, 'content');
