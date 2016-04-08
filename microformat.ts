@@ -25,14 +25,14 @@ export async function crawlHEntryThread(seed: string) {
                 .concat(entry.repostOf)
                 .concat(entry.children)
                 .map(r => r.url)
-                .filter(r => r !== '' && !entryDict.has(r));
+                .filter(r => !entryDict.has(r));
             boundary = boundary.concat(references);
         } catch (err) {
             debug('Broken link: ' + err);
             entryDict.set(url, new Entry(url));
         }
     }
-    return entryDict;
+    return Array.from(entryDict.values());
 }
 
 export function getHEntryFromUrl(url: string): Promise<Entry> {
