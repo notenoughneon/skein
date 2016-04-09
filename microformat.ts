@@ -63,7 +63,6 @@ export async function getHEntry(html: string | Buffer, url: string): Promise<Ent
         return entry;
 }
 
-
 function prop(mf, name, f?) {
     if (mf.properties[name] != null) {
         if (f != null)
@@ -82,6 +81,17 @@ function firstProp(mf, name, f?) {
     return null;
 }
 
+export function _buildCard(mf) {
+    if (typeof(mf) === 'string')
+        return new Card(mf);
+    var card = new Card();
+    card.name = firstProp(mf, 'name');
+    card.photo = firstProp(mf, 'photo');
+    card.url = firstProp(mf, 'url');
+    card.uid = firstProp(mf, 'uid');
+    return card;
+}
+
 export function _buildEntry(mf) {
     if (typeof(mf) === 'string')
         return new Entry(mf);
@@ -93,7 +103,7 @@ export function _buildEntry(mf) {
     entry.content = firstProp(mf, 'content');
     entry.summary = firstProp(mf, 'summary');
     entry.url = firstProp(mf, 'url');
-    entry.author = firstProp(mf, 'author', a => new Card(a));
+    entry.author = firstProp(mf, 'author', a => _buildCard(a));
     entry.category = prop(mf, 'category');
     entry.syndication = prop(mf, 'syndication');
     entry.replyTo = prop(mf, 'in-reply-to', r => _buildEntry(r));
@@ -112,7 +122,7 @@ export function getRepHCard(html: string | Buffer, url: string): Promise<Card> {
         then(function(mf) {
             var cards = mf.items.
                 filter(i => i.type.some(t => t == 'h-card')).
-                map(h => new Card(h));
+                map(h => _buildCard(h));
             // 1. uid and url match page url
             var match = cards.filter(function(c) {
                 return c.url != null &&
@@ -164,9 +174,8 @@ export class Entry {
     repostOf: Entry[] = [];
     children: Entry[] = [];
 
-    constructor(url?) {
-        if (url != null && typeof(url) === 'string') {
-            // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
+    constructor(url?: string) {
+        if (typeof(url) === 'string') {
             this.url = url;
         }
     }
@@ -294,13 +303,12 @@ export class Card {
     url: string = null;
     uid: string = null;
 
-    constructor(mf?) {
-        if (mf != null && mf.properties !== undefined) {
-            // mf parser output
-            this.name = firstProp(mf, 'name');
-            this.photo = firstProp(mf, 'photo');
-            this.url = firstProp(mf, 'url');
-            this.uid = firstProp(mf, 'uid');
+    constructor(urlOrName?: string) {
+        if (typeof(urlOrName) === 'string') {
+            if (urlOrName.startsWith('http://') || urlOrName.startsWith('https://'))
+                this.url = urlOrName;
+            else
+                this.name = urlOrName;
         }
     }
 }
