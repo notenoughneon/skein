@@ -115,10 +115,10 @@ class Api {
                 res.sendStatus(400);
         });
 
-        this.router.post('/auth', rateLimit(3, 1000 * 60 * 10), function(req, res) {
+        this.router.post('/auth', rateLimit(3, 1000 * 60 * 10), (req, res) => {
             if (req['post'].password === site.config.password) {
                 nodefn.call(crypto.randomBytes, 18).
-                    then(function (buf) {
+                    then((buf) => {
                         var code = buf.toString('base64');
                         this.lastIssuedCode = {
                             code: code,

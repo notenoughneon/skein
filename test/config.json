@@ -13,10 +13,10 @@
     "entriesPerPage": 10,
     "port": 8000,
     "staticSiteRoot": "build/test/static",
-    "authUrl": "http://localhost:8000/auth",
-    "tokenUrl": "http://localhost:8000/token",
-    "micropubUrl": "http://localhost:8000/micropub",
-    "webmentionUrl": "http://localhost:8000/webmention",
+    "authUrl": "http://localhost:8000/api/auth",
+    "tokenUrl": "http://localhost:8000/api/token",
+    "micropubUrl": "http://localhost:8000/api/micropub",
+    "webmentionUrl": "http://localhost:8000/api/webmention",
     "publisher": {
         "type": "file",
         "root": "build/test/static"
