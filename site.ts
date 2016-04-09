@@ -22,7 +22,7 @@ var _renderTag = jade.compileFile('template/tagpage.jade', {pretty:true});
 
 
 function getPathForIndex(page) {
-    return 'index' + (page == 1 ? '' : page);
+    return '/index' + (page == 1 ? '' : page);
 }
 
 function getPathForCategory(category) {
@@ -255,30 +255,37 @@ class Site {
         for (let c of entry.category) {
             await this.generateTagIndex(c);
         }
-        await this.generateIndex();
+        await this.generateFeed();
     }
 
-    async generateIndex() {
-        var limit = this.config.entriesPerPage;
+    async _generateFeed(entries: microformat.Entry[], page: number, total: number) {
+        let html = this.renderStreamPage(entries, page, total);
+        await this.publisher.put(getPathForIndex(page), html, 'text/html');
+        debug('Published ' + getPathForIndex(page));
+    }
+
+    async generateFeed() {
         var entries = await this.getAll();
-        entries.sort((a,b) => b.published.getTime() - a.published.getTime());
+        entries.sort(microformat.Entry.byDateDesc);
+        var limit = this.config.entriesPerPage;
         var chunks = util.chunk(limit, entries);
         for (let index = 0; index < chunks.length; index++) {
             let chunk = chunks[index];
-            let html = this.renderStreamPage(chunk, index + 1, chunks.length);
-            await this.publisher.put(getPathForIndex(index + 1), html, 'text/html');
-            debug('generated ' + getPathForIndex(index + 1));
+            await this._generateFeed(chunk, index + 1, chunks.length);
         }
-        debug('done generating index');
+    }
+
+    async _generateTagIndex(entries: microformat.Entry[], category: string) {
+        var html = this.renderTagPage(entries, category);
+        await this.publisher.put(getPathForCategory(category), html, 'text/html');
+        debug('Published ' + getPathForCategory(category));
     }
 
     async generateTagIndex(category: string) {
         var entries = await this.getAll();
         entries = entries.filter(e => e.category.indexOf(category) > -1);
-        entries.sort((a, b) => b.published.getTime() - a.published.getTime());
-        var html = this.renderTagPage(entries, category);
-        await this.publisher.put(getPathForCategory(category), html, 'text/html');
-        debug('generated ' + getPathForCategory(category));
+        entries.sort(microformat.Entry.byDateDesc);
+        await this._generateTagIndex(entries, category);
     }
 
     getSlug(name: string, date: Date) {
@@ -290,19 +297,28 @@ class Site {
         }
     }
 
-    async reGenerate() {
+    async generateAll() {
         var entries = await this.getAll();
+        entries.sort(microformat.Entry.byDateDesc);
+        // entries
         for (let entry of entries) {
             let html = this.renderEntry(entry);
-            await this.publisher.put(url.parse(entry.url).pathname, html, 'text/html');
-            debug('regenerated '+ entry.url);
+            let path = url.parse(entry.url).pathname;
+            await this.publisher.put(path, html, 'text/html');
+            debug('Published '+ path);
         }
-        await this.generateIndex();
+        // feed
+        var limit = this.config.entriesPerPage;
+        var chunks = util.chunk(limit, entries);
+        for (let index = 0; index < chunks.length; index++) {
+            let chunk = chunks[index];
+            await this._generateFeed(chunk, index + 1, chunks.length);
+        }
+        // tags
         var categories = util.unique(util.flatten(entries.map(e => e.category)));
         for (let category of categories) {
-            await this.generateTagIndex(category);
+            await this._generateTagIndex(entries.filter(e => e.category.indexOf(category) > -1), category);
         }
-        debug('done regenerating');
     }
 
     async validate() {

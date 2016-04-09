@@ -225,6 +225,9 @@ export class Entry {
         }
     }
 
+    static byDate = (a: Entry, b: Entry) => a.published.getTime() - b.published.getTime();
+    static byDateDesc = (a: Entry, b: Entry) => b.published.getTime() - a.published.getTime();
+
     domain(): string {
         var p = url.parse(this.url);
         return p.protocol + '//' + p.host;

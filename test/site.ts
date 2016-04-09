@@ -133,7 +133,7 @@ describe('site', function() {
 
     //FIXME: brittle
     it('can generate an index', function(done) {
-        site.generateIndex().
+        site.generateFeed().
             then(() => parser.getAsync({html: fs.readFileSync(config.publisher.root + '/index.html')})).
             then(mf => {
                 var feed = mf.items[0];
@@ -177,7 +177,7 @@ describe('site', function() {
 
     it('regenerate works', function(done) {
         exec('find ' + config.publisher.root + ' -name *.html | xargs rm').
-            then(() => site.reGenerate()).
+            then(() => site.generateAll()).
             then(() => {
                 var path = config.publisher.root + url.parse(post1.url).path + '.html';
                 assert.equal(fs.existsSync(path), true, path + ' exists');
