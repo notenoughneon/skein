@@ -400,6 +400,16 @@ describe('entry', function() {
         entry.deduplicate();
         assert.deepEqual(entry.children, [c1,c2]);
     });
+    it('discover authorship by rel-author', function(done) {
+        var html = '<div class="h-entry"></div><a rel="author" href="/author"></a>';
+        microformat.getHEntry(html, 'http://somesite')
+        .then(e => {
+            assert(e.author !== null);
+            assert(e.author.url === 'http://somesite/author');
+        })
+        .then(done)
+        .catch(done);
+    });
     it('getRepHCard (case 2)', function(done) {
         var expected = new microformat.Card();
         expected.name = 'Test User';

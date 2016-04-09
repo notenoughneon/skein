@@ -35,13 +35,15 @@ export async function crawlHEntryThread(seed: string) {
     return Array.from(entryDict.values());
 }
 
-export function getHEntryFromUrl(url: string): Promise<Entry> {
-    return request(url).
-        then(res => {
-            if (res.statusCode != 200)
-                throw new Error('Server returned status ' + res.statusCode);
-            return getHEntry(res.body, url);
-        });
+export async function getHEntryFromUrl(url: string): Promise<Entry> {
+    var res = await request(url);
+    if (res.statusCode != 200)
+        throw new Error('Server returned status ' + res.statusCode);
+    var entry = await getHEntry(res.body, url);
+    if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
+        //TODO: fetch author-page
+    }
+    return entry;
 }
 
 export async function getHEntry(html: string | Buffer, url: string): Promise<Entry> {
@@ -52,15 +54,12 @@ export async function getHEntry(html: string | Buffer, url: string): Promise<Ent
     else if (entries.length > 1)
         throw new Error('Multiple h-entries found');
     var entry = _buildEntry(entries[0]);
-    if (entry.author == null) {
-        return getRepHCard(html, url).
-            then(function(card) {
-                if (card !== null) entry.author = card;
-                return entry;
-            });
+    if (entry.author === null) {
+        if (mf.rels.author != null && mf.rels.author.length > 0) {
+            entry.author = new Card(mf.rels.author[0]);
+        }
     }
-    else 
-        return entry;
+    return entry;
 }
 
 function prop(mf, name, f?) {
