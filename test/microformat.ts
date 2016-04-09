@@ -26,7 +26,7 @@ describe('entry', function() {
                 ]
             }
         };
-        var entry = new microformat.Entry(mf2);
+        var entry = microformat._buildEntry(mf2);
         assert.equal(url, entry.url);
         assert.equal(content, entry.content.value);
         assert.equal(content, entry.content.html);
@@ -112,7 +112,7 @@ describe('entry', function() {
                 <span class="p-category">indieweb</span>\
                 <div class="p-name e-content">Hello <b>World!</b></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getHEntryWithCard(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"Hello World!",
@@ -142,7 +142,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content">Here is a <i>reply</i></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getHEntryWithCard(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"Here is a reply",
@@ -185,7 +185,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content"><div class="p-summary">Summary</div> Hello <b>World!</b></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getHEntryWithCard(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"First Post",
@@ -214,7 +214,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content">Hello <b>World!</b></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getHEntryWithCard(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry.flatten(), [{
                     "name":"Hello World!",
@@ -251,7 +251,7 @@ describe('entry', function() {
                     <div class="p-name e-content">Here is a <i>reply</i></div>\
                 </div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getHEntryWithCard(html, 'http://testsite').
             then(function(entry) {
                 var flat = entry.flatten();
                 assert.deepEqual(flat, [
@@ -364,7 +364,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content">Hello <b>World!</b><img class="u-photo" src="photo.jpg"/></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getHEntryWithCard(html, 'http://testsite').
             then(function(entry){
                 assert.deepEqual(entry.getPhotos(), ['http://testsite/photo.jpg']);
             }).
@@ -379,7 +379,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content"><img class="u-photo" src="photo.jpg"/></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getHEntryWithCard(html, 'http://testsite').
             then(function(entry){
                 assert.equal(entry.isArticle(), false);
             }).
@@ -418,7 +418,7 @@ describe('entry', function() {
         <div class="h-cite"><a class="u-url" href="http://othersite/123"></a>a comment</div>\
         <div class="h-card"><a class="u-url" href="http://testsite"></a>a card</div>\
         </div>';
-        microformat.getHEntry(html, 'http://testsite')
+        microformat.getHEntryWithCard(html, 'http://testsite')
         .then(e => {
             assert(e.children.length === 1);
             assert(e.children[0].name === 'a comment');

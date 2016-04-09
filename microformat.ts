@@ -44,30 +44,67 @@ export function getHEntryFromUrl(url: string): Promise<Entry> {
         });
 }
 
-export function getHEntryWithCard(html: string | Buffer, url: string): Promise<Entry> {
-    return getHEntry(html, url).
-        then(function(entry) {
-            if (entry && entry.author == null) {
-                return getRepHCard(html, url).
-                    then(function(card) {
-                        if (card !== null) entry.author = card;
-                        return entry;
-                    });
-            }
-            else return entry;
-        });
+export async function getHEntryWithCard(html: string | Buffer, url: string): Promise<Entry> {
+    var mf = await parser.getAsync({html: html, baseUrl: url});
+    var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
+    if (entries.length == 0)
+        throw new Error('No h-entry found');
+    else if (entries.length > 1)
+        throw new Error('Multiple h-entries found');
+    var entry = _buildEntry(entries[0]);
+    if (entry.author == null) {
+        return getRepHCard(html, url).
+            then(function(card) {
+                if (card !== null) entry.author = card;
+                return entry;
+            });
+    }
+    else 
+        return entry;
 }
 
-export function getHEntry(html: string | Buffer, url: string): Promise<Entry> {
-    return parser.getAsync({html: html, baseUrl: url}).
-        then(function(mf) {
-            var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
-            if (entries.length == 0)
-                throw new Error('No h-entry found');
-            else if (entries.length > 1)
-                throw new Error('Multiple h-entries found');
-            return new Entry(entries[0]);
-        });
+
+function prop(mf, name, f?) {
+    if (mf.properties[name] != null) {
+        if (f != null)
+            return mf.properties[name].map(f);
+        return mf.properties[name];
+    }
+    return [];
+}
+
+function firstProp(mf, name, f?) {
+    if (mf.properties[name] != null) {
+        if (f != null)
+            return f(mf.properties[name][0]);
+        return mf.properties[name][0];
+    }
+    return null;
+}
+
+export function _buildEntry(mf) {
+    if (typeof(mf) === 'string')
+        return new Entry(mf);
+    var entry = new Entry();
+    if (!mf.type.some(t => t === 'h-entry' || t === 'h-cite'))
+        throw new Error('Attempt to parse ' + mf.type + ' as Entry');
+    entry.name = firstProp(mf, 'name');
+    entry.published = firstProp(mf, 'published', p => new Date(p));
+    entry.content = firstProp(mf, 'content');
+    entry.summary = firstProp(mf, 'summary');
+    entry.url = firstProp(mf, 'url');
+    entry.author = firstProp(mf, 'author', a => new Card(a));
+    entry.category = prop(mf, 'category');
+    entry.syndication = prop(mf, 'syndication');
+    entry.replyTo = prop(mf, 'in-reply-to', r => _buildEntry(r));
+    entry.likeOf = prop(mf, 'like-of', r => _buildEntry(r));
+    entry.repostOf = prop(mf, 'repost-of', r => _buildEntry(r));
+    entry.children = (mf.children || []).
+        concat(mf.properties['comment'] || []).
+        filter(i => i.type.some(t => t === 'h-cite')).
+        map(e => _buildEntry(e)).
+        filter(e => e.url != null);
+    return entry;
 }
 
 export function getRepHCard(html: string | Buffer, url: string): Promise<Card> {
@@ -113,32 +150,6 @@ function urlsEqual(u1, u2) {
         p1.path === p2.path;
 }
 
-function prop(mf, name, f?) {
-    if (mf.properties[name] != null) {
-        if (f != null)
-            return mf.properties[name].map(f);
-        return mf.properties[name];
-    }
-    return [];
-}
-
-function firstProp(mf, name, f?) {
-    if (mf.properties[name] != null) {
-        if (f != null)
-            return f(mf.properties[name][0]);
-        return mf.properties[name][0];
-    }
-    return null;
-}
-
-function children(mf) {
-    return (mf.children || []).
-        concat(mf.properties['comment'] || []).
-        filter(i => i.type.some(t => t === 'h-cite')).
-        map(e => new Entry(e)).
-        filter(e => e.url != null);
-}
-
 export class Entry {
     name: string = null;
     published: Date = null;
@@ -153,26 +164,10 @@ export class Entry {
     repostOf: Entry[] = [];
     children: Entry[] = [];
 
-    constructor(mf?) {
-        if (mf != null && typeof(mf) === 'string') {
+    constructor(url?) {
+        if (url != null && typeof(url) === 'string') {
             // stub with only url, ie. from "<a href="..." class="u-in-reply-to">"
-            this.url = mf;
-        } else if (mf != null && mf.properties !== undefined) {
-            // mf parser output
-            if (!mf.type.some(t => t === 'h-entry' || t === 'h-cite'))
-                throw new Error('Attempt to parse ' + mf.type + ' as Entry');
-            this.name = firstProp(mf, 'name');
-            this.published = firstProp(mf, 'published', p => new Date(p));
-            this.content = firstProp(mf, 'content');
-            this.summary = firstProp(mf, 'summary');
-            this.url = firstProp(mf, 'url');
-            this.author = firstProp(mf, 'author', a => new Card(a));
-            this.category = prop(mf, 'category');
-            this.syndication = prop(mf, 'syndication');
-            this.replyTo = prop(mf, 'in-reply-to', r => new Entry(r));
-            this.likeOf = prop(mf, 'like-of', r => new Entry(r));
-            this.repostOf = prop(mf, 'repost-of', r => new Entry(r));
-            this.children = children(mf);
+            this.url = url;
         }
     }
 
