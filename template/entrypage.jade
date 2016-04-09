@@ -1,4 +1,5 @@
 extends ./page
-- var title = utils.truncate(entry.name, 32) + ' - ' + site.title;
+block title
+    = utils.truncate(entry.name, 32) + ' - ' + site.title
 block content
     include ./entry

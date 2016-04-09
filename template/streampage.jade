@@ -1,5 +1,6 @@
 extends ./page
-- var title = site.title;
+block title
+    = site.title
 block content
     div(class="h-feed")
         each entry in entries

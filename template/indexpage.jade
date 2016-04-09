@@ -1,5 +1,6 @@
 extends ./page
-- var title = category + ' - ' + site.title;
+block title
+    = category + ' - ' + site.title
 block content
     h2= category
     ul(class="h-feed")
