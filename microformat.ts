@@ -40,11 +40,11 @@ export function getHEntryFromUrl(url: string): Promise<Entry> {
         then(res => {
             if (res.statusCode != 200)
                 throw new Error('Server returned status ' + res.statusCode);
-            return getHEntryWithCard(res.body, url);
+            return getHEntry(res.body, url);
         });
 }
 
-export async function getHEntryWithCard(html: string | Buffer, url: string): Promise<Entry> {
+export async function getHEntry(html: string | Buffer, url: string): Promise<Entry> {
     var mf = await parser.getAsync({html: html, baseUrl: url});
     var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
     if (entries.length == 0)

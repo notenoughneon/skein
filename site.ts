@@ -211,7 +211,7 @@ class Site {
         //ISSUE: some properties may be embedded mf in the content (e.g. summary)
         //so we render and then re-parse it to get all properties
         var html = this.renderEntry(entry);
-        entry = await microformat.getHEntryWithCard(html, this.config.url);
+        entry = await microformat.getHEntry(html, this.config.url);
         await this.publisher.put(slug, html, 'text/html');
         return entry;
     }
@@ -220,7 +220,7 @@ class Site {
         u = url.parse(u).pathname;
         var obj = await this.publisher.get(u);
         debug('got ' + obj);
-        return await microformat.getHEntryWithCard(obj.Body, url.resolve(this.config.url, u));
+        return await microformat.getHEntry(obj.Body, url.resolve(this.config.url, u));
     }
 
     async getAll() {
@@ -232,7 +232,7 @@ class Site {
             if (obj.ContentType === 'text/html') {
                 let u = url.resolve(this.config.url, key);
                 try {
-                    let entry = await microformat.getHEntryWithCard(obj.Body, u);
+                    let entry = await microformat.getHEntry(obj.Body, u);
                     if (entry != null && !seen[entry.url] && (entry.url === u || entry.url + '.html' === u)) {
                         seen[entry.url] = true;
                         entries.push(entry);
@@ -312,10 +312,10 @@ class Site {
                 var u = url.resolve(this.config.url, key);
                 var obj = await this.publisher.get(key);
                 if (obj.ContentType == 'text/html') {
-                    var expected = await microformat.getHEntryWithCard(obj.Body, u);
+                    var expected = await microformat.getHEntry(obj.Body, u);
                     if (expected != null && (expected.url === u || expected.url + '.html' === u)) {
                         let html = this.renderEntry(expected);
-                        var actual = await microformat.getHEntryWithCard(html, expected.url);
+                        var actual = await microformat.getHEntry(html, expected.url);
                         assert.deepEqual(actual, expected);
                         debug('pass ' + expected.url);
                     }
@@ -349,7 +349,7 @@ class Site {
             throw new Error('Didn\'t find mention on source page');
         } else {
             var targetEntry = await this.get(targetUrl);
-            var sourceEntry = await microformat.getHEntryWithCard(sourceHtml, sourceUrl);
+            var sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl);
             // TODO: handle non mf mentions
             targetEntry.children.push(sourceEntry);
             targetEntry.deduplicate();
