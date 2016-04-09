@@ -178,7 +178,7 @@ class Api {
                     category: req['post'].category
                 })).
                 then(e => entry = e).
-                then(() => site.generateFeed()).
+                then(() => site.generateStream()).
                 then(() => when.map(entry.category, category => site.generateTagIndex(category))).
                 then(() => site.publisher.commit('publish ' + entry.url)).
                 then(() => release()).

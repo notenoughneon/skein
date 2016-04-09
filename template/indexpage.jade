@@ -1,13 +1,10 @@
 extends ./page
-- var title = site.title;
+- var title = category + ' - ' + site.title;
 block content
-    div(class="h-feed")
+    h2= category
+    ul(class="h-feed")
         each entry in entries
-            include ./streamentry
-        ul(class="pager")
-            if page < totalPages
-                li
-                    a(href=utils.getPathForIndex(page + 1) rel="previous") Older
-            if page > 1
-                li
-                    a(href=utils.getPathForIndex(page - 1) rel="next") Newer
+            li(class="h-cite")
+                - var dateString = utils.formatDate(entry.published);
+                time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
+                a(class="u-url p-name" href=entry.url)= utils.truncate(entry.name, 64)

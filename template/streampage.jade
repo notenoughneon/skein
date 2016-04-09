@@ -1,0 +1,13 @@
+extends ./page
+- var title = site.title;
+block content
+    div(class="h-feed")
+        each entry in entries
+            include ./streamentry
+        ul(class="pager")
+            if page < totalPages
+                li
+                    a(href=utils.getPathForIndex(page + 1) rel="previous") Older
+            if page > 1
+                li
+                    a(href=utils.getPathForIndex(page - 1) rel="next") Newer

@@ -133,7 +133,7 @@ describe('site', function() {
 
     //FIXME: brittle
     it('can generate an index', function(done) {
-        site.generateFeed().
+        site.generateStream().
             then(() => parser.getAsync({html: fs.readFileSync(config.publisher.root + '/index.html')})).
             then(mf => {
                 var feed = mf.items[0];
@@ -173,6 +173,22 @@ describe('site', function() {
             }).
             then(done).
             catch(done);
+    });
+
+    it('can generate an article index', function(done) {
+        site.generateArticleIndex()
+        .then(() => parser.getAsync({html: fs.readFileSync(config.publisher.root + '/articles.html')}))
+        .then(mf => {
+            var feed = mf.items[0];
+            assert.equal(feed.type[0], 'h-feed');
+            var entry1 = feed.children[0];
+            assert.equal(entry1.type[0], 'h-cite');
+            assert.equal(entry1.properties.url[0], post5.url);
+            assert.equal(entry1.properties.published[0], post5.published.toISOString());
+            assert.equal(entry1.properties.name[0], post5.name);
+        })
+        .then(done)
+        .catch(done);
     });
 
     it('regenerate works', function(done) {
