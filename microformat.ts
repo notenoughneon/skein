@@ -16,7 +16,6 @@ export async function crawlHEntryThread(seed: string) {
     while (boundary.length > 0) {
         let url = boundary.shift();
         try {
-            debug('Fetching ' + url);
             let entry = await getHEntryFromUrl(url);
             entryDict.set(url, entry);
             let references = entry
@@ -37,13 +36,56 @@ export async function crawlHEntryThread(seed: string) {
 
 export async function getHEntryFromUrl(url: string): Promise<Entry> {
     var res = await request(url);
+    debug('Fetching ' + url);
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
     var entry = await getHEntry(res.body, url);
     if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
-        //TODO: fetch author-page
+        try {
+            var author = await getCardFromAuthorPage(entry.author.url);
+            if (author !== null)
+                entry.author = author;
+        } catch (err) {
+            debug('Failed to fetch author page: ' + err.message);
+        }
     }
     return entry;
+}
+
+export async function getCardFromAuthorPage(url: string): Promise<Card> {
+    var res = await request(url);
+    debug('Fetching ' + url);
+    if (res.statusCode != 200)
+        throw new Error('Server returned status ' + res.statusCode);
+    var mf = await parser.getAsync({html: res.body, baseUrl: url});
+    var cards = mf.items.
+        filter(i => i.type.some(t => t == 'h-card')).
+        map(h => _buildCard(h));
+    // 1. uid and url match author-page url
+    var match = cards.filter(c =>
+        c.url != null &&
+        c.uid != null &&
+        urlsEqual(c.url, url) &&
+        urlsEqual(c.uid, url)
+    );
+    if (match.length > 0) return match[0];
+    // 2. url matches rel=me
+    if (mf.rels.me != null) {
+        var match = cards.filter(c =>
+            mf.rels.me.some(r =>
+                c.url != null &&
+                urlsEqual(c.url, r)
+            )
+        );
+        if (match.length > 0) return match[0];
+    }
+    // 3. url matches author-page url
+    var match = cards.filter(c =>
+        c.url != null &&
+        urlsEqual(c.url, url)
+    );
+    if (match.length > 0) return match[0];
+    return null;
 }
 
 export async function getHEntry(html: string | Buffer, url: string): Promise<Entry> {
@@ -116,6 +158,10 @@ export function _buildEntry(mf) {
     return entry;
 }
 
+/**
+ * Deprecated in favor of authorship algorithm:
+ * http://indiewebcamp.com/authorship
+ */
 export function getRepHCard(html: string | Buffer, url: string): Promise<Card> {
     return parser.getAsync({html: html, baseUrl: url}).
         then(function(mf) {
