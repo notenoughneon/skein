@@ -19,7 +19,8 @@ div(class="h-entry")
     if !entry.isLike() && !entry.isRepost()
         div(class="blog-post")
             if entry.isArticle()
-                h2(class="blog-post-title p-name")= entry.name
+                h2(class="blog-post-title p-name")
+                    a(href=entry.url)= entry.name
             - var hideAuthor = true;
             include ./meta
             if entry.summary !== null
