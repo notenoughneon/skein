@@ -4,6 +4,7 @@ import fs = require('fs');
 import url = require('url');
 import path = require('path');
 import child_process = require('child_process');
+import express = require('express');
 import nodefn = require('when/node');
 var parser = require('microformat-node');
 import microformat = require('../microformat');
@@ -12,15 +13,13 @@ import util = require('../util');
 
 var exec = nodefn.lift(child_process.exec);
 
-// test web server
-var express = require('express');
 var app = express();
-var http = require('http').Server(app);
-app.use(express.static('build/test/static', {extensions: ['html']}));
-
 var config = JSON.parse(fs.readFileSync('test/config.json').toString());
 
+app.use(express.static('build/test/static', {extensions: ['html']}));
+
 describe('site', function() {
+    var server;
     var site: Site;
     var post1: microformat.Entry,
     post2: microformat.Entry,
@@ -29,12 +28,16 @@ describe('site', function() {
     post5: microformat.Entry;
 
     before(function(done) {
-        exec('rm -rf ' + config.publisher.root).
-            then(() => exec('cp -R skel ' + config.publisher.root)).
-            then(() => done()).
-            catch(done);
-        site = new Site(config);
-        var server = http.listen(8000);
+        exec('rm -rf ' + config.publisher.root)
+        .then(() => exec('cp -R skel ' + config.publisher.root))
+        .then(() => server = app.listen(config.port))
+        .then(() => site = new Site(config))
+        .then(() => done())
+        .catch(done);
+    });
+
+    after(function() {
+        server.close();
     });
 
     it('can post a note', function(done) {

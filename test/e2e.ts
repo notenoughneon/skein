@@ -23,17 +23,21 @@ app.use(express.static(config.staticSiteRoot, {extensions: ['html']}));
 app.set('views', './template');
 app.set('view engine', 'jade');
 
-var server = app.listen(config.port);
-
 describe('e2e', function() {
+    var server;
     var code;
     var token;
     
     before(function(done) {
-        exec('rm -rf ' + config.publisher.root).
-            then(() => exec('cp -R skel ' + config.publisher.root)).
-            then(() => done()).
-            catch(done);
+        exec('rm -rf ' + config.publisher.root)
+        .then(() => exec('cp -R skel ' + config.publisher.root))
+        .then(() => server = app.listen(config.port))
+        .then(() => done())
+        .catch(done);
+    });
+
+    after(function() {
+        server.close();
     });
     
     it('micropub endpoint requires token', function(done) {
