@@ -94,6 +94,8 @@ interface Micropub {
     name?: string,
     content: string | {html: string},
     replyTo?: string,
+    likeOf?: string,
+    repostOf?: string,
     syndication?: string[],
     photo?: {filename: string, tmpfile: string, mimetype: string},
     audio?: {filename: string, tmpfile: string, mimetype: string},
@@ -190,6 +192,10 @@ class Site {
         entry.url = this.config.url + slug;
         if (m.replyTo != null)
             entry.replyTo.push(await microformat.getHEntryFromUrl(m.replyTo));
+        if (m.likeOf != null)
+            entry.likeOf.push(await microformat.getHEntryFromUrl(m.likeOf));
+        if (m.repostOf != null)
+            entry.repostOf.push(await microformat.getHEntryFromUrl(m.repostOf));
         if (m.syndication != null)
             entry.syndication = m.syndication;
         if (m.photo != null) {
@@ -213,6 +219,7 @@ class Site {
         var html = this.renderEntry(entry);
         entry = await microformat.getHEntry(html, this.config.url);
         await this.publisher.put(slug, html, 'text/html');
+        debug('Published ' + entry.getSlug())
         return entry;
     }
 
@@ -379,6 +386,7 @@ class Site {
             targetEntry.deduplicate();
             var targetHtml = this.renderEntry(targetEntry);
             await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
+            debug('Received webmention from ' + sourceUrl);
         }
     }
 

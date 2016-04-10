@@ -168,6 +168,8 @@ class Api {
                     content: req['post'].content,
                     name: req['post'].name,
                     replyTo: req['post']['in-reply-to'],
+                    likeOf: req['post']['like-of'],
+                    repostOf: req['post']['repost-of'],
                     photo: req['files'].photo,
                     audio: req['files'].audio,
                     syndication: req['post'].syndication,
