@@ -225,22 +225,22 @@ class Site {
 
     async getAll() {
         var keys = await this.publisher.list();
-        var seen = {};
-        var entries: microformat.Entry[] = [];
-        for (let key of keys) {
+        var entries: Map<string, microformat.Entry> = new Map();
+        var re = /^(index|js|css|tags|articles|log.txt)/;
+        keys = keys.filter(k => !re.test(k));
+        await Promise.all(keys.map( async (key) => {
             let obj = await this.publisher.get(key);
             if (obj.ContentType === 'text/html') {
                 let u = url.resolve(this.config.url, key);
                 try {
                     let entry = await microformat.getHEntry(obj.Body, u);
-                    if (entry != null && !seen[entry.url] && (entry.url === u || entry.url + '.html' === u)) {
-                        seen[entry.url] = true;
-                        entries.push(entry);
+                    if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
+                        entries.set(entry.url, entry);
                     }
                 } catch (err) {}
             }
-        }
-        return entries;
+        }));
+        return Array.from(entries.values());
     }
 
     async update(entry: microformat.Entry) {
