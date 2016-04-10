@@ -98,10 +98,10 @@ export function flatten<T>(arrarr: T[][]) {
 
 export function unique<T>(elts: T[]) {
     var tmp: T[] = [];
-    var seen = {};
+    var seen: Set<T> = new Set();
     for (let elt of elts) {
-        if (!seen[elt]) {
-            seen[elt] = true;
+        if (!seen.has(elt)) {
+            seen.add(elt);
             tmp.push(elt);
         }
     }
