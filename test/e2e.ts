@@ -18,7 +18,8 @@ var exec = util.promisify(child_process.exec);
 var app = express();
 var configFile = 'test/config.json';
 var config = JSON.parse(fs.readFileSync(configFile).toString());
-var api = new Api(new Site(config));
+var site = new Site(config);
+var api = new Api(site);
 
 app.use('/api', api.router);
 app.use(express.static(config.staticSiteRoot, {extensions: ['html']}));
@@ -42,16 +43,6 @@ describe('e2e', function() {
         server.close();
     });
     
-    it('micropub endpoint requires token', function(done) {
-        var form = { h: 'entry', content: 'Hello World!' };
-        post({ url: config.micropubUrl, form: form })
-        .then(res => {
-            assert(res.statusCode === 401);
-        })
-        .then(done)
-        .catch(done);
-    });
-
     it('auth endpoint rejects invalid password', function(done) {
         var form = {
             password: 'invalid password',
@@ -115,7 +106,38 @@ describe('e2e', function() {
         .catch(done);
     });
     
-    it('can post a note (access token in header)', function(done) {
+    it('micropub endpoint requires token', function(done) {
+        var form = { h: 'entry', content: 'Hello World!' };
+        post({ url: config.micropubUrl, form: form })
+        .then(res => {
+            assert(res.statusCode === 401);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('micropub endpoint rejects invalid access token in header', function(done) {
+        var form = { h: 'entry', content: 'Access token in header' };
+        var headers = { Authorization: 'bearer ' + 'bad token' };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 401);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('micropub endpoint rejects invalid access token in body', function(done) {
+        var form = { h: 'entry', content: 'Access token in body', access_token: 'bad token' };
+        post({ url: config.micropubUrl, form: form })
+        .then(res => {
+            assert(res.statusCode === 401);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('micropub endpoint accepts access token in header', function(done) {
         var form = { h: 'entry', content: 'Access token in header' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
@@ -126,7 +148,7 @@ describe('e2e', function() {
         .catch(done);
     });
 
-    it('can post a note (access token in body)', function(done) {
+    it('micropub endpoint accepts access token in body', function(done) {
         var form = { h: 'entry', content: 'Access token in body', access_token: token };
         post({ url: config.micropubUrl, form: form })
         .then(res => {
@@ -136,7 +158,7 @@ describe('e2e', function() {
         .catch(done);
     });
     
-    it('posting stress test', function(done) {
+    it.skip('posting stress test', function(done) {
         this.timeout(0);
         var headers = { Authorization: 'bearer ' + token };
         var elts = util.range(1, 10);
@@ -151,5 +173,99 @@ describe('e2e', function() {
         .then(() => done())
         .catch(done);
         
+    });
+    
+    var testNote;
+    it('post note via micropub', function(done) {
+        var form = { h: 'entry', content: 'Test note' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testNote = e;
+            assert(e.name === form.content);
+            assert(e.content.html === form.content);
+            assert(e.content.value === form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    var testReply;
+    it('post reply via micropub', function(done) {
+        var form = { h: 'entry', content: 'Test reply', 'in-reply-to': testNote.url };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testReply = e;
+            assert(e.name === form.content);
+            assert(e.replyTo[0].url === testNote.url);
+            assert(e.replyTo[0].name === testNote.name);
+            return site.get(testNote.url);
+        })
+        .then(e => {
+            testNote = e;
+            assert(e.children[0].url === testReply.url);
+            assert(e.children[0].name === testReply.name);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    var testLike;
+    it('post like via micropub', function(done) {
+        var form = { h: 'entry', content: 'Test like', 'like-of': testNote.url };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testLike = e;
+            assert(e.name === form.content);
+            assert(e.likeOf[0].url === testNote.url);
+            assert(e.likeOf[0].name === testNote.name);
+            return site.get(testNote.url);
+        })
+        .then(e => {
+            testNote = e;
+            assert(e.children[1].url === testLike.url);
+            assert(e.children[1].name === testLike.name);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    var testRepost;
+    it('post repost via micropub', function(done) {
+        var form = { h: 'entry', content: 'Test repost', 'repost-of': testNote.url };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testRepost = e;
+            assert(e.name === form.content);
+            assert(e.repostOf[0].url === testNote.url);
+            assert(e.repostOf[0].name === testNote.name);
+            return site.get(testNote.url);
+        })
+        .then(e => {
+            testNote = e;
+            assert(e.children[2].url === testRepost.url);
+            assert(e.children[2].name === testRepost.name);
+        })
+        .then(done)
+        .catch(done);
     });
 });

@@ -52,7 +52,8 @@ var stat = promisify(fs.stat);
 var readdir = promisify(fs.readdir);
 var _writeFile = promisify(fs.writeFile);
 
-var request = promisify(Request.get);
+var get = promisify(Request.get);
+var post = promisify(Request.post);
 
 export function dump(data) {
     console.log(util.inspect(data, {depth: null}));
@@ -212,7 +213,7 @@ export function isMentionOf(html, permalink) {
 }
 
 function getWebmentionEndpoint(target) {
-    return request(target).
+    return get(target).
         then(function (res) {
             return parser.getAsync({html: res.body, baseUrl: target});
         }).
@@ -229,18 +230,18 @@ function getWebmentionEndpoint(target) {
 export function sendWebmention(source, target) {
     return getWebmentionEndpoint(target).
         then(function (endpoint) {
-            return request({uri:endpoint, method:'POST', form:{source:source, target:target}}).
+            return post({uri:endpoint, form:{source:source, target:target}}).
                 then(function (res) {
                     var status = res.statusCode;
                     if (status !== 200 && status !== 202)
-                        throw new Error('Webmention endpoint returned status ' + status);
+                        throw new Error(endpoint + ' returned status ' + status);
                     return;
                 });
         });
 }
 
 export function getPage(permalink) {
-    return request({uri: permalink}).
+    return get({uri: permalink}).
         then(function (res) {
             var status = res.statusCode;
             if (status >= 200 && status <= 299)

@@ -219,7 +219,6 @@ class Site {
     async get(u: string) {
         u = url.parse(u).pathname;
         var obj = await this.publisher.get(u);
-        debug('got ' + obj);
         return await microformat.getHEntry(obj.Body, url.resolve(this.config.url, u));
     }
 
