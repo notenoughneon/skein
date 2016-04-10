@@ -41,49 +41,96 @@ describe('e2e', function() {
     });
     
     it('micropub endpoint requires token', function(done) {
-        var m = {content: 'Hello World!'};
-        post(config.micropubUrl, {form: m})
+        var form = { h: 'entry', content: 'Hello World!' };
+        post(config.micropubUrl, { form: form })
         .then(res => {
             assert(res.statusCode === 401);
         })
         .then(done)
         .catch(done);
     });
-    
+
     it('auth endpoint rejects invalid password', function(done) {
-        var r = {
+        var form = {
             password: 'invalid password',
             client_id: 'e2e_test',
             scope: 'post',
             redirect_uri: 'http://bogus.redirect',
             state: '12345'
         };
-        post(config.authUrl, {form: r})
+        post(config.authUrl, { form: form })
         .then (res => {
             assert(res.statusCode === 401);
         })
         .then(done)
         .catch(done);
     });
-    
-    it('auth endpoint issues token', function(done) {
-        var r = {
+
+    it('auth endpoint issues code', function(done) {
+        var form = {
             password: config.password,
             client_id: 'e2e_test',
             scope: 'post',
             redirect_uri: 'http://bogus.redirect',
             state: '12345'
         };
-        post(config.authUrl, {form: r})
+        post(config.authUrl, { form: form })
         .then (res => {
             assert(res.statusCode === 302);
             var location = res.headers.location;
-            assert(location.startsWith(r.redirect_uri));
+            assert(location.startsWith(form.redirect_uri));
             var query = url.parse(location).query;
             var args = querystring.parse(query);
-            assert(args.state === r.state);
+            assert(args.state === form.state);
             assert(args.me === config.url);
             code = args.code;
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    it('token endpoint rejects invalid code', function(done) {
+        var form = { code: 'invalid code' };
+        post(config.tokenUrl, { form: form })
+        .then(res => {
+            assert(res.statusCode === 401);
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    it('token endpoint issues token', function(done) {
+        var form = { code: code };
+        post(config.tokenUrl, { form: form })
+        .then(res => {
+            assert(res.statusCode === 200);
+            var args = querystring.parse(res.body);
+            assert(args.scope === 'post');
+            assert(args.me === config.url);
+            token = args.access_token;
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('can post a note (access token in header)', function(done) {
+        var form = { h: 'entry', content: 'Access token in header' };
+        var headers = { Authorization: 'bearer ' + token };
+        post(config.micropubUrl, { form: form, headers: headers })
+        .then(res => {
+            console.log(res.statusCode);
+            assert(res.statusCode === 201);
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    it('can post a note (access token in body)', function(done) {
+        var form = { h: 'entry', content: 'Access token in body', access_token: token };
+        post(config.micropubUrl, { form: form })
+        .then(res => {
+            console.log(res.statusCode);
+            assert(res.statusCode === 201);
         })
         .then(done)
         .catch(done);

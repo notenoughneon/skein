@@ -104,7 +104,7 @@ class Api {
         this.router.use(parsePost);
         this.router.use(logger);
 
-        this.router.get('/auth', function(req, res) {
+        this.router.get('/auth', (req, res) => {
             if (req.query.client_id != null &&
                 req.query.me != null &&
                 req.query.redirect_uri != null &&
@@ -129,21 +129,19 @@ class Api {
                         res.redirect(req['post'].redirect_uri + '?' +
                         querystring.stringify({code: code, state: req['post'].state, me: site.config.url}));
                     }).
-                    catch(function (e) {
-                        handleError(res, e);
-                    });
+                    catch(e => handleError(res, e));
             } else {
                 debug('Failed password authentication from ' + req.ip);
                 res.sendStatus(401);
             }
         });
 
-        this.router.post('/token', rateLimit(3, 1000 * 60), function(req, res) {
+        this.router.post('/token', rateLimit(3, 1000 * 60), (req, res) => {
             if (this.lastIssuedCode !== null &&
                 this.lastIssuedCode.code === req['post'].code &&
                 ((Date.now() - this.lastIssuedCode.date) < 60 * 1000)) {
                 this.generateToken(this.lastIssuedCode.client_id, this.lastIssuedCode.scope).
-                    then(function (result) {
+                    then((result) => {
                         this.lastIssuedCode = null;
                         if (result === undefined) {
                             res.sendStatus(500);
@@ -152,16 +150,14 @@ class Api {
                             res.send(querystring.stringify({access_token: result.token, scope: result.scope, me: site.config.url}));
                         }
                     }).
-                    catch(function (e) {
-                        handleError(res, e);
-                    });
+                    catch(e => handleError(res, e));
             } else {
                 debug('Failed token request from ' + req.ip);
                 res.sendStatus(401);
             }
         });
 
-        this.router.post('/micropub', this.requireAuth('post'), function(req, res) {
+        this.router.post('/micropub', this.requireAuth('post'), (req, res) => {
             var entry: microformat.Entry;
             var release;
             if (req['post'].h != 'entry')
@@ -197,7 +193,7 @@ class Api {
                 });
         });
 
-        this.router.post('/webmention', rateLimit(50, 1000 * 60 * 60), function(req, res) {
+        this.router.post('/webmention', rateLimit(50, 1000 * 60 * 60), (req, res) => {
             var release;
             var source = req['post'].source;
             var target = req['post'].target;
@@ -215,7 +211,7 @@ class Api {
                 });
         });
 
-        this.router.get('/entries/*', this.requireAuth('post'), function(req, res) {
+        this.router.get('/entries/*', this.requireAuth('post'), (req, res) => {
             var url = req.params[0];
             site.get(url).
                 then(entry => {
@@ -225,13 +221,13 @@ class Api {
                 catch(e => handleError(res, e));
         });
 
-        this.router.put('/entries', this.requireAuth('post'), bodyParser.json(), function(req, res) {
+        this.router.put('/entries', this.requireAuth('post'), bodyParser.json(), (req, res) => {
             var entry = req.body;
             return site.update(entry).
                 catch(e => handleError(res, e));
         });
 
-        this.router.delete('/entries/*', this.requireAuth('post'), function(req, res) {
+        this.router.delete('/entries/*', this.requireAuth('post'), (req, res) => {
             var url = req.params[0];
             site.delete(url).
                 then(() => res.sendStatus(204)).
@@ -250,7 +246,7 @@ class Api {
     }
 
     requireAuth(scope) {
-        return function(req, res, next) {
+        return (req, res, next) => {
             var token;
             if (req.headers.authorization !== undefined) {
                 var re = /^bearer (.+)/i;
@@ -264,7 +260,7 @@ class Api {
                 return denyAccess(req, res);
             }
             var found = this.tokens.find(t => t.token === token);
-            if (found === undefined || !found.scope.split(' ').some(function(s) {return s === scope;}))
+            if (found === undefined || !found.scope.split(' ').some(s => s === scope))
                 return denyAccess(req, res);
             next();
         };
