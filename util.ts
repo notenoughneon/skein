@@ -121,6 +121,14 @@ export function chunk(size, arr) {
     return chunks;
 }
 
+export function range(start: number, end: number) {
+    return [...function* () {
+        var i = start;
+        while (i <= end)
+            yield i++;
+    } ()];
+}
+
 /* walk directory recursively and return list of files */
 export async function walkDir(d) {
     var stats = await stat(d);

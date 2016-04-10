@@ -8,6 +8,8 @@ import Site = require('../site');
 import Api = require('../api');
 import child_process = require('child_process');
 import util = require('../util');
+import Debug = require('debug');
+var debug = Debug('e2e');
 
 var get = util.promisify(Request.get);
 var post = util.promisify(Request.post);
@@ -42,7 +44,7 @@ describe('e2e', function() {
     
     it('micropub endpoint requires token', function(done) {
         var form = { h: 'entry', content: 'Hello World!' };
-        post(config.micropubUrl, { form: form })
+        post({ url: config.micropubUrl, form: form })
         .then(res => {
             assert(res.statusCode === 401);
         })
@@ -58,7 +60,7 @@ describe('e2e', function() {
             redirect_uri: 'http://bogus.redirect',
             state: '12345'
         };
-        post(config.authUrl, { form: form })
+        post({ url: config.authUrl, form: form })
         .then (res => {
             assert(res.statusCode === 401);
         })
@@ -74,7 +76,7 @@ describe('e2e', function() {
             redirect_uri: 'http://bogus.redirect',
             state: '12345'
         };
-        post(config.authUrl, { form: form })
+        post({ url: config.authUrl, form: form })
         .then (res => {
             assert(res.statusCode === 302);
             var location = res.headers.location;
@@ -91,7 +93,7 @@ describe('e2e', function() {
 
     it('token endpoint rejects invalid code', function(done) {
         var form = { code: 'invalid code' };
-        post(config.tokenUrl, { form: form })
+        post({ url: config.tokenUrl, form: form })
         .then(res => {
             assert(res.statusCode === 401);
         })
@@ -101,7 +103,7 @@ describe('e2e', function() {
 
     it('token endpoint issues token', function(done) {
         var form = { code: code };
-        post(config.tokenUrl, { form: form })
+        post({ url: config.tokenUrl, form: form })
         .then(res => {
             assert(res.statusCode === 200);
             var args = querystring.parse(res.body);
@@ -116,9 +118,8 @@ describe('e2e', function() {
     it('can post a note (access token in header)', function(done) {
         var form = { h: 'entry', content: 'Access token in header' };
         var headers = { Authorization: 'bearer ' + token };
-        post(config.micropubUrl, { form: form, headers: headers })
+        post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
-            console.log(res.statusCode);
             assert(res.statusCode === 201);
         })
         .then(done)
@@ -127,12 +128,28 @@ describe('e2e', function() {
 
     it('can post a note (access token in body)', function(done) {
         var form = { h: 'entry', content: 'Access token in body', access_token: token };
-        post(config.micropubUrl, { form: form })
+        post({ url: config.micropubUrl, form: form })
         .then(res => {
-            console.log(res.statusCode);
             assert(res.statusCode === 201);
         })
         .then(done)
         .catch(done);
+    });
+    
+    it('posting stress test', function(done) {
+        this.timeout(0);
+        var headers = { Authorization: 'bearer ' + token };
+        var elts = util.range(1, 10);
+        Promise.all(elts.map(elt => {
+            let form = { h: 'entry', content: 'Stress test post ' + elt };
+            return post({ url: config.micropubUrl, form: form, headers: headers })
+            .then(res => {
+                assert(res.statusCode === 201);
+                debug('Done ' + res.headers.location);
+            });
+        }))
+        .then(() => done())
+        .catch(done);
+        
     });
 });
