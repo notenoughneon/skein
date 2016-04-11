@@ -178,7 +178,7 @@ describe('e2e', function() {
     
     var testNote;
     it('post note via micropub', function(done) {
-        var form = { h: 'entry', content: 'Test note. <b>HTML</b> should be escaped.' };
+        var form = { h: 'entry', content: 'Test note.' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
@@ -195,17 +195,15 @@ describe('e2e', function() {
         .catch(done);
     });
     
-    it('post note with html chars', function(done) {
-        var form = { h: 'entry', content: 'Test note. <b>HTML</b> should be escaped.' };
+    it('html in plain text escaped', function(done) {
+        var form = { h: 'entry', content: 'Plain text note. <b>HTML</b> should be escaped.' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
-            debug(res.statusCode);
             assert(res.statusCode === 201);
             return site.get(res.headers.location);
         })
         .then(e => {
-            debug(e.content);
             assert(e.name === form.content);
             assert(e.content.html === util.escapeHtml(form.content));
             assert(e.content.value === form.content);
@@ -371,7 +369,7 @@ describe('e2e', function() {
     
     var testArticle;
     it('post article via micropub', function(done) {
-        var form = { h: 'entry', name: 'Example Article', content: 'Here is some content. <b>HTML</b> should be escaped.' };
+        var form = { h: 'entry', name: 'Example Article', content: 'Here is some content.' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
