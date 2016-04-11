@@ -176,7 +176,7 @@ class Site {
             entry.name = m.name || content;
             entry.content = {
                 value: content,
-                html: util.autoLink(util.escapeHtml(m.content))
+                html: util.autoLink(util.escapeHtml(content))
             };
         } else {
             entry.name = m.name || util.stripHtml(content.html);

@@ -6,13 +6,37 @@ mixin cite(entry, rootClass)
             a(class="u-like-of" href=likeOf.url)
         each repostOf in entry.repostOf
             a(class="u-repost-of" href=repostOf.url)
-        div(class="blog-post")
-            if entry.isArticle()
-                h2(class="blog-post-title p-name")= entry.name
-            - var hideAuthor = false;
-            include ./meta
-            if entry.content != null
-                div(class="e-content" + (entry.isArticle() ? '' : ' p-name note-content'))= entry.content.value
-            else if entry.name != null
-                div(class="p-name")= entry.name
-            include ./actions
+
+        if entry.likeOf.length > 0
+            div(class="blog-post-meta")
+                i(class="fa fa-star")
+                |  
+                a(class="p-author h-card" href=entry.author.url)= entry.author.name
+                |  liked this. 
+                a(class="u-url" href=entry.url)
+                    if entry.published != null
+                        - var dateString = utils.formatDate(entry.published);
+                        time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
+
+        if entry.repostOf.length > 0
+            div(class="blog-post-meta")
+                i(class="fa fa-retweet")
+                |  
+                a(class="p-author h-card" href=entry.author.url)= entry.author.name
+                |  reposted this. 
+                a(class="u-url" href=entry.url)
+                    if entry.published != null
+                        - var dateString = utils.formatDate(entry.published);
+                        time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
+
+        if !entry.isLike() && !entry.isRepost()
+            div(class="blog-post")
+                if entry.isArticle()
+                    h2(class="blog-post-title p-name")= entry.name
+                - var hideAuthor = false;
+                include ./meta
+                if entry.content != null
+                    div(class="e-content" + (entry.isArticle() ? '' : ' p-name note-content'))= entry.content.value
+                else if entry.name != null
+                    div(class="p-name")= entry.name
+                include ./actions

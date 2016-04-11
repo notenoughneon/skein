@@ -221,7 +221,7 @@ describe('e2e', function() {
     
     var testLike;
     it('post like via micropub', function(done) {
-        var form = { h: 'entry', content: 'Test like', 'like-of': testNote.url };
+        var form = { h: 'entry', 'like-of': testNote.url };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
@@ -230,7 +230,6 @@ describe('e2e', function() {
         })
         .then(e => {
             testLike = e;
-            assert(e.name === form.content);
             assert(e.likeOf[0].url === testNote.url);
             assert(e.likeOf[0].name === testNote.name);
             return site.get(testNote.url);
@@ -238,7 +237,6 @@ describe('e2e', function() {
         .then(e => {
             testNote = e;
             assert(e.children[1].url === testLike.url);
-            assert(e.children[1].name === testLike.name);
         })
         .then(done)
         .catch(done);
@@ -246,7 +244,7 @@ describe('e2e', function() {
     
     var testRepost;
     it('post repost via micropub', function(done) {
-        var form = { h: 'entry', content: 'Test repost', 'repost-of': testNote.url };
+        var form = { h: 'entry', 'repost-of': testNote.url };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
@@ -255,7 +253,6 @@ describe('e2e', function() {
         })
         .then(e => {
             testRepost = e;
-            assert(e.name === form.content);
             assert(e.repostOf[0].url === testNote.url);
             assert(e.repostOf[0].name === testNote.name);
             return site.get(testNote.url);
@@ -263,7 +260,6 @@ describe('e2e', function() {
         .then(e => {
             testNote = e;
             assert(e.children[2].url === testRepost.url);
-            assert(e.children[2].name === testRepost.name);
         })
         .then(done)
         .catch(done);
