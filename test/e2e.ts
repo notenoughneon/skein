@@ -195,6 +195,23 @@ describe('e2e', function() {
         .catch(done);
     });
     
+    it('whitespace behavior in plain text', function(done) {
+        var form = { h: 'entry', content: 'Here is a line break.\nHere is    extra whitespace.\n    This line begins with whitespace.' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert(e.name === form.content);
+            assert(e.content.html === util.escapeHtml(form.content));
+            assert(e.content.value === form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     it('html in plain text escaped', function(done) {
         var form = { h: 'entry', content: 'Plain text note. <b>HTML</b> should be escaped.' };
         var headers = { Authorization: 'bearer ' + token };
