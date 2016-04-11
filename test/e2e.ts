@@ -2,6 +2,7 @@ import assert = require('assert');
 import url = require('url');
 import querystring = require('querystring');
 import fs = require('fs');
+import path = require('path');
 import express = require('express');
 import Request = require('request');
 import Site = require('../site');
@@ -177,7 +178,7 @@ describe('e2e', function() {
     
     var testNote;
     it('post note via micropub', function(done) {
-        var form = { h: 'entry', content: 'Test note' };
+        var form = { h: 'entry', content: 'Test note. <b>HTML</b> should be escaped.' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
@@ -187,7 +188,26 @@ describe('e2e', function() {
         .then(e => {
             testNote = e;
             assert(e.name === form.content);
-            assert(e.content.html === form.content);
+            assert(e.content.html === util.escapeHtml(form.content));
+            assert(e.content.value === form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('post note with html chars', function(done) {
+        var form = { h: 'entry', content: 'Test note. <b>HTML</b> should be escaped.' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            debug(res.statusCode);
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            debug(e.content);
+            assert(e.name === form.content);
+            assert(e.content.html === util.escapeHtml(form.content));
             assert(e.content.value === form.content);
         })
         .then(done)
@@ -260,6 +280,132 @@ describe('e2e', function() {
         .then(e => {
             testNote = e;
             assert(e.children[2].url === testRepost.url);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('test webmention deduplication', function(done) {
+        util.sendWebmention(testReply.url, testNote.url)
+        .then(() => {
+            return site.get(testNote.url);
+        })
+        .then(e => {
+            assert(e.children.length === 3);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    var testSyndication;
+    it('post note with syndication', function(done) {
+        var form = { h: 'entry', content: 'Test syndication', syndication: [
+            'https://twitter.com/testuser/status/12345',
+            'https://instagram.com/p/12345',
+            'https://facebook.com/12345'
+        ] };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers, qsStringifyOptions: { arrayFormat: 'brackets' } })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testSyndication = e;
+            assert(e.name === form.content);
+            assert(e.content.value === form.content);
+            assert.deepEqual(e.syndication, form.syndication);
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    var testCategories;
+    it('post note with categories', function(done) {
+        var form = { h: 'entry', content: 'Test categories', category: ['indieweb', 'micropub'] };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers, qsStringifyOptions: { arrayFormat: 'brackets' } })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testCategories = e;
+            assert(e.name === form.content);
+            assert(e.content.value === form.content);
+            assert.deepEqual(e.category, form.category);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    var testPhoto;
+    it('post photo via micropub', function(done) {
+        var formData = {
+            h: 'entry',
+            content: 'Test photo',
+            photo: {
+                value: fs.createReadStream('test/teacups.jpg'),
+                options: {
+                    filename: 'teacups.jpg',
+                    contentType: 'image/jpg'
+                }
+            }
+        };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, formData: formData, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testPhoto = e;
+            assert(e.name === formData.content);
+            assert(e.content.value === formData.content);
+            var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
+            assert.deepEqual(e.getPhotos(),[config.url + photoSlug]);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    var testArticle;
+    it('post article via micropub', function(done) {
+        var form = { h: 'entry', name: 'Example Article', content: 'Here is some content. <b>HTML</b> should be escaped.' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testArticle = e;
+            assert(e.name === form.name);
+            assert(e.content.html === util.escapeHtml(form.content));
+            assert(e.content.value === form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    var testArticle2;
+    it('post article with html content', function(done) {
+        var form = {
+            h: 'entry',
+            name: 'Article with HTML',
+            'content[html]': '<p class="p-summary">Here is a <b>summary</b></p><p>Lorem <i>ipsum</i> dolor</p>'
+        };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testArticle2 = e;
+            assert(e.name === form.name);
+            assert(e.content.html === form['content[html]']);
+            assert(e.content.value === util.stripHtml(form['content[html]']));
         })
         .then(done)
         .catch(done);
