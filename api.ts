@@ -19,7 +19,13 @@ import util = require('./util');
 
 function parsePost(req, res, next) {
     if (req.method === 'POST') {
-        var busboy = new Busboy({headers: req.headers});
+        var busboy = new Busboy({
+            headers: req.headers,
+            limits: {
+                files: 10,
+                fileSize: 10 * 1000 * 1000
+            }
+        });
         req.post = {};
         req.files = {};
         busboy.on('field', function (fieldname, val) {
@@ -46,6 +52,12 @@ function parsePost(req, res, next) {
         busboy.on('finish', function () {
             next();
         });
+        res.on('finish', function() {
+            for (let field in req.files) {
+                debug('Cleaning up ' + req.files[field].tmpfile);
+                fs.unlink(req.files[field].tmpfile);
+            }
+        });
         req.pipe(busboy);
     } else {
         next();
@@ -71,7 +83,9 @@ function logger(req, res, next) {
     var parms = (req.method == 'POST' ? req.post : req.query);
     debug('%s %s %s', req.ip, req.method, req.url);
     if (Object.keys(parms).length > 0)
-        debug(inspect(req.method == 'POST' ? req.post : req.query));
+        debug(req.method == 'POST' ? req.post : req.query);
+    if (Object.keys(req.files).length > 0)
+        debug(req.files);
     next();
 }
 
