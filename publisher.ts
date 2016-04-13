@@ -2,7 +2,7 @@
 import when = require('when');
 
 interface Publisher {
-    put(path: string, obj: any, contentType: string): Promise<void>;
+    put(path: string, obj: string | NodeJS.ReadableStream, contentType?: string): Promise<void>;
     delete(path: string, contentType: string): Promise<void>;
     get(path: string): Promise<{Body: Buffer, ContentType: string}>;
     exists(path: string): Promise<boolean>;

@@ -34,7 +34,7 @@ describe('e2e', function() {
     
     before(function(done) {
         exec('rm -rf ' + config.publisher.root)
-        .then(() => exec('cp -R skel ' + config.publisher.root))
+        .then(() => site.init())
         .then(() => server = app.listen(config.port))
         .then(() => done())
         .catch(done);

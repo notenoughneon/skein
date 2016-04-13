@@ -13,6 +13,7 @@
     "entriesPerPage": 10,
     "port": 8000,
     "staticSiteRoot": "build/test/static",
+    "skelRoot": "skel",
     "authUrl": "http://localhost:8000/api/auth",
     "tokenUrl": "http://localhost:8000/api/token",
     "micropubUrl": "http://localhost:8000/api/micropub",

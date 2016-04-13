@@ -68,6 +68,7 @@ interface SiteConfig {
     entriesPerPage: number;
     port: number;
     staticSiteRoot?: string;
+    skelRoot?: string;
     authUrl: string;
     tokenUrl: string;
     micropubUrl: string;
@@ -119,6 +120,20 @@ class Site {
                 this.publisher = new GitPublisher(config.publisher);
             default:
                 throw new Error('Unknown publisher type');
+        }
+    }
+    
+    async init() {
+        try {
+            if (typeof this.config.skelRoot === 'string') {
+                var files = await util.walkDir(this.config.skelRoot);
+                for (let file of files) {
+                    debug('Copying ' + file);
+                    await this.publisher.put(path.relative(this.config.skelRoot, file), fs.createReadStream(file));
+                }
+            }
+        } catch (err) {
+            debug(err);
         }
     }
 
