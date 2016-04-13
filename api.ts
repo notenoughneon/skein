@@ -22,10 +22,11 @@ function parsePost(req, res, next) {
         var busboy = new Busboy({
             headers: req.headers,
             limits: {
-                files: 10,
+                files: 1,
                 fileSize: 10 * 1000 * 1000
             }
         });
+        var tmpfiles = [];
         req.post = {};
         req.files = {};
         busboy.on('field', function (fieldname, val) {
@@ -47,15 +48,16 @@ function parsePost(req, res, next) {
         busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
             var tmpfile = path.join(os.tmpdir(), path.basename(filename));
             req.files[fieldname] = {tmpfile: tmpfile, filename: filename, mimetype: mimetype};
+            tmpfiles.push(tmpfile);
             file.pipe(fs.createWriteStream(tmpfile));
         });
         busboy.on('finish', function () {
             next();
         });
         res.on('finish', function() {
-            for (let field in req.files) {
-                debug('Cleaning up ' + req.files[field].tmpfile);
-                fs.unlink(req.files[field].tmpfile);
+            for (let file of tmpfiles) {
+                debug('Cleaning up ' + file);
+                fs.unlink(file);
             }
         });
         req.pipe(busboy);
