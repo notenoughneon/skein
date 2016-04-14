@@ -1,5 +1,9 @@
 # skein
 
+[![travis][travis-image]][travis-url]
+[travis-image]: https://api.travis-ci.org/notenoughneon/skein.svg?branch=master
+[travis-url]: https://travis-ci.org/notenoughneon/skein
+
 Indieweb static site generator
 
 ## Features
