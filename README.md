@@ -6,8 +6,6 @@
 
 Indieweb static site generator
 
-## Features
-
 * Publish to Amazon S3, git, or local filesystem
 * Supported post types:
   * Notes
@@ -24,8 +22,22 @@ Indieweb static site generator
 * Micropub
 * Webmentions
 
-## Running
+## Building
 
 ```
-node server.js config.json
+npm run build
+```
+
+## Quick start
+
+Running the end-to-end test will populate a sample site under build/test/static.
+
+```
+mocha build/test/e2e
+```
+
+You can then start the static file and API server on localhost:8000 by running:
+
+```
+node build/server.js test/config.json
 ```
