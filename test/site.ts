@@ -192,18 +192,19 @@ describe('site', function() {
         .catch(done);
     });
 
-    it('regenerate works', function(done) {
-        exec('find ' + config.publisher.root + ' -name *.html | xargs rm').
-            then(() => site.generateAll()).
+    it('generateAll works', function(done) {
+        var indexfile = config.publisher.root + '/index.html';
+        var tagfile = config.publisher.root + '/tags/indieweb.html';
+        var postfile = config.publisher.root + post1.getSlug() + '.html';
+        site.config.title = "New Blog Title";
+        site.generateAll().
             then(() => {
-                var path = config.publisher.root + url.parse(post1.url).path + '.html';
-                assert.equal(fs.existsSync(path), true, path + ' exists');
-                path = config.publisher.root + url.parse(post2.url).path + '.html';
-                assert.equal(fs.existsSync(path), true, path + ' exists');
-                path = config.publisher.root + '/index.html';
-                assert.equal(fs.existsSync(path), true, path + ' exists');
-                path = config.publisher.root + '/tags/indieweb.html';
-                assert.equal(fs.existsSync(path), true, path + ' exists');
+                var html = fs.readFileSync(indexfile);
+                assert(html.toString().indexOf(site.config.title) !== -1);
+                html = fs.readFileSync(tagfile);
+                assert(html.toString().indexOf(site.config.title) !== -1);
+                html = fs.readFileSync(postfile);
+                assert(html.toString().indexOf(site.config.title) !== -1);
             }).
             then(done).
             catch(done);
