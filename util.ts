@@ -251,7 +251,7 @@ export function getPage(permalink) {
 }
 
 export function delay(ms: number) {
-    return new Promise<void>((res, rej) => setTimeout(() => res(), ms));
+    return new Promise<void>((res, rej) => setTimeout(res, ms));
 }
 
 export class Semaphore {
