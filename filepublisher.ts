@@ -1,14 +1,13 @@
 ///<reference path="typings/main.d.ts"/>
 import fs = require('fs');
 import pathlib = require('path');
-import when = require('when');
-import nodefn = require('when/node');
 var guard = require('when/guard');
 import util = require('./util');
 import Publisher = require('./publisher');
 
-var readFile = nodefn.lift(fs.readFile);
-var stat = nodefn.lift(fs.stat);
+var readFile = util.promisify(fs.readFile);
+var stat = util.promisify(fs.stat);
+var unlink = util.promisify(fs.unlink);
 
 class FilePublisher implements Publisher {
     root: string;
@@ -17,25 +16,24 @@ class FilePublisher implements Publisher {
         this.root = config.root;
     }
 
-    private readWithFallback(filepath, extensions): Promise<{Body: Buffer, ContentType: string}> {
-        return when.any(extensions.map(function (ext) {
-            return readFile(filepath + ext).
-                then(function (data) {
-                    return {Body: data, ContentType: util.inferMimetype(filepath + ext)};
-                });
-        }));
+    private async readWithFallback(filepath, extensions): Promise<{Body: Buffer, ContentType: string}> {
+        for (let ext of extensions) {
+            try {
+                var res = await readFile(filepath + ext);
+                return {Body: res, ContentType: util.inferMimetype(filepath + ext)};
+            } catch (err) {}
+        }
+        throw new Error(filepath + ' not found');
     }
 
-    private existsWithFallback(filepath, extensions): Promise<boolean> {
-        return when.any(extensions.map(function (ext) {
-            return stat(filepath + ext);
-        })).
-            then(function () {
+    private async existsWithFallback(filepath, extensions): Promise<boolean> {
+        for (let ext of extensions) {
+            try {
+                await stat(filepath + ext);
                 return true;
-            }).
-            catch(function () {
-                return false;
-            });
+            } catch (err) {}
+        }
+        return false;
     }
 
     put(path, obj, contentType): Promise<void> {
@@ -47,7 +45,7 @@ class FilePublisher implements Publisher {
     async delete(path, contentType) {
         if (contentType === 'text/html')
             path = path + '.html';
-        await nodefn.call(fs.unlink, pathlib.join(this.root, path));
+        await unlink(pathlib.join(this.root, path));
     }
 
     get(path): Promise<{Body: Buffer, ContentType: string}> {
@@ -65,7 +63,7 @@ class FilePublisher implements Publisher {
 
     rollback(): Promise<void> {
         // NOOP
-        return new Promise(null);
+        return Promise.resolve(null);
     }
 
     commit(msg): Promise<void> {
