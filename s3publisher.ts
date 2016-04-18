@@ -55,7 +55,7 @@ class S3Publisher implements Publisher {
                 if (contentType == 'text/html' && !/\.html$/.test(path))
                     return this.deleteObject({Bucket: this.bucket, Key: path + '.html'});
             }).
-            then(() => undefined);
+            then(() => null);
     }
 
     get(path): Promise<{Body: Buffer, ContentType: string}> {
@@ -84,7 +84,7 @@ class S3Publisher implements Publisher {
 
     rollback(): Promise<void> {
         // NOOP
-        return when(undefined);
+        return Promise.resolve(null);
     }
 
     commit(msg): Promise<void> {
@@ -94,7 +94,7 @@ class S3Publisher implements Publisher {
                 var log = text + new Date().toLocaleString() + ' ' + msg + '\n';
                 return this.put('log.txt', log, 'text/plain');
             }).
-            then(() => undefined);
+            then(() => null);
     }
 }
 
