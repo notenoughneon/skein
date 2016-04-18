@@ -251,6 +251,7 @@ class Site {
         keys = keys.filter(k => !re.test(k));
         await Promise.all(keys.map( async (key) => {
             let obj = await this.publisher.get(key);
+            debug('got ' + key);
             if (obj.ContentType === 'text/html') {
                 let u = url.resolve(this.config.url, key);
                 try {

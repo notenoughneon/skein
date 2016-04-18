@@ -28,12 +28,13 @@ class S3Publisher implements Publisher {
         var s3 = new AWS.S3({region: config.region});
         this.putObject = guard(guard.n(1), nodefn.lift(s3.putObject.bind(s3)));
         this.deleteObject = guard(guard.n(1), nodefn.lift(s3.deleteObject.bind(s3)));
-        this.getObject = guard(guard.n(1), nodefn.lift(s3.getObject.bind(s3)));
+        this.getObject = guard(guard.n(10), nodefn.lift(s3.getObject.bind(s3)));
         this.headObject = guard(guard.n(1), nodefn.lift(s3.headObject.bind(s3)));
         this.listObjects = guard(guard.n(1), nodefn.lift(s3.listObjects.bind(s3)));
     }
 
     put(path, obj, contentType): Promise<void> {
+        debug('put ' + path);
         var params = {
             Bucket: this.bucket,
             Key: normalizePath(path),
@@ -52,6 +53,7 @@ class S3Publisher implements Publisher {
     }
     
     delete(path, contentType): Promise<void> {
+        debug('delete ' + path);
         return this.deleteObject({Bucket: this.bucket, Key: path}).
             then(() => {
                 if (contentType == 'text/html' && !/\.html$/.test(path))
@@ -61,10 +63,12 @@ class S3Publisher implements Publisher {
     }
 
     get(path): Promise<{Body: Buffer, ContentType: string}> {
+        debug('get ' + path);
         return this.getObject({Bucket: this.bucket, Key: normalizePath(path)});
     }
 
     exists(path): Promise<boolean> {
+        debug('exists ' + path);
         return this.headObject({Bucket: this.bucket, Key: normalizePath(path)}).
             then(function () {
                 return true;
@@ -75,6 +79,7 @@ class S3Publisher implements Publisher {
     }
 
     async list(): Promise<string[]> {
+        debug('list');
         // FIXME: handle truncated results
         var data = await this.listObjects({Bucket: this.bucket});
         return data.Contents.map(o => o.Key);
