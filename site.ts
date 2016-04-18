@@ -258,7 +258,9 @@ class Site {
                     if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
                         entries.set(entry.url, entry);
                     }
-                } catch (err) {}
+                } catch (err) {
+                    debug(err);
+                }
             }
         }));
         return Array.from(entries.values());

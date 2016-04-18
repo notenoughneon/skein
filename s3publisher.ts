@@ -3,6 +3,8 @@ var AWS = require('aws-sdk');
 import when = require('when');
 import nodefn = require('when/node');
 var guard = require('when/guard');
+import Debug = require('debug');
+var debug = Debug('s3publisher');
 import util = require('./util');
 import Publisher = require('./publisher');
 
@@ -72,14 +74,10 @@ class S3Publisher implements Publisher {
             });
     }
 
-    list(): Promise<string[]> {
+    async list(): Promise<string[]> {
         // FIXME: handle truncated results
-        return this.listObjects({Bucket: this.bucket}).
-            then(function (data) {
-                return data.Contents.map(function (o) {
-                    return o.Key;
-                });
-            })
+        var data = await this.listObjects({Bucket: this.bucket});
+        return data.Contents.map(o => o.Key);
     }
 
     rollback(): Promise<void> {
