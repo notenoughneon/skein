@@ -107,8 +107,8 @@ export async function getHEntry(html: string | Buffer, url: string): Promise<Ent
 function prop(mf, name, f?) {
     if (mf.properties[name] != null) {
         if (f != null)
-            return mf.properties[name].map(f);
-        return mf.properties[name];
+            return mf.properties[name].filter(e => e !== '').map(f);
+        return mf.properties[name].filter(e => e !== '');
     }
     return [];
 }
