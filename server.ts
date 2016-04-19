@@ -11,16 +11,7 @@ var configFile = process.argv[2];
 var config = JSON.parse(fs.readFileSync(configFile).toString());
 var site = new Site(config);
 var api = new Api(site);
-
-var watcher = (event, filename) => {
-    if (event === 'change') {
-        fs.readFile(configFile, (err, data) => {
-            site.config = JSON.parse(data.toString());
-            debug('reloaded config');
-        });
-    }
-};
-fs.watch(configFile, watcher);
+site.init();
 
 app.use('/api', api.router);
 
