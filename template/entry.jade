@@ -1,32 +1,29 @@
 include ./cite
 div(class="h-entry")
     each replyTo in entry.replyTo
-        div(class="blog-post-meta")
-            i(class="fa fa-reply")
-            |  In reply to:
+        i(class="fa fa-reply")
+        |  In reply to:
         +cite(replyTo, ' p-in-reply-to')
 
     if entry.likeOf.length > 0
-        div(class="blog-post-meta")
-            i(class="fa fa-star")
-            |  
-            a(class="p-author h-card" href=entry.author.url)= entry.author.name
-            |  liked this. 
-            a(class="u-url" href=entry.url)
-                if entry.published != null
-                    - var dateString = utils.formatDate(entry.published);
-                    time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
+        i(class="fa fa-star")
+        |  
+        a(class="p-author h-card" href=entry.author.url)= entry.author.name
+        |  liked this.
+        a(class="u-url" href=entry.url)
+            if entry.published != null
+                - var dateString = utils.formatDate(entry.published);
+                time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
     if entry.repostOf.length > 0
-        div(class="blog-post-meta")
-            i(class="fa fa-retweet")
-            |  
-            a(class="p-author h-card" href=entry.author.url)= entry.author.name
-            |  reposted this. 
-            a(class="u-url" href=entry.url)
-                if entry.published != null
-                    - var dateString = utils.formatDate(entry.published);
-                    time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
+        i(class="fa fa-retweet")
+        |  
+        a(class="p-author h-card" href=entry.author.url)= entry.author.name
+        |  reposted this.
+        a(class="u-url" href=entry.url)
+            if entry.published != null
+                - var dateString = utils.formatDate(entry.published);
+                time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
     if !entry.isLike() && !entry.isRepost()
         div(class="blog-post-larger")

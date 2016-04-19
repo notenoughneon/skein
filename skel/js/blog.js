@@ -1,4 +1,4 @@
-$("time").each(function() {
+$(".blog-post-meta time").each(function() {
     var month = ["Jan","Feb","Mar","Apr","May","Jun",
                  "Jul","Aug","Sep","Oct","Nov","Dec"];
     var dt = new Date($(this).attr("datetime"));
