@@ -10,10 +10,14 @@ html(lang="en")
         link(rel="stylesheet" href="/css/bootstrap.min.css")
         link(rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css")
         link(rel="stylesheet" href="/css/blog.css")
-        link(rel="authorization_endpoint" href=site.authUrl)
-        link(rel="token_endpoint" href=site.tokenUrl)
-        link(rel="micropub" href=site.micropubUrl)
-        link(rel="webmention" href=site.webmentionUrl)
+        if site.authUrl != null
+            link(rel="authorization_endpoint" href=site.authUrl)
+        if site.tokenUrl != null
+            link(rel="token_endpoint" href=site.tokenUrl)
+        if site.micropubUrl != null
+            link(rel="micropub" href=site.micropubUrl)
+        if site.webmentionUrl != null
+            link(rel="webmention" href=site.webmentionUrl)
 
     body
         div(class="navbar navbar-default" role="navigation")
