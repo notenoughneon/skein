@@ -355,14 +355,19 @@ class Site {
     }
 
     async validate() {
+        var failures: {key: string, expected: microformat.Entry, actual: microformat.Entry}[] = [];
         var keys = await this.publisher.list();
         for (let key of keys) {
             try {
                 var u = url.resolve(this.config.url, key);
                 var obj = await this.publisher.get(key);
                 if (obj.ContentType == 'text/html') {
-                    var expected = await microformat.getHEntry(obj.Body, u);
-                    if (expected != null && (expected.url === u || expected.url + '.html' === u)) {
+                    var isEntry = false;
+                    try {                       
+                        var expected = await microformat.getHEntry(obj.Body, u);
+                        isEntry = true;
+                    } catch (e) {}
+                    if (isEntry && (expected.url === u || expected.url + '.html' === u)) {
                         let html = this.renderEntry(expected);
                         var actual = await microformat.getHEntry(html, expected.url);
                         assert.deepEqual(actual, expected);
@@ -371,11 +376,11 @@ class Site {
                 }
             } catch (err) {
                 debug('fail ' + expected.url);
-                return {expected: expected, actual: actual};
+                failures.push({key, expected, actual});
             }
         }
-        debug('all entries passed');
-        return null;
+        debug('Validation complete: ' + failures.length + ' failures');
+        return failures;
     }
 
     async sendWebmentionsFor(entry: microformat.Entry) {
