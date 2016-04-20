@@ -3,9 +3,11 @@ block title
     = category + ' - ' + site.title
 block content
     h2= category
-    ul(class="h-feed")
+    ol(class="container-fluid h-feed list-unstyled")
         each entry in entries
-            li(class="h-cite")
+            li(class="row h-cite")
                 - var dateString = utils.formatDate(entry.published);
-                time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
-                a(class="u-url p-name" href=entry.url)= utils.truncate(entry.name, 64)
+                div(class="col-sm-2 blog-post-meta")
+                    time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
+                div(class="col-sm-10")
+                    a(class="u-url p-name" href=entry.url)= utils.truncate(entry.name, 64)
