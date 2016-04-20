@@ -7,7 +7,7 @@ block content
         each entry in entries
             li(class="row h-cite")
                 - var dateString = utils.formatDate(entry.published);
-                div(class="col-sm-2 blog-post-meta")
+                div(class="col-sm-3 blog-post-meta")
                     time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
-                div(class="col-sm-10")
+                div(class="col-sm-9")
                     a(class="u-url p-name" href=entry.url)= utils.truncate(entry.name, 64)
