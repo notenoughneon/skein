@@ -332,24 +332,25 @@ class Site {
         var entries = await this.getAll();
         entries.sort(microformat.Entry.byDateDesc);
         // entries
-        for (let entry of entries) {
+        await util.map(entries, async (entry) => {
             let html = this.renderEntry(entry);
             let path = url.parse(entry.url).pathname;
             await this.publisher.put(path, html, 'text/html');
             debug('Published '+ path);
-        }
+        });
         // feed
         var limit = this.config.entriesPerPage;
         var chunks = util.chunk(limit, entries);
-        for (let index = 0; index < chunks.length; index++) {
+        await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
             await this._generateStream(chunk, index + 1, chunks.length);
-        }
+        });
         // tags
         var tags = util.unique(util.flatten(entries.map(e => e.category)));
-        for (let tag of tags) {
-            await this._generateIndex(entries.filter(e => e.category.indexOf(tag) > -1), 'Posts tagged ' + tag, getPathForTag(tag));
-        }
+        await util.map(tags, async (tag) => {
+            await this._generateIndex(entries.filter(e => e.category.indexOf(tag) > -1),
+            'Posts tagged ' + tag, getPathForTag(tag));
+        });
         // articles
         await this._generateIndex(entries.filter(e => e.isArticle()), 'Articles', '/articles');
     }
