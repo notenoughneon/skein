@@ -227,6 +227,8 @@ export class Entry {
 
     static byDate = (a: Entry, b: Entry) => a.published.getTime() - b.published.getTime();
     static byDateDesc = (a: Entry, b: Entry) => b.published.getTime() - a.published.getTime();
+    static byType = (a: Entry, b: Entry) => a._getType() - b._getType();
+    static byTypeDesc = (a: Entry, b: Entry) => b._getType() - a._getType();
 
     domain(): string {
         var p = url.parse(this.url);
@@ -256,6 +258,12 @@ export class Entry {
 
     isLike(): boolean {
         return this.likeOf.length > 0;
+    }
+    
+    private _getType(): number {
+        if (this.isLike() || this.isRepost())
+            return 1;
+        return 0;
     }
     
     getSlug(): string {

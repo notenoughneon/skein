@@ -153,6 +153,7 @@ class Site {
     }
 
     renderEntry(entry: microformat.Entry) {
+        entry.children.sort(microformat.Entry.byType);
         return _renderEntry({
             site: this.config,
             entry: entry,
