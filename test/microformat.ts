@@ -413,11 +413,16 @@ describe('entry', function() {
     });
     
     it('discover authorship by url', function(done) {
-        microformat.getHEntryFromUrl('https://aaronparecki.com/2016/04/06/15/')
+        var pages = {
+            'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
+            'http://somesite/': '<a class="h-card u-uid u-url" href="/"><img class="u-photo" src="me.jpg">Test User</a>'
+        };
+        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        microformat.getHEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
-            assert(e.author.name !== null && e.author.name !== '');
-            assert(e.author.photo !== null && e.author.photo !== '');
+            assert(e.author.name === 'Test User');
+            assert(e.author.photo === 'http://somesite/me.jpg');
         })
         .then(done)
         .catch(done);

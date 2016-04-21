@@ -7,7 +7,7 @@ import url = require('url');
 import Debug = require('debug');
 var debug = Debug('microformat');
 
-var request = util.promisify(Request);
+export var request = util.promisify(Request);
 
 export async function crawlHEntryThread(seed: string) {
     var boundary: string[] = [];
