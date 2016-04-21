@@ -4,6 +4,16 @@ import fs = require('fs');
 import microformat = require('../microformat');
 
 describe('entry', function() {
+    var orig_request;
+    
+    before(function() {
+        orig_request = microformat.request;
+    });
+    
+    after(function() {
+        microformat.request = orig_request;
+    });
+    
     it('can be constructed with no args', function() {
         var entry = new microformat.Entry();
         assert.equal(entry.url, null);
@@ -471,12 +481,27 @@ describe('entry', function() {
         .catch(done);
     });
     
-    it('authorship author-page failure', function(done) {
+    it('authorship author-page no match', function(done) {
         var pages = {
             'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
             'http://somesite/': '<a class="h-card" href="/notme"><img src="me.jpg">Test User</a>'
         };
         microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        microformat.getHEntryFromUrl('http://somesite/post')
+        .then(e => {
+            assert(e.author !== null);
+            assert(e.author.name === null);
+            assert(e.author.photo === null);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('authorship author-page 404', function(done) {
+        var pages = {
+            'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>'
+        };
+        microformat.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
         microformat.getHEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
