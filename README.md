@@ -19,23 +19,3 @@ Indieweb static site generator
   * Articles
   * Photos
   * Audio
-
-## Building
-
-```
-npm run build
-```
-
-## Quick start
-
-Running the end-to-end test will populate a sample site under build/test/static.
-
-```
-mocha build/test/e2e
-```
-
-You can then start the static file and API server on localhost:8000 by running:
-
-```
-node build/server.js test/config.json
-```
