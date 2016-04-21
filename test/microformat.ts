@@ -423,19 +423,6 @@ describe('entry', function() {
         .catch(done);
     });
     
-    it('getRepHCard (case 2)', function(done) {
-        var expected = new microformat.Card();
-        expected.name = 'Test User';
-        expected.url = 'http://somesite.com';
-        expected.photo = 'http://somesite.com/photo.jpg';
-        var html = '<a class="h-card" href="http://somesite.com" rel="me">Test User<img class="u-photo" src="/photo.jpg"/></a>';
-        microformat.getRepHCard(html, 'http://somesite.com/2015/9/9').
-            then(card => {
-                assert.deepEqual(card, expected);
-            }).
-            then(done).
-            catch(done);
-    });
     it('filters non-cite from children', function(done) {
         var html = '<div class="h-entry">\
         <div class="h-cite"><a class="u-url" href="http://othersite/123"></a>a comment</div>\

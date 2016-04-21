@@ -158,45 +158,6 @@ export function _buildEntry(mf) {
     return entry;
 }
 
-/**
- * Deprecated in favor of authorship algorithm:
- * http://indiewebcamp.com/authorship
- */
-export function getRepHCard(html: string | Buffer, url: string): Promise<Card> {
-    return parser.getAsync({html: html, baseUrl: url}).
-        then(function(mf) {
-            var cards = mf.items.
-                filter(i => i.type.some(t => t == 'h-card')).
-                map(h => _buildCard(h));
-            // 1. uid and url match page url
-            var match = cards.filter(function(c) {
-                return c.url != null &&
-                c.uid != null &&
-                urlsEqual(c.url, url) &&
-                urlsEqual(c.uid, url);
-            });
-            if (match.length > 0) return match[0];
-            // 2. url has rel=me
-            if (mf.rels.me != null) {
-                var match = cards.filter(function(c) {
-                    return mf.rels.me.some(function(r) {
-                        return c.url != null &&
-                        urlsEqual(c.url, r);
-                    });
-                });
-                if (match.length > 0) return match[0];
-            }
-            // 3. is only hcard, url matches page url
-            if (cards.length === 1) {
-                var card = cards[0];
-                if (card.url != null &&
-                        urlsEqual(card.url, url))
-                    return card;
-            }
-            return null;
-        });
-}
-
 function urlsEqual(u1, u2) {
     var p1 = url.parse(u1);
     var p2 = url.parse(u2);
