@@ -410,6 +410,26 @@ describe('entry', function() {
         entry.deduplicate();
         assert.deepEqual(entry.children, [c1,c2]);
     });
+    
+    it('getHEntryFromUrl', function(done) {
+        var pages = {
+            'http://somesite/post': '<div class="h-entry">Test post</div>',
+        };
+        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        microformat.getHEntryFromUrl('http://somesite/post')
+        .then(e => {
+            assert(e.name === 'Test post');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('getHEntryFromUrl 404', function(done) {
+        microformat.request = url => Promise.resolve({statusCode: 404, body: ''});
+        microformat.getHEntryFromUrl('http://somesite/post')
+       .then(() => assert(false))
+       .catch(err => done(err.message == 'Server returned status 404' ? null : err));
+    });
 
     it('authorship author-page by url', function(done) {
         var html = '<div class="h-entry"><a class="u-author" href="/author"></a></div>';
