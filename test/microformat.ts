@@ -400,6 +400,7 @@ describe('entry', function() {
         entry.deduplicate();
         assert.deepEqual(entry.children, [c1,c2]);
     });
+    
     it('discover authorship by rel-author', function(done) {
         var html = '<div class="h-entry"></div><a rel="author" href="/author"></a>';
         microformat.getHEntry(html, 'http://somesite')
@@ -410,6 +411,18 @@ describe('entry', function() {
         .then(done)
         .catch(done);
     });
+    
+    it('discover authorship by url', function(done) {
+        microformat.getHEntryFromUrl('https://aaronparecki.com/2016/04/06/15/')
+        .then(e => {
+            assert(e.author !== null);
+            assert(e.author.name !== null && e.author.name !== '');
+            assert(e.author.photo !== null && e.author.photo !== '');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     it('getRepHCard (case 2)', function(done) {
         var expected = new microformat.Card();
         expected.name = 'Test User';
