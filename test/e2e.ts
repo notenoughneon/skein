@@ -229,6 +229,54 @@ describe('e2e', function() {
         .catch(done);
     });
     
+    it('youtube.com oembed', function(done) {
+        var form = { h: 'entry', content: 'Youtube oembed. https://www.youtube.com/watch?v=sPasebVMIW4' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert(e.name === form.content);
+            assert(e.content.value === form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    it('youtu.be oembed', function(done) {
+        var form = { h: 'entry', content: 'Youtube oembed (short link). https://youtu.be/bt_yCugXk8U' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert(e.name === form.content);
+            assert(e.content.value === form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('soundcloud.com oembed', function(done) {
+        var form = { h: 'entry', content: 'Soundcloud oembed. https://soundcloud.com/dj-rasoul/dj-ra-soul-deep-n-da-bay-may-2014' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert(e.name === form.content);
+            assert(e.content.value === form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     var testReply;
     it('post reply via micropub', function(done) {
         var form = { h: 'entry', content: 'Test reply', 'in-reply-to': testNote.url };
