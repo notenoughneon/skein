@@ -239,10 +239,6 @@ export class Entry {
         return [];
     }
 
-    isReplyTo(url: string): boolean {
-        return this.references().indexOf(url) !== -1;
-    }
-
     isArticle(): boolean {
         return !this.isReply() &&
             !this.isRepost() &&
