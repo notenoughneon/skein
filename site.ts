@@ -215,15 +215,15 @@ class Site {
         if (m.syndication != null)
             entry.syndication = m.syndication;
         if (m.photo != null) {
-            var photoslug = path.join(path.dirname(slug), m.photo.filename);
-            entry.content.html = '<p><img class="u-photo" src="' + photoslug + '"/></p>' + entry.content.html;
-            await this.publisher.put(photoslug, fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
+            entry.content.html = '<p><img class="u-photo" src="' + m.photo.filename + '"/></p>' + entry.content.html;
+            await this.publisher.put(path.join(path.dirname(slug), m.photo.filename),
+            fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
         }
         if (m.audio != null) {
-            var audioslug = path.join(path.dirname(slug), m.audio.filename);
-            entry.content.html = '<p><audio class="u-audio" src="' + audioslug + '" controls>' +
+            entry.content.html = '<p><audio class="u-audio" src="' + m.audio.filename + '" controls>' +
             'Your browser does not support the audio tag.</audio></p>' + entry.content.html;
-            await this.publisher.put(audioslug, fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
+            await this.publisher.put(path.join(path.dirname(slug), m.audio.filename),
+            fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
         }
         for (let link of entry.allLinks()) {
             let embed = await oembed(link);
