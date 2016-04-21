@@ -6,7 +6,8 @@
   "scripts": {
     "prebuild": "typings install",
     "build": "tsc || true",
-    "test": "mocha build/test"
+    "test": "mocha build/test",
+    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- build/test"
   },
   "dependencies": {
     "aws-sdk": "^2.3.3",
@@ -21,6 +22,8 @@
     "when": "^3.7.7"
   },
   "devDependencies": {
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
     "typescript": "^1.8.10",
     "typings": "^0.7.12"

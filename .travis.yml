@@ -1,4 +1,6 @@
 language: node_js
 node_js:
   - "5"
-before_script: "npm run build"
+before_script: "npm run-script build"
+script: "npm run-script test-travis"
+after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
