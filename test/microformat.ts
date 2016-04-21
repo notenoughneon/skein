@@ -400,10 +400,21 @@ describe('entry', function() {
         entry.deduplicate();
         assert.deepEqual(entry.children, [c1,c2]);
     });
-    
-    it('discover authorship by rel-author', function(done) {
+
+    it('authorship author-page by url', function(done) {
+        var html = '<div class="h-entry"><a class="u-author" href="/author"></a></div>';
+        microformat.getHEntry(html, 'http://somesite/post')
+        .then(e => {
+            assert(e.author !== null);
+            assert(e.author.url === 'http://somesite/author');
+        })
+        .then(done)
+        .catch(done);
+    });
+        
+    it('authorship author-page by rel-author', function(done) {
         var html = '<div class="h-entry"></div><a rel="author" href="/author"></a>';
-        microformat.getHEntry(html, 'http://somesite')
+        microformat.getHEntry(html, 'http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.url === 'http://somesite/author');
@@ -412,10 +423,10 @@ describe('entry', function() {
         .catch(done);
     });
     
-    it('discover authorship by url', function(done) {
+    it('authorship author-page url/uid', function(done) {
         var pages = {
             'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
-            'http://somesite/': '<a class="h-card u-uid u-url" href="/"><img class="u-photo" src="me.jpg">Test User</a>'
+            'http://somesite/': '<div class="h-card"><a class="u-uid" href="/"><img src="me.jpg">Test User</a></div>'
         };
         microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
         microformat.getHEntryFromUrl('http://somesite/post')
@@ -423,6 +434,54 @@ describe('entry', function() {
             assert(e.author !== null);
             assert(e.author.name === 'Test User');
             assert(e.author.photo === 'http://somesite/me.jpg');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('authorship author-page rel-me', function(done) {
+        var pages = {
+            'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
+            'http://somesite/': '<a class="h-card" rel="me" href="/"><img src="me.jpg">Test User</a>'
+        };
+        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        microformat.getHEntryFromUrl('http://somesite/post')
+        .then(e => {
+            assert(e.author !== null);
+            assert(e.author.name === 'Test User');
+            assert(e.author.photo === 'http://somesite/me.jpg');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('authorship author-page url only', function(done) {
+        var pages = {
+            'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
+            'http://somesite/': '<a class="h-card" href="/"><img src="me.jpg">Test User</a>'
+        };
+        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        microformat.getHEntryFromUrl('http://somesite/post')
+        .then(e => {
+            assert(e.author !== null);
+            assert(e.author.name === 'Test User');
+            assert(e.author.photo === 'http://somesite/me.jpg');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('authorship author-page failure', function(done) {
+        var pages = {
+            'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
+            'http://somesite/': '<a class="h-card" href="/notme"><img src="me.jpg">Test User</a>'
+        };
+        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        microformat.getHEntryFromUrl('http://somesite/post')
+        .then(e => {
+            assert(e.author !== null);
+            assert(e.author.name === null);
+            assert(e.author.photo === null);
         })
         .then(done)
         .catch(done);
