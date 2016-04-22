@@ -97,7 +97,7 @@ function denyAccess(req, res) {
 }
 
 function handleError(res, error) {
-    debug(error.stack);
+    debug('Server error: ' + error);
     res.sendStatus(500);
 }
 

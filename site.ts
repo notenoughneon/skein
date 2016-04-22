@@ -249,7 +249,7 @@ class Site {
     async getAll() {
         var keys = await this.publisher.list();
         var entries: Map<string, microformat.Entry> = new Map();
-        var re = /^(index|js|css|tags|articles|log.txt)/;
+        var re = /^(index|js|css|tags|articles|\.git|log.txt)/;
         keys = keys.filter(k => !re.test(k));
         await Promise.all(keys.map( async (key) => {
             let obj = await this.publisher.get(key);
