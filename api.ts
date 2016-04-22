@@ -5,7 +5,6 @@ import path = require('path');
 import querystring = require('querystring');
 import express = require('express');
 var Busboy = require('busboy');
-var bodyParser = require('body-parser');
 import crypto = require('crypto');
 import when = require('when');
 import nodefn = require('when/node');
@@ -227,29 +226,6 @@ class Api {
                     handleError(res, e);
                     release();
                 });
-        });
-
-        this.router.get('/entries/*', this.requireAuth('post'), (req, res) => {
-            var url = req.params[0];
-            site.get(url).
-                then(entry => {
-                    res.type('application/json');
-                    res.send(entry.serialize());
-                }).
-                catch(e => handleError(res, e));
-        });
-
-        this.router.put('/entries', this.requireAuth('post'), bodyParser.json(), (req, res) => {
-            var entry = req.body;
-            return site.update(entry).
-                catch(e => handleError(res, e));
-        });
-
-        this.router.delete('/entries/*', this.requireAuth('post'), (req, res) => {
-            var url = req.params[0];
-            site.delete(url).
-                then(() => res.sendStatus(204)).
-                catch(e => handleError(res, e));
         });
 
     }
