@@ -19,7 +19,7 @@
     "micropubUrl": "http://localhost:8000/api/micropub",
     "webmentionUrl": "http://localhost:8000/api/webmention",
     "publisher": {
-        "type": "git",
+        "type": "file",
         "root": "build/test/static"
     },
     "password": "xxxxxxxx"
