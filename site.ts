@@ -128,10 +128,11 @@ class Site {
         try {
             if (typeof this.config.skelRoot === 'string') {
                 var files = await util.walkDir(this.config.skelRoot);
-                for (let file of files) {
+                await util.map(files, async (file) => {
                     debug('Copying ' + file);
                     await this.publisher.put(path.relative(this.config.skelRoot, file), fs.createReadStream(file));
-                }
+                });
+                await this.publisher.commit('Copy skel files');
             }
         } catch (err) {
             debug(err);
