@@ -330,6 +330,26 @@ class Site {
             return this.getNextAvailable(1, datepart + '/');
         }
     }
+    
+    async generateFor(entry: microformat.Entry) {
+        var entries = await this.getAll();
+        entries.sort(microformat.Entry.byDateDesc);
+        // feed
+        var limit = this.config.entriesPerPage;
+        var chunks = util.chunk(limit, entries);
+        await util.map(util.range(0, chunks.length - 1), async (index) => {
+            let chunk = chunks[index];
+            await this._generateStream(chunk, index + 1, chunks.length);
+        });
+        // tags
+        await util.map(entry.category, async (tag) => {
+            await this._generateIndex(entries.filter(e => e.category.indexOf(tag) > -1),
+            'Posts tagged ' + tag, getPathForTag(tag));
+        });
+        // articles
+        if (entry.isArticle())
+            await this._generateIndex(entries.filter(e => e.isArticle()), 'Articles', '/articles');
+    }
 
     async generateAll() {
         var entries = await this.getAll();

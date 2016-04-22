@@ -191,12 +191,7 @@ class Api {
                     category: req['post'].category
                 })).
                 then(e => entry = e).
-                then(() => site.generateStream()).
-                then(() => when.map(entry.category, category => site.generateTagIndex(category))).
-                then(() => {
-                    if (entry.isArticle())
-                        return site.generateArticleIndex();
-                }).
+                then(() => site.generateFor(entry)).
                 then(() => site.publisher.commit('publish ' + entry.url)).
                 then(() => release()).
                 then(() => site.sendWebmentionsFor(entry)).
