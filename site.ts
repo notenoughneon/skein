@@ -118,6 +118,7 @@ class Site {
                 break;
             case 'git':
                 this.publisher = new GitPublisher(config.publisher);
+                break;
             default:
                 throw new Error('Unknown publisher type');
         }

@@ -34,6 +34,7 @@ describe('e2e', function() {
     
     before(function(done) {
         exec('rm -rf ' + config.publisher.root)
+        .then(() => exec('git init ' + config.publisher.root))
         .then(() => site.init())
         .then(() => server = app.listen(config.port))
         .then(() => done())
