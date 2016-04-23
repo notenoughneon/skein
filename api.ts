@@ -6,6 +6,7 @@ import querystring = require('querystring');
 import express = require('express');
 var Busboy = require('busboy');
 import crypto = require('crypto');
+import jwt = require('jsonwebtoken');
 import when = require('when');
 import nodefn = require('when/node');
 var callbacks = require('when/callbacks');
@@ -103,8 +104,6 @@ function handleError(res, error) {
 class Api {
     site: Site;
     router: express.Router;
-    // in-memory list of issued tokens
-    tokens: {token: string, client_id: string, scope: string}[];
     // store the last code issued by the auth endpoint in memory
     lastIssuedCode: {code: string, client_id: string, scope: string, date: number};
     publishMutex: util.Mutex;
@@ -112,7 +111,6 @@ class Api {
     constructor(site: Site) {
         this.site = site;
         this.router = express.Router();
-        this.tokens = [];
         this.lastIssuedCode = null;
         this.publishMutex = new util.Mutex();
 
@@ -155,17 +153,10 @@ class Api {
             if (this.lastIssuedCode !== null &&
                 this.lastIssuedCode.code === req['post'].code &&
                 ((Date.now() - this.lastIssuedCode.date) < 60 * 1000)) {
-                this.generateToken(this.lastIssuedCode.client_id, this.lastIssuedCode.scope).
-                    then((result) => {
-                        this.lastIssuedCode = null;
-                        if (result === undefined) {
-                            res.sendStatus(500);
-                        } else {
-                            res.type('application/x-www-form-urlencoded');
-                            res.send(querystring.stringify({access_token: result.token, scope: result.scope, me: site.config.url}));
-                        }
-                    }).
-                    catch(e => handleError(res, e));
+                var token = this.generateToken(this.lastIssuedCode.client_id, this.lastIssuedCode.scope);
+                res.type('application/x-www-form-urlencoded');
+                res.send(querystring.stringify({access_token: token, scope: this.lastIssuedCode.scope, me: site.config.url}));
+                this.lastIssuedCode = null;
             } else {
                 debug('Failed token request from ' + req.ip);
                 res.sendStatus(401);
@@ -226,12 +217,7 @@ class Api {
     }
 
     generateToken(client_id: string, scope: string) {
-        return nodefn.call(crypto.randomBytes, 18).
-            then(buf => {
-                var token = {token: buf.toString('base64'), client_id: client_id, scope: scope};
-                this.tokens.push(token);
-                return token;
-            });
+        return jwt.sign({client_id, scope}, this.site.config.jwtSecret);
     }
 
     requireAuth(scope) {
@@ -248,10 +234,14 @@ class Api {
             } else {
                 return denyAccess(req, res);
             }
-            var found = this.tokens.find(t => t.token === token);
-            if (found === undefined || !found.scope.split(' ').some(s => s === scope))
+            try {
+                var claim = jwt.verify(token, this.site.config.jwtSecret);
+                if (!claim.scope.split(' ').some(s => s === scope))
+                    return denyAccess(req, res);
+                next();
+            } catch (err) {
                 return denyAccess(req, res);
-            next();
+            }
         };
     }
 }

@@ -89,6 +89,7 @@ interface SiteConfig {
         bucket: string;
     };
     password: string;
+    jwtSecret: string;
 }
 
 interface Micropub {
