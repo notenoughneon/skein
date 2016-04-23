@@ -2,19 +2,17 @@
   "name": "skein",
   "version": false,
   "ambientDependencies": {
-    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#e95958ac847d9a343bdc8d7cbc796a5f6da29f71",
     "aws-sdk": "github:DefinitelyTyped/DefinitelyTyped/aws-sdk/aws-sdk.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
-    "debug": "github:DefinitelyTyped/DefinitelyTyped/debug/debug.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
-    "serve-static": "github:DefinitelyTyped/DefinitelyTyped/serve-static/serve-static.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
-    "mime": "github:DefinitelyTyped/DefinitelyTyped/mime/mime.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
-    "express": "github:DefinitelyTyped/DefinitelyTyped/express/express.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
-    "request": "github:DefinitelyTyped/DefinitelyTyped/request/request.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
-    "form-data": "github:DefinitelyTyped/DefinitelyTyped/form-data/form-data.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
-    "sqlite3": "github:DefinitelyTyped/DefinitelyTyped/sqlite3/sqlite3.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
-    "when": "github:DefinitelyTyped/DefinitelyTyped/when/when.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
     "cheerio": "github:DefinitelyTyped/DefinitelyTyped/cheerio/cheerio.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
+    "debug": "github:DefinitelyTyped/DefinitelyTyped/debug/debug.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
+    "express": "github:DefinitelyTyped/DefinitelyTyped/express/express.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
+    "form-data": "github:DefinitelyTyped/DefinitelyTyped/form-data/form-data.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
+    "jade": "github:DefinitelyTyped/DefinitelyTyped/jade/jade.d.ts#af5b8275d1f2b92738b93fddabc461fc20c553a1",
+    "mime": "github:DefinitelyTyped/DefinitelyTyped/mime/mime.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
     "mocha": "github:DefinitelyTyped/DefinitelyTyped/mocha/mocha.d.ts#8f081073e6cb416f901b272810d8b04d6e01c9e0",
-    "body-parser": "github:DefinitelyTyped/DefinitelyTyped/body-parser/body-parser.d.ts#b27d0d0e1ce4207a7a5b1da847cb776c16d7531e",
-    "jade": "github:DefinitelyTyped/DefinitelyTyped/jade/jade.d.ts#af5b8275d1f2b92738b93fddabc461fc20c553a1"
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#e95958ac847d9a343bdc8d7cbc796a5f6da29f71",
+    "request": "github:DefinitelyTyped/DefinitelyTyped/request/request.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
+    "serve-static": "github:DefinitelyTyped/DefinitelyTyped/serve-static/serve-static.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f",
+    "when": "github:DefinitelyTyped/DefinitelyTyped/when/when.d.ts#5109e1269d6ab8e8e73b1a5e85d8ceb836d3099f"
   }
 }
