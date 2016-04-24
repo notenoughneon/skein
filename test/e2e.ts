@@ -108,7 +108,7 @@ describe('e2e', function() {
     });
     
     it('micropub endpoint requires token', function(done) {
-        var form = { h: 'entry', content: 'Hello World!' };
+        var form = { h: 'entry', content: 'Do not post' };
         post({ url: config.micropubUrl, form: form })
         .then(res => {
             assert(res.statusCode === 401);
@@ -117,8 +117,19 @@ describe('e2e', function() {
         .catch(done);
     });
     
+    it('micropub endpoint rejects invalid auth header', function(done) {
+        var form = { h: 'entry', content: 'Do not post' };
+        var headers = { Authorization: 'bad header' };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 401);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     it('micropub endpoint rejects invalid access token in header', function(done) {
-        var form = { h: 'entry', content: 'Access token in header' };
+        var form = { h: 'entry', content: 'Do not post' };
         var headers = { Authorization: 'bearer ' + 'bad token' };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
@@ -128,8 +139,38 @@ describe('e2e', function() {
         .catch(done);
     });
     
+    it('micropub endpoint rejects access token with invalid scope', function(done) {
+        var authForm = {
+            password: config.password,
+            client_id: 'e2e_test',
+            scope: 'bogus',
+            redirect_uri: 'http://bogus.redirect',
+            state: '12345'
+        };
+        post({ url: config.authUrl, form: authForm })
+        .then (res => {
+            assert(res.statusCode === 302);
+            var location = res.headers.location;
+            var query = url.parse(location).query;
+            var args = querystring.parse(query);
+            return post({ url: config.tokenUrl, form: { code: args.code } });
+        })
+        .then(res => {
+            assert(res.statusCode === 200);
+            var args = querystring.parse(res.body);
+            var form = { h: 'entry', content: 'Do not post' };
+            var headers = { Authorization: 'bearer ' + args.access_token };
+            return post({ url: config.micropubUrl, form: form, headers: headers });
+        })
+        .then(res => {
+            assert(res.statusCode === 401);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     it('micropub endpoint rejects invalid access token in body', function(done) {
-        var form = { h: 'entry', content: 'Access token in body', access_token: 'bad token' };
+        var form = { h: 'entry', content: 'Do not post', access_token: 'bad token' };
         post({ url: config.micropubUrl, form: form })
         .then(res => {
             assert(res.statusCode === 401);
