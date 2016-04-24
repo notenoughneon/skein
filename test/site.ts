@@ -210,5 +210,30 @@ describe('site', function() {
             catch(done);
     });
     
-
+    it('update works', function(done) {
+        post1.content.html = 'Updated content';
+        site.update(post1)
+        .then(() => site.get(post1.url))
+        .then(e => {
+            assert(e.content.html === 'Updated content');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('delete works', function(done) {
+        site.delete(post4.url)
+        .then(() => site.get(post4.url))
+        .then(() => assert(false))
+        .catch(err => done(err.message.endsWith('not found') ? null : err));
+    })
+    
+    it('validate works', function(done) {
+        site.validate()
+        .then(res => {
+            assert(res.length === 0);
+        })
+        .then(done)
+        .catch(done);
+    });
 });
