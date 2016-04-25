@@ -212,34 +212,25 @@ export function isMentionOf(html, permalink) {
     return getLinks(html).some(function(l){return l === permalink;});
 }
 
-function getWebmentionEndpoint(target) {
-    return get(target).
-        then(function (res) {
-            if (res.statusCode !== 200)
-                throw new Error(target + ' returned status ' + res.statusCode);
-            return parser.getAsync({html: res.body, baseUrl: target});
-        }).
-        then(function (mf) {
-            if (mf.rels['webmention'] !== undefined)
-                return mf.rels['webmention'][0];
-            else if (mf.rels['http://webmention.org/'] !== undefined)
-                return mf.rels['http://webmention.org/'][0];
-            else
-                throw new Error('No webmention endpoint');
-        });
+async function getWebmentionEndpoint(target) {
+    var res = await get(target);
+    if (res.statusCode !== 200)
+        throw new Error(target + ' returned status ' + res.statusCode);
+    var mf = await parser.getAsync({html: res.body, baseUrl: target});
+    if (mf.rels['webmention'] !== undefined)
+        return mf.rels['webmention'][0];
+    else if (mf.rels['http://webmention.org/'] !== undefined)
+        return mf.rels['http://webmention.org/'][0];
+    else
+        throw new Error('No webmention endpoint');
 }
 
-export function sendWebmention(source, target) {
-    return getWebmentionEndpoint(target).
-        then(function (endpoint) {
-            return post({uri:endpoint, form:{source:source, target:target}}).
-                then(function (res) {
-                    var status = res.statusCode;
-                    if (status !== 200 && status !== 202)
-                        throw new Error(endpoint + ' returned status ' + status);
-                    return;
-                });
-        });
+export async function sendWebmention(source, target) {
+    var endpoint = await getWebmentionEndpoint(target);
+    var res = await post({uri:endpoint, form:{source:source, target:target}});
+    var status = res.statusCode;
+    if (status !== 200 && status !== 202)
+        throw new Error(endpoint + ' returned status ' + status);
 }
 
 export function getPage(permalink) {
