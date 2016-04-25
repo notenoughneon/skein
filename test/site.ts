@@ -132,66 +132,6 @@ describe('site', function() {
             catch(done);
     });
 
-    //FIXME: brittle
-    it('can generate an index', function(done) {
-        site.generateStream().
-            then(() => parser.getAsync({html: fs.readFileSync(config.publisher.root + '/index.html')})).
-            then(mf => {
-                var feed = mf.items[0];
-                assert.equal(feed.type[0], 'h-feed');
-                var entry1 = feed.children[3];
-                assert.equal(entry1.type[0], 'h-entry');
-                assert.equal(entry1.properties.url[0], post2.url);
-                assert.equal(entry1.properties.published[0], post2.published.toISOString());
-                assert.deepEqual(entry1.properties.content[0], post2.content);
-                assert.equal(entry1.properties.name[0], post2.name);
-                var entry2 = feed.children[4];
-                assert.equal(entry2.type[0], 'h-entry');
-                assert.equal(entry2.properties.url[0], post1.url);
-                assert.equal(entry2.properties.published[0], post1.published.toISOString());
-                assert.deepEqual(entry2.properties.content[0], post1.content);
-                assert.equal(entry2.properties.name[0], post1.name);
-                var author = mf.items[1];
-                assert.equal(author.type[0], 'h-card');
-                assert.equal(author.properties.name[0], config.author.name);
-                assert.equal(author.properties.url[0], config.url);
-            }).
-            then(done).
-            catch(done);
-    });
-    
-    it('can generate a tag index', function(done) {
-        site.generateTagIndex('indieweb').
-            then(() => parser.getAsync({html: fs.readFileSync(config.publisher.root + '/tags/indieweb.html')})).
-            then(mf => {
-                var feed = mf.items[0];
-                assert.equal(feed.type[0], 'h-feed');
-                var entry1 = feed.children[0];
-                assert.equal(entry1.type[0], 'h-cite');
-                assert.equal(entry1.properties.url[0], post4.url);
-                assert.equal(entry1.properties.published[0], post4.published.toISOString());
-                assert.equal(entry1.properties.name[0], post4.name);
-            }).
-            then(done).
-            catch(done);
-    });
-
-    it('can generate an article index', function(done) {
-        site.generateArticleIndex()
-        .then(() => parser.getAsync({html: fs.readFileSync(config.publisher.root + '/articles.html')}))
-        .then(mf => {
-            var feed = mf.items[0];
-            assert.equal(feed.type[0], 'h-feed');
-            var entry1 = feed.children[0];
-            assert.equal(entry1.type[0], 'h-cite');
-            assert.equal(entry1.properties.url[0], post5.url);
-            assert.equal(entry1.properties.published[0], post5.published.toISOString());
-            assert.equal(entry1.properties.name[0], post5.name);
-        })
-        .then(done)
-        .catch(done);
-    });
-
     it('generateAll works', function(done) {
         var indexfile = config.publisher.root + '/index.html';
         var tagfile = config.publisher.root + '/tags/indieweb.html';
