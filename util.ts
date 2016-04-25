@@ -2,7 +2,6 @@
 import fs = require('fs');
 import path = require('path');
 import url = require('url');
-import util = require('util');
 import cheerio = require('cheerio');
 import Request = require('request');
 var parser = require('microformat-node');
@@ -55,10 +54,6 @@ var _writeFile = promisify(fs.writeFile);
 
 var get = promisify(Request.get);
 var post = promisify(Request.post);
-
-export function dump(data) {
-    console.log(util.inspect(data, {depth: null}));
-}
 
 export function tryDelete(p) {
     try {
