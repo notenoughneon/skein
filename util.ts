@@ -1,6 +1,7 @@
 ///<reference path="typings/main.d.ts"/>
 import fs = require('fs');
 import path = require('path');
+import url = require('url');
 import util = require('util');
 import cheerio = require('cheerio');
 import Request = require('request');
@@ -216,6 +217,16 @@ async function getWebmentionEndpoint(target) {
     var res = await get(target);
     if (res.statusCode !== 200)
         throw new Error(target + ' returned status ' + res.statusCode);
+    if (res.headers.link !== undefined) {
+        for (let header of res.headers.link.split(',')) {
+            let match = header.match(/<([^>]+)>;\s*rel=([^" ]+|"[^"]+")/);
+            if (match !== null) {
+                let rel = match[2].match(/"?([^"]+)"?/);
+                if (rel !== null && rel[1].split(' ').some(r => r === 'webmention'))
+                    return url.resolve(target, match[1]);
+            }
+        }
+    }
     var mf = await parser.getAsync({html: res.body, baseUrl: target});
     if (mf.rels['webmention'] !== undefined)
         return mf.rels['webmention'][0];
