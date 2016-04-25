@@ -274,16 +274,14 @@ class Site {
     async update(entry: microformat.Entry) {
         var html = this.renderEntry(entry);
         await this.publisher.put(entry.getSlug(), html, 'text/html');
+        await this.generateFor(entry);
         return entry;
     }
 
     async delete(url: string) {
         var entry = await this.get(url);
         await this.publisher.delete(entry.getSlug(), 'text/html');
-        for (let c of entry.category) {
-            await this.generateTagIndex(c);
-        }
-        await this.generateStream();
+        await this.generateFor(entry);
     }
 
     async _generateStream(entries: microformat.Entry[], page: number, total: number) {
@@ -292,35 +290,10 @@ class Site {
         debug('Published ' + getPathForIndex(page));
     }
 
-    async generateStream() {
-        var entries = await this.getAll();
-        entries.sort(microformat.Entry.byDateDesc);
-        var limit = this.config.entriesPerPage;
-        var chunks = util.chunk(limit, entries);
-        for (let index = 0; index < chunks.length; index++) {
-            let chunk = chunks[index];
-            await this._generateStream(chunk, index + 1, chunks.length);
-        }
-    }
-
     async _generateIndex(entries: microformat.Entry[], category: string, path: string) {
         var html = this.renderIndexPage(entries, category);
         await this.publisher.put(path, html, 'text/html');
         debug('Published ' + path);
-    }
-
-    async generateTagIndex(tag: string) {
-        var entries = await this.getAll();
-        entries = entries.filter(e => e.category.indexOf(tag) > -1);
-        entries.sort(microformat.Entry.byDateDesc);
-        await this._generateIndex(entries, 'Posts tagged ' + tag, getPathForTag(tag));
-    }
-
-    async generateArticleIndex() {
-        var entries = await this.getAll();
-        entries = entries.filter(e => e.isArticle());
-        entries.sort(microformat.Entry.byDateDesc);
-        await this._generateIndex(entries, 'Articles', '/articles');
     }
 
     getSlug(name: string, date: Date) {
