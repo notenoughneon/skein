@@ -389,7 +389,13 @@ describe('e2e', function() {
         .catch(done);
     });
     
-    it('test webmention deduplication', function(done) {
+    it('webmention send to nonexistent target', function(done) {
+        util.sendWebmention('http://localhost:8000/12345', 'http://localhost:8000/nonexist')
+        .then(() => assert(false))
+        .catch(err => done(err.message.endsWith('returned status 404') ? null : err));
+    });
+    
+    it('webmention receive deduplication', function(done) {
         util.sendWebmention(testReply.url, testNote.url)
         .then(() => {
             return site.get(testNote.url);

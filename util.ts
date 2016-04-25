@@ -215,6 +215,8 @@ export function isMentionOf(html, permalink) {
 function getWebmentionEndpoint(target) {
     return get(target).
         then(function (res) {
+            if (res.statusCode !== 200)
+                throw new Error(target + ' returned status ' + res.statusCode);
             return parser.getAsync({html: res.body, baseUrl: target});
         }).
         then(function (mf) {
