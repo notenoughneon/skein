@@ -310,7 +310,7 @@ class Site {
         entries.sort(microformat.Entry.byDateDesc);
         // feed
         var limit = this.config.entriesPerPage;
-        var chunks = util.chunk(limit, entries);
+        var chunks = util.chunk(limit, entries.filter(e => !e.isReply() && !e.isLike()));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
             await this._generateStream(chunk, index + 1, chunks.length);
@@ -337,7 +337,7 @@ class Site {
         });
         // feed
         var limit = this.config.entriesPerPage;
-        var chunks = util.chunk(limit, entries);
+        var chunks = util.chunk(limit, entries.filter(e => !e.isReply() && !e.isLike()));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
             await this._generateStream(chunk, index + 1, chunks.length);
