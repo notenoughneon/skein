@@ -22,6 +22,6 @@
         "type": "file",
         "root": "build/test/static"
     },
-    "password": "xxxxxxxx",
-    "jwtSecret": "secret"
+    "password": "notmypassword",
+    "jwtSecret": "notmysecret"
 }
