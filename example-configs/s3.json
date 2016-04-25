@@ -1,0 +1,27 @@
+{
+    "title": "Example Blog Title",
+    "url": "http://example.com",
+    "author": {
+        "name": "Example User",
+        "photo": "/author.png",
+        "note": "Here is a bio",
+        "elsewhere": [
+            {"name": "Twitter", "url": "https://twitter.com/exampleuser"},
+            {"name": "Instagram", "url": "https://instagram.com/exampleuser"}
+        ]
+    },
+    "entriesPerPage": 10,
+    "port": 80,
+    "skelRoot": "skel",
+    "authUrl": "http://api.example.com/api/auth",
+    "tokenUrl": "http://api.example.com/api/token",
+    "micropubUrl": "http://api.example.com/api/micropub",
+    "webmentionUrl": "http://api.example.com/api/webmention",
+    "publisher": {
+        "type": "s3",
+        "region": "us-west-2",
+        "bucket": "example.com"
+    },
+    "password": "notmypassword",
+    "jwtSecret": "notmysecret"
+}
