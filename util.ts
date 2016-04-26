@@ -169,6 +169,10 @@ export function inferMimetype(filename) {
     }
 }
 
+export function collapseWhitespace(s) {
+    return s.replace(/\s+/g, ' ');
+}
+
 export function truncate(s, len) {
     if (s.length > len)
         return s.substr(0, len) + '...';
