@@ -238,7 +238,8 @@ class Site {
         var html = this.renderEntry(entry);
         entry = await microformat.getHEntry(html, this.config.url);
         await this.publisher.put(slug, html, 'text/html');
-        debug('Published ' + entry.getSlug())
+        debug('Published ' + entry.getSlug());
+        await this.generateFor(entry);
         return entry;
     }
 

@@ -182,7 +182,6 @@ class Api {
                     category: req['post'].category
                 })).
                 then(e => entry = e).
-                then(() => site.generateFor(entry)).
                 then(() => site.publisher.commit('publish ' + entry.url)).
                 then(() => release()).
                 then(() => site.sendWebmentionsFor(entry)).
