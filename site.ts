@@ -189,7 +189,7 @@ class Site {
             entry.name = m.name || content;
             entry.content = {
                 value: content,
-                html: util.autoLink(util.escapeHtml(content))
+                html: '<div class="note-content">' + util.autoLink(util.escapeHtml(content)) + '</div>'
             };
         } else {
             entry.name = m.name || util.stripHtml(content.html);

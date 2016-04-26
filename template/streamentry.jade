@@ -37,7 +37,7 @@ div(class="h-entry")
                 div(class="p-summary")= entry.summary
                 a(href=entry.url) More...
             else
-                - var contentClass = "e-content" + (entry.isArticle() ? '' : ' p-name note-content');
+                - var contentClass = "e-content" + (entry.isArticle() ? '' : ' p-name');
                 div(class=contentClass)!= entry.content.html
             include ./actions
 

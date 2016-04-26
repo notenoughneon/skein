@@ -230,7 +230,6 @@ describe('e2e', function() {
         .then(e => {
             testNote = e;
             assert(e.name === form.content);
-            assert(e.content.html === util.escapeHtml(form.content));
             assert(e.content.value === form.content);
         })
         .then(done)
@@ -247,7 +246,6 @@ describe('e2e', function() {
         })
         .then(e => {
             assert(e.name === form.content);
-            assert(e.content.html === util.escapeHtml(form.content));
             assert(e.content.value === form.content);
         })
         .then(done)
@@ -264,7 +262,6 @@ describe('e2e', function() {
         })
         .then(e => {
             assert(e.name === form.content);
-            assert(e.content.html === util.escapeHtml(form.content));
             assert(e.content.value === form.content);
         })
         .then(done)
@@ -514,7 +511,6 @@ describe('e2e', function() {
         .then(e => {
             testArticle = e;
             assert(e.name === form.name);
-            assert(e.content.html === util.escapeHtml(form.content));
             assert(e.content.value === form.content);
         })
         .then(done)
