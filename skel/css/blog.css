@@ -259,10 +259,14 @@ h1 a:hover {
 .blog-post-syndication {
     position: absolute;
     right: 0px;
+    color: #ccc;
+}
+
+.blog-post-syndication span {
+    margin-left: 10px;
 }
 .blog-post-syndication a {
-  margin-left: 10px;
-  color: #ccc;
+    color: #ccc;
 }
 .blog-reply {
   margin-bottom: 30px;

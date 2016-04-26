@@ -12,7 +12,3 @@ p(class="blog-post-meta")
             time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
         else
             = entry.url
-    each category in entry.category
-        a(href=utils.getPathForCategory(category))
-            |  
-            span(class="label label-default p-category")= category

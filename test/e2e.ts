@@ -429,7 +429,7 @@ describe('e2e', function() {
     
     var testSyndication;
     it('post note with syndication', function(done) {
-        var form = { h: 'entry', content: 'Test syndication', syndication: [
+        var form = { h: 'entry', content: 'Test syndication', category: ['test'], syndication: [
             'https://twitter.com/testuser/status/12345',
             'https://instagram.com/p/12345',
             'https://facebook.com/12345'

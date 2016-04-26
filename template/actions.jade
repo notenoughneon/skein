@@ -1,6 +1,10 @@
 div(class="blog-post-bottom")
     span(class="blog-post-actions") &nbsp;
     span(class="blog-post-syndication")
+        each category in entry.category
+            span
+                | #
+                a(class="p-category" href=utils.getPathForCategory(category))= category
         each s in entry.syndication
             -
                 var icon;
@@ -14,5 +18,6 @@ div(class="blog-post-bottom")
                     icon = 'fa-soundcloud';
                 else
                     icon = 'fa-external-link';
-            a(class="u-syndication" href=s)
-                i(class="fa " + icon)
+            span
+                a(class="u-syndication" href=s)
+                    i(class="fa " + icon)
