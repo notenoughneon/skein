@@ -85,8 +85,8 @@ function logger(req, res, next) {
     var parms = (req.method == 'POST' ? req.post : req.query);
     debug('%s %s %s', req.ip, req.method, req.url);
     if (Object.keys(parms).length > 0)
-        debug(req.method == 'POST' ? req.post : req.query);
-    if (Object.keys(req.files).length > 0)
+        debug(parms);
+    if (req.files !== undefined && Object.keys(req.files).length > 0)
         debug(req.files);
     next();
 }
