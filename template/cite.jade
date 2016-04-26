@@ -34,7 +34,11 @@ mixin cite(entry, rootClass)
                 - var hideAuthor = false;
                 include ./meta
                 if entry.content != null
-                    div(class="e-content" + (entry.isArticle() ? '' : ' p-name'))= entry.content.value
+                    div(class="e-content" + (entry.isArticle() ? '' : ' p-name'))
+                        if entry.isReply()
+                            = utils.truncate(entry.content.value, 1440)
+                        else
+                            = utils.truncate(entry.content.value, 180)
                 else if entry.name != null
                     div(class="p-name")= entry.name
                 include ./actions

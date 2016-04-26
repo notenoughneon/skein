@@ -39,7 +39,7 @@ export async function constructHEntryForMention(url: string) {
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
     var entry = new Entry(url);
-    entry.content = {html: 'html content', value: util.truncate(util.collapseWhitespace(util.stripHtml(res.body)), 180)};
+    entry.content = {html: res.body, value: util.collapseWhitespace(util.stripHtml(res.body))};
     return entry;
 }
 
