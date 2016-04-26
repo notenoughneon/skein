@@ -300,12 +300,14 @@ class Site {
         }
     }
     
+    static streamFilter = e => !e.isReply() && !e.isLike() && !e.category.some(c => c === 'hidden');
+    
     async generateFor(entry: microformat.Entry) {
         var entries = await this.getAll();
         entries.sort(microformat.Entry.byDateDesc);
         // feed
         var limit = this.config.entriesPerPage;
-        var chunks = util.chunk(limit, entries.filter(e => !e.isReply() && !e.isLike()));
+        var chunks = util.chunk(limit, entries.filter(Site.streamFilter));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
             await this._generateStream(chunk, index + 1, chunks.length);
@@ -332,7 +334,7 @@ class Site {
         });
         // feed
         var limit = this.config.entriesPerPage;
-        var chunks = util.chunk(limit, entries.filter(e => !e.isReply() && !e.isLike()));
+        var chunks = util.chunk(limit, entries.filter(Site.streamFilter));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
             await this._generateStream(chunk, index + 1, chunks.length);
