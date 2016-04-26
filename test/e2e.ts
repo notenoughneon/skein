@@ -11,6 +11,7 @@ import child_process = require('child_process');
 import util = require('../util');
 import Debug = require('debug');
 var debug = Debug('e2e');
+import microformat = require('../microformat');
 
 var get = util.promisify(Request.get);
 var post = util.promisify(Request.post);
@@ -270,7 +271,7 @@ describe('e2e', function() {
         .catch(done);
     });
     
-    it('youtube.com oembed', function(done) {
+    it.skip('youtube.com oembed', function(done) {
         var form = { h: 'entry', content: 'Youtube oembed. https://www.youtube.com/watch?v=sPasebVMIW4' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
@@ -286,7 +287,7 @@ describe('e2e', function() {
         .catch(done);
     });
 
-    it('youtu.be oembed', function(done) {
+    it.skip('youtu.be oembed', function(done) {
         var form = { h: 'entry', content: 'Youtube oembed (short link). https://youtu.be/bt_yCugXk8U' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
@@ -302,7 +303,7 @@ describe('e2e', function() {
         .catch(done);
     });
     
-    it('soundcloud.com oembed', function(done) {
+    it.skip('soundcloud.com oembed', function(done) {
         var form = { h: 'entry', content: 'Soundcloud oembed. https://soundcloud.com/dj-rasoul/dj-ra-soul-deep-n-da-bay-may-2014' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
@@ -405,6 +406,28 @@ describe('e2e', function() {
         })
         .then(done)
         .catch(done);
+    });
+    
+    it('webmention from non-mf2 source', function(done) {
+        var html = '<html>\
+        <head><title>Some page title</title></head>\
+        <body>\
+        Here is a non-mf2 <a href="' + testNote.url + '">mention</a>.\
+        Here is some more text:\
+        <ul>\
+        <li>one\
+        <li>two\
+        <li>three\
+        </ul>\
+        Aasdf asdf asd fasdf asd fas dfasd fasd fasd fasdf asdf asdf as dfsadf asdf\
+        asdf asdfasd fas dfasd fasd fasd fasd fasd fasd fasd fasd fasd sadf ad fasd\
+        </body>\
+        </html>';
+        site.publisher.put('non-mf2-mention.html', html)
+        .then(() => util.sendWebmention('http://localhost:8000/non-mf2-mention', testNote.url))
+        .then(done)
+        .catch(done);
+
     });
     
     var testSyndication;

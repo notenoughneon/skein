@@ -1,5 +1,5 @@
 p(class="blog-post-meta")
-    if !hideAuthor
+    if !hideAuthor && entry.author != null
         a(class="p-author h-card" href=entry.author.url)
             if entry.author.photo != null
                 img(src=entry.author.photo)
@@ -10,6 +10,8 @@ p(class="blog-post-meta")
         if entry.published != null
             - var dateString = utils.formatDate(entry.published);
             time(class="dt-published" datetime=entry.published.toISOString() title=dateString)= dateString
+        else
+            = entry.url
     each category in entry.category
         a(href=utils.getPathForCategory(category))
             |  

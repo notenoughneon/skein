@@ -34,6 +34,15 @@ export async function crawlHEntryThread(seed: string) {
     return Array.from(entryDict.values());
 }
 
+export async function constructHEntryForMention(url: string) {
+    var res = await request(url);
+    if (res.statusCode != 200)
+        throw new Error('Server returned status ' + res.statusCode);
+    var entry = new Entry(url);
+    entry.content = {html: 'html content', value: util.truncate(util.stripHtml(res.body), 180)};
+    return entry;
+}
+
 export async function getHEntryFromUrl(url: string): Promise<Entry> {
     var res = await request(url);
     debug('Fetching ' + url);

@@ -29,12 +29,6 @@ function getPathForTag(category) {
     return '/tags/' + category;
 }
 
-function truncate(s, len) {
-    if (s.length > len)
-        return s.substr(0, len) + '...';
-    return s;
-}
-
 function formatDate(date) {
     var month = ["Jan","Feb","Mar","Apr","May","Jun",
         "Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -50,7 +44,7 @@ var templateUtils = {
     formatDate: formatDate,
     getPathForIndex: getPathForIndex,
     getPathForCategory: getPathForTag,
-    truncate: truncate
+    truncate: util.truncate
 };
 
 interface SiteConfig {
@@ -402,8 +396,13 @@ class Site {
             throw new Error('Didn\'t find mention on source page');
         } else {
             var targetEntry = await this.get(targetUrl);
-            var sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl);
-            // TODO: handle non mf mentions
+            var sourceEntry;
+            try {
+                sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl);                
+            } catch (err) {
+                // construct h-cite for non-mf2 mention
+                sourceEntry = await microformat.constructHEntryForMention(sourceUrl);
+            }
             targetEntry.children.push(sourceEntry);
             targetEntry.deduplicate();
             var targetHtml = this.renderEntry(targetEntry);

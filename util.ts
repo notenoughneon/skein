@@ -169,6 +169,12 @@ export function inferMimetype(filename) {
     }
 }
 
+export function truncate(s, len) {
+    if (s.length > len)
+        return s.substr(0, len) + '...';
+    return s;
+}
+
 export function kebabCase(str) {
     str = str.toLowerCase();
     str = str.replace(/[^a-z0-9 ]/g, ' ');
