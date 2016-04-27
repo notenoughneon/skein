@@ -4,12 +4,17 @@ html(lang="en")
         h1 Authorization Request
         form(method="post" action="/api/auth" enctype="application/x-www-form-urlencoded")
             h2= client_id
-            p is requesting <b>#{scope}</b> access to <b>#{me}</b>.
+            if response_type === 'id'
+                p is requesting identification for <b>#{me}</b>.
+            else if response_type === 'code'
+                p is requesting authorization to <b>#{scope}</b> to <b>#{me}</b>.
             input(type="hidden" name="me" value=me)
             input(type="hidden" name="client_id" value=client_id)
             input(type="hidden" name="redirect_uri" value=redirect_uri)
             input(type="hidden" name="state" value=state)
-            input(type="hidden" name="scope" value=scope)
+            input(type="hidden" name="response_type" value=response_type)
+            if response_type === 'code'
+                input(type="hidden" name="scope" value=scope)
             | Password:
             input(type="password" name="password")
             input(type="submit" value="Authorize")

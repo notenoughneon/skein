@@ -118,20 +118,26 @@ class Api {
         this.router.use(logger);
 
         this.router.get('/auth', (req, res) => {
+            if (req.query.response_type == null)
+                req.query.response_type = 'id';
             if (req.query.client_id == null || req.query.me == null ||
-                req.query.redirect_uri == null || req.query.state == null) {
+                req.query.redirect_uri == null || req.query.state == null ||
+                (req.query.response_type !== 'id' && req.query.response_type !== 'code') ||
+                (req.query.response_type === 'code' && req.query.scope == null)) {
                 res.sendStatus(400);
             } else {
-                if (req.query.scope == null)
-                    req.query.scope = 'id';
                 res.render('authform', req.query);
             }
         });
 
-        this.router.post('/auth', rateLimit(3, 1000 * 60 * 10), (req, res) => {
-            if (req['post'].password === site.config.password) {
-                nodefn.call(crypto.randomBytes, 18).
-                    then((buf) => {
+        this.router.post('/auth', rateLimit(3, 1000 * 60 * 10), async (req, res) => {
+            try {
+                if (req['post'].password === site.config.password) {
+                    if (req['post'].response_type === 'id') {
+                        res.redirect(req['post'].redirect_uri + '?' +
+                            querystring.stringify({state: req['post'].state, me: site.config.url}));
+                    } else if (req['post'].response_type === 'code') {
+                        var buf = await nodefn.call(crypto.randomBytes, 18);
                         var code = buf.toString('base64');
                         this.lastIssuedCode = {
                             code: code,
@@ -140,13 +146,16 @@ class Api {
                             date: Date.now()
                         };
                         res.redirect(req['post'].redirect_uri + '?' +
-                        querystring.stringify({code: code, state: req['post'].state, me: site.config.url}));
-                    }).
-                    catch(e => handleError(res, e));
-            } else {
-                debug('Failed password authentication from ' + req.ip);
-                res.sendStatus(401);
-            }
+                            querystring.stringify({code: code, state: req['post'].state, me: site.config.url}));
+                    } else {
+                        res.sendStatus(400);
+                    }
+                } else {
+                    debug('Failed password authentication from ' + req.ip);
+                    res.sendStatus(401);
+                }
+            } catch (e) {handleError(res, e)};
+
         });
 
         this.router.post('/token', rateLimit(3, 1000 * 60), (req, res) => {

@@ -49,6 +49,7 @@ describe('e2e', function() {
         var form = {
             password: 'invalid password',
             client_id: 'e2e_test',
+            response_type: 'code',
             scope: 'post',
             redirect_uri: 'http://bogus.redirect',
             state: '12345'
@@ -65,6 +66,7 @@ describe('e2e', function() {
         var form = {
             password: config.password,
             client_id: 'e2e_test',
+            response_type: 'code',
             scope: 'post',
             redirect_uri: 'http://bogus.redirect',
             state: '12345'
@@ -144,6 +146,7 @@ describe('e2e', function() {
         var authForm = {
             password: config.password,
             client_id: 'e2e_test',
+            response_type: 'code',
             scope: 'bogus',
             redirect_uri: 'http://bogus.redirect',
             state: '12345'
