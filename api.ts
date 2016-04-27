@@ -118,14 +118,14 @@ class Api {
         this.router.use(logger);
 
         this.router.get('/auth', (req, res) => {
-            if (req.query.client_id != null &&
-                req.query.me != null &&
-                req.query.redirect_uri != null &&
-                req.query.state != null &&
-                req.query.scope != null)
-                res.render('authform', req.query);
-            else
+            if (req.query.client_id == null || req.query.me == null ||
+                req.query.redirect_uri == null || req.query.state == null) {
                 res.sendStatus(400);
+            } else {
+                if (req.query.scope == null)
+                    req.query.scope = 'id';
+                res.render('authform', req.query);
+            }
         });
 
         this.router.post('/auth', rateLimit(3, 1000 * 60 * 10), (req, res) => {
