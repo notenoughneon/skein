@@ -63,6 +63,8 @@ interface SiteConfig {
     port: number;
     staticSiteRoot?: string;
     skelRoot?: string;
+    keyFile?: string;
+    certFile?: string;
     authUrl: string;
     tokenUrl: string;
     micropubUrl: string;
