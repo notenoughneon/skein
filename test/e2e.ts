@@ -61,6 +61,56 @@ describe('e2e', function() {
         .then(done)
         .catch(done);
     });
+    
+    it('auth endpoint rejects invalid code (indieauth)', function(done) {
+        var form = {
+            code: 'invalid code',
+            client_id: 'e2e_test',
+            redirect_uri: 'http://bogus.redirect',
+            state: '12345'
+        };
+        post({ url: config.authUrl, form: form })
+        .then (res => {
+            assert(res.statusCode === 401);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('auth endpoint successful login (indieauth)', function(done) {
+        var form = {
+            password: config.password,
+            client_id: 'e2e_test',
+            response_type: 'id',
+            scope: 'post',
+            redirect_uri: 'http://bogus.redirect',
+            state: '12345'
+        };
+        post({ url: config.authUrl, form: form })
+        .then (res => {
+            assert(res.statusCode === 302);
+            var location = res.headers.location;
+            assert(location.startsWith(form.redirect_uri));
+            var query = url.parse(location).query;
+            var args = querystring.parse(query);
+            assert(args.state === form.state);
+            assert(args.me === config.url);
+            var form2 = {
+                code: args.code,
+                redirect_uri: form.redirect_uri,
+                client_id: form.client_id,
+                state: form.state
+            };
+            return post({ url: config.authUrl, form: form2 });
+        })
+        .then(res => {
+            assert(res.statusCode === 200);
+            var args = querystring.parse(res.body);
+            assert(args.me === config.url);
+        })
+        .then(done)
+        .catch(done);
+    });
 
     it('auth endpoint issues code', function(done) {
         var form = {
@@ -87,7 +137,7 @@ describe('e2e', function() {
     });
 
     it('token endpoint rejects invalid code', function(done) {
-        var form = { code: 'invalid code' };
+        var form = { code: 'invalid code', redirect_uri: 'http://bogus.redirect', client_id: 'e2e_test' };
         post({ url: config.tokenUrl, form: form })
         .then(res => {
             assert(res.statusCode === 401);
@@ -97,7 +147,7 @@ describe('e2e', function() {
     });
 
     it('token endpoint issues token', function(done) {
-        var form = { code: code };
+        var form = { code: code, redirect_uri: 'http://bogus.redirect', client_id: 'e2e_test' };
         post({ url: config.tokenUrl, form: form })
         .then(res => {
             assert(res.statusCode === 200);
@@ -157,7 +207,7 @@ describe('e2e', function() {
             var location = res.headers.location;
             var query = url.parse(location).query;
             var args = querystring.parse(query);
-            return post({ url: config.tokenUrl, form: { code: args.code } });
+            return post({ url: config.tokenUrl, form: { code: args.code, redirect_uri: 'http://bogus.redirect', client_id: 'e2e_test' } });
         })
         .then(res => {
             assert(res.statusCode === 200);

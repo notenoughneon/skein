@@ -105,7 +105,7 @@ class Api {
     site: Site;
     router: express.Router;
     // store the last code issued by the auth endpoint in memory
-    lastIssuedCode: {code: string, client_id: string, scope: string, date: number};
+    lastIssuedCode: {code: string, redirect_uri: string, client_id: string, scope: string, date: number};
     publishMutex: util.Mutex;
 
     constructor(site: Site) {
@@ -130,26 +130,35 @@ class Api {
             }
         });
 
-        this.router.post('/auth', rateLimit(3, 1000 * 60 * 10), async (req, res) => {
+        this.router.post('/auth', rateLimit(6, 1000 * 60 * 10), async (req, res) => {
             try {
-                if (req['post'].password === site.config.password) {
-                    if (req['post'].response_type === 'id') {
-                        res.redirect(req['post'].redirect_uri + '?' +
-                            querystring.stringify({state: req['post'].state, me: site.config.url}));
-                    } else if (req['post'].response_type === 'code') {
-                        var buf = await nodefn.call(crypto.randomBytes, 18);
-                        var code = buf.toString('base64');
-                        this.lastIssuedCode = {
-                            code: code,
-                            client_id: req['post'].client_id,
-                            scope: req['post'].scope,
-                            date: Date.now()
-                        };
-                        res.redirect(req['post'].redirect_uri + '?' +
-                            querystring.stringify({code: code, state: req['post'].state, me: site.config.url}));
+                if (req['post'].code != null) {
+                    if (this.lastIssuedCode !== null &&
+                        this.lastIssuedCode.code === req['post'].code &&
+                        this.lastIssuedCode.redirect_uri === req['post'].redirect_uri &&
+                        this.lastIssuedCode.client_id === req['post'].client_id &&
+                        ((Date.now() - this.lastIssuedCode.date) < 60 * 1000)) {
+                        res.type('application/x-www-form-urlencoded');
+                        res.send(querystring.stringify({me: site.config.url}));
+                        this.lastIssuedCode = null;
                     } else {
-                        res.sendStatus(400);
+                        debug('Failed auth verification from ' + req.ip);
+                        res.sendStatus(401);
                     }
+                } else if (req['post'].password === site.config.password) {
+                    if (req['post'].response_type === 'id')
+                        req['post'].scope = '';
+                    var buf = await nodefn.call(crypto.randomBytes, 18);
+                    var code = buf.toString('base64');
+                    this.lastIssuedCode = {
+                        code: code,
+                        redirect_uri: req['post'].redirect_uri,
+                        client_id: req['post'].client_id,
+                        scope: req['post'].scope,
+                        date: Date.now()
+                    };
+                    res.redirect(req['post'].redirect_uri + '?' +
+                        querystring.stringify({code: code, state: req['post'].state, me: site.config.url}));
                 } else {
                     debug('Failed password authentication from ' + req.ip);
                     res.sendStatus(401);
@@ -161,7 +170,9 @@ class Api {
         this.router.post('/token', rateLimit(3, 1000 * 60), (req, res) => {
             if (this.lastIssuedCode !== null &&
                 this.lastIssuedCode.code === req['post'].code &&
-                ((Date.now() - this.lastIssuedCode.date) < 60 * 1000)) {
+                this.lastIssuedCode.redirect_uri === req['post'].redirect_uri &&
+                this.lastIssuedCode.client_id === req['post'].client_id &&
+               ((Date.now() - this.lastIssuedCode.date) < 60 * 1000)) {
                 var token = this.generateToken(this.lastIssuedCode.client_id, this.lastIssuedCode.scope);
                 res.type('application/x-www-form-urlencoded');
                 res.send(querystring.stringify({access_token: token, scope: this.lastIssuedCode.scope, me: site.config.url}));
