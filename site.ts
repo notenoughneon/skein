@@ -103,6 +103,7 @@ interface Micropub {
 class Site {
     config: SiteConfig;
     publisher: Publisher;
+    mutex: util.Mutex;
 
     constructor(config: SiteConfig) {
         this.config = config;
@@ -119,6 +120,7 @@ class Site {
             default:
                 throw new Error('Unknown publisher type');
         }
+        this.mutex = new util.Mutex();
     }
     
     async init() {
@@ -233,10 +235,8 @@ class Site {
         //ISSUE: some properties may be embedded mf in the content (e.g. summary)
         //so we render and then re-parse it to get all properties
         var html = this.renderEntry(entry);
-        entry = await microformat.getHEntry(html, this.config.url);
-        await this.publisher.put(slug, html, 'text/html');
-        debug('Published ' + entry.getSlug());
-        await this.generateFor(entry);
+        entry = await microformat.getHEntry(html, entry.url);
+        await this.update(entry);
         return entry;
     }
 
@@ -272,6 +272,7 @@ class Site {
     async update(entry: microformat.Entry) {
         var html = this.renderEntry(entry);
         await this.publisher.put(entry.getSlug(), html, 'text/html');
+        debug('Published ' + entry.getSlug());
         await this.generateFor(entry);
         return entry;
     }
@@ -279,6 +280,7 @@ class Site {
     async delete(url: string) {
         var entry = await this.get(url);
         await this.publisher.delete(entry.getSlug(), 'text/html');
+        debug('Deleted ' + entry.getSlug());
         await this.generateFor(entry);
     }
 
@@ -394,25 +396,31 @@ class Site {
     }
 
     async receiveWebmention(sourceUrl: string, targetUrl: string) {
-        if (url.parse(targetUrl).host != url.parse(this.config.url).host)
-            throw new Error("Target URL " + targetUrl + " doesn't match " + this.config.url);
-        var sourceHtml = await util.getPage(sourceUrl);
-        if (!util.isMentionOf(sourceHtml, targetUrl)) {
-            throw new Error('Didn\'t find mention on source page');
-        } else {
-            var targetEntry = await this.get(targetUrl);
-            var sourceEntry;
-            try {
-                sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl);                
-            } catch (err) {
-                // construct h-cite for non-mf2 mention
-                sourceEntry = await microformat.constructHEntryForMention(sourceUrl);
+        try {
+            var release = await this.mutex.lock();
+            if (url.parse(targetUrl).host != url.parse(this.config.url).host)
+                throw new Error("Target URL " + targetUrl + " doesn't match " + this.config.url);
+            var sourceHtml = await util.getPage(sourceUrl);
+            if (!util.isMentionOf(sourceHtml, targetUrl)) {
+                throw new Error('Didn\'t find mention on source page');
+            } else {
+                var targetEntry = await this.get(targetUrl);
+                var sourceEntry;
+                try {
+                    sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl);
+                } catch (err) {
+                    // construct h-cite for non-mf2 mention
+                    sourceEntry = await microformat.constructHEntryForMention(sourceUrl);
+                }
+                targetEntry.children.push(sourceEntry);
+                targetEntry.deduplicate();
+                var targetHtml = this.renderEntry(targetEntry);
+                await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
+                await this.publisher.commit('webmention from ' + sourceUrl + ' to ' + targetUrl);
+                debug('Received webmention from ' + sourceUrl);
             }
-            targetEntry.children.push(sourceEntry);
-            targetEntry.deduplicate();
-            var targetHtml = this.renderEntry(targetEntry);
-            await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
-            debug('Received webmention from ' + sourceUrl);
+        } finally {
+            release();
         }
     }
 

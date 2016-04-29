@@ -216,21 +216,13 @@ class Api {
         });
 
         this.router.post('/webmention', rateLimit(50, 1000 * 60 * 60), (req, res) => {
-            var release;
             var source = req['post'].source;
             var target = req['post'].target;
             if (source === undefined || target === undefined)
                 return res.status(400).send('"source" and "target" parameters are required');
-            this.publishMutex.lock().
-                then(r => release = r).
-                then(() => site.receiveWebmention(source, target)).
-                then(() => site.publisher.commit('webmention from ' + source + ' to ' + target)).
-                then(() => release()).
-                then(() => res.sendStatus(200)).
-                catch(e => {
-                    handleError(res, e);
-                    release();
-                });
+            site.receiveWebmention(source, target)
+            .then(() => res.sendStatus(200))
+            .catch(e => handleError(res, e));
         });
 
     }
