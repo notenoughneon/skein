@@ -160,10 +160,11 @@ class Site {
         });
     }
 
-    renderStreamPage(entries: microformat.Entry[], page: number, totalPages: number) {
+    renderStreamPage(entries: microformat.Entry[], allEntries: microformat.Entry[], page: number, totalPages: number) {
         return _renderStream({
             site: this.config,
             entries: entries,
+            allEntries: allEntries,
             page: page,
             totalPages: totalPages,
             utils: templateUtils
@@ -281,8 +282,8 @@ class Site {
         await this.generateFor(entry);
     }
 
-    async _generateStream(entries: microformat.Entry[], page: number, total: number) {
-        let html = this.renderStreamPage(entries, page, total);
+    async _generateStream(entries: microformat.Entry[], allEntries: microformat.Entry[], page: number, total: number) {
+        let html = this.renderStreamPage(entries, allEntries, page, total);
         await this.publisher.put(getPathForIndex(page), html, 'text/html');
         debug('Published ' + getPathForIndex(page));
     }
@@ -312,7 +313,7 @@ class Site {
         var chunks = util.chunk(limit, entries.filter(Site.streamFilter));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
-            await this._generateStream(chunk, index + 1, chunks.length);
+            await this._generateStream(chunk, entries, index + 1, chunks.length);
         });
         // tags
         await util.map(entry.category, async (tag) => {
@@ -339,7 +340,7 @@ class Site {
         var chunks = util.chunk(limit, entries.filter(Site.streamFilter));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
-            await this._generateStream(chunk, index + 1, chunks.length);
+            await this._generateStream(chunk, entries, index + 1, chunks.length);
         });
         // tags
         var tags = util.unique(util.flatten(entries.map(e => e.category)));

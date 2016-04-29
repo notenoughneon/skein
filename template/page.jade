@@ -28,28 +28,25 @@ html(lang="en")
                         span(class="icon-bar")
                         span(class="icon-bar")
                         span(class="icon-bar")
-                div(class="navbar-collapse collapse")
-                    ul(class="nav navbar-nav")
-                        li
-                            a(href="/articles") Articles
 
         div(class="container")
             div(class="row")
                 div(class="col-sm-8 blog-main")
                     block content
                 div(class="col-sm-3 col-sm-offset-1 blog-sidebar")
-                    div(class="sidebar-module sidebar-module-inset")
-                        h4 About
-                        div(class="h-card")
-                            img(class="u-photo" src=site.author.photo)
-                            a(class="p-name u-url" rel="me" href=site.url)= site.author.name
-                            p(class="p-note")= site.author.note
-                    div(class="sidebar-module")
-                        h4 Elsewhere
-                        ol(class="list-unstyled")
-                            each e in site.author.elsewhere
-                                li
-                                    a(href=e.url rel="me")= e.name
+                    block sidebar
+                        div(class="sidebar-module sidebar-module-inset")
+                            h4 About
+                            div(class="h-card")
+                                img(class="u-photo" src=site.author.photo)
+                                a(class="p-name u-url" rel="me" href=site.url)= site.author.name
+                                p(class="p-note")= site.author.note
+                        div(class="sidebar-module")
+                            h4 Elsewhere
+                            ol(class="list-unstyled")
+                                each e in site.author.elsewhere
+                                    li
+                                        a(href=e.url rel="me")= e.name
 
         div(class="blog-footer")
 
