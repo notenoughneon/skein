@@ -106,13 +106,11 @@ class Api {
     router: express.Router;
     // store the last code issued by the auth endpoint in memory
     lastIssuedCode: {code: string, redirect_uri: string, client_id: string, scope: string, date: number};
-    publishMutex: util.Mutex;
 
     constructor(site: Site) {
         this.site = site;
         this.router = express.Router();
         this.lastIssuedCode = null;
-        this.publishMutex = new util.Mutex();
 
         this.router.use(parsePost);
         this.router.use(logger);
@@ -185,34 +183,26 @@ class Api {
 
         this.router.post('/micropub', this.requireAuth('post'), (req, res) => {
             var entry: microformat.Entry;
-            var release;
             if (req['post'].h != 'entry')
                 return res.sendStatus(400);
-            this.publishMutex.lock().
-                then(r => release = r).
-                then(() => site.publish({
-                    content: req['post'].content,
-                    name: req['post'].name,
-                    replyTo: req['post']['in-reply-to'],
-                    likeOf: req['post']['like-of'],
-                    repostOf: req['post']['repost-of'],
-                    photo: req['files'].photo,
-                    audio: req['files'].audio,
-                    syndication: req['post'].syndication,
-                    category: req['post'].category
-                })).
-                then(e => entry = e).
-                then(() => site.publisher.commit('publish ' + entry.url)).
-                then(() => release()).
-                then(() => site.sendWebmentionsFor(entry)).
-                then(() => {
-                    res.location(entry.url);
-                    res.sendStatus(201);
-                }).
-                catch(e => {
-                    handleError(res, e);
-                    release();
-                });
+            site.publish({
+                content: req['post'].content,
+                name: req['post'].name,
+                replyTo: req['post']['in-reply-to'],
+                likeOf: req['post']['like-of'],
+                repostOf: req['post']['repost-of'],
+                photo: req['files'].photo,
+                audio: req['files'].audio,
+                syndication: req['post'].syndication,
+                category: req['post'].category
+            })
+            .then(e => entry = e)
+            .then(() => site.sendWebmentionsFor(entry))
+            .then(() => {
+                res.location(entry.url);
+                res.sendStatus(201);
+            })
+            .catch(e => handleError(res, e));
         });
 
         this.router.post('/webmention', rateLimit(50, 1000 * 60 * 60), (req, res) => {

@@ -183,61 +183,67 @@ class Site {
     }
 
     async publish(m: Micropub) {
-        var entry = new microformat.Entry();
-        entry.author = this.getAuthor();
-        // workaround: type guards dont work with properties
-        // https://github.com/Microsoft/TypeScript/issues/3812
-        var content = m.content;
-        if (content == null)
-            content = '';
-        if (typeof content === 'string') {
-            entry.name = m.name || content;
-            entry.content = {
-                value: content,
-                html: '<div class="note-content">' + util.autoLink(util.escapeHtml(content)) + '</div>'
-            };
-        } else {
-            entry.name = m.name || util.stripHtml(content.html);
-            entry.content = {
-                value: util.stripHtml(content.html),
-                html: content.html
-            };
+        try {
+            var release = await this.mutex.lock();
+            var entry = new microformat.Entry();
+            entry.author = this.getAuthor();
+            // workaround: type guards dont work with properties
+            // https://github.com/Microsoft/TypeScript/issues/3812
+            var content = m.content;
+            if (content == null)
+                content = '';
+            if (typeof content === 'string') {
+                entry.name = m.name || content;
+                entry.content = {
+                    value: content,
+                    html: '<div class="note-content">' + util.autoLink(util.escapeHtml(content)) + '</div>'
+                };
+            } else {
+                entry.name = m.name || util.stripHtml(content.html);
+                entry.content = {
+                    value: util.stripHtml(content.html),
+                    html: content.html
+                };
+            }
+            entry.published = new Date();
+            if (m.category != null)
+                entry.category = m.category;
+            var slug = await this.getSlug(m.name, entry.published);
+            entry.url = this.config.url + slug;
+            if (m.replyTo != null)
+                entry.replyTo.push(await microformat.getHEntryFromUrl(m.replyTo));
+            if (m.likeOf != null)
+                entry.likeOf.push(await microformat.getHEntryFromUrl(m.likeOf));
+            if (m.repostOf != null)
+                entry.repostOf.push(await microformat.getHEntryFromUrl(m.repostOf));
+            if (m.syndication != null)
+                entry.syndication = m.syndication;
+            if (m.photo != null) {
+                entry.content.html = '<p><img class="u-photo" src="' + m.photo.filename + '"/></p>' + entry.content.html;
+                await this.publisher.put(path.join(path.dirname(slug), m.photo.filename),
+                fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
+            }
+            if (m.audio != null) {
+                entry.content.html = '<p><audio class="u-audio" src="' + m.audio.filename + '" controls>' +
+                'Your browser does not support the audio tag.</audio></p>' + entry.content.html;
+                await this.publisher.put(path.join(path.dirname(slug), m.audio.filename),
+                fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
+            }
+            for (let link of entry.allLinks()) {
+                let embed = await oembed(link);
+                if (embed !== null)
+                    entry.content.html = entry.content.html + '<p>' + embed + '</p>';
+            }
+            //ISSUE: some properties may be embedded mf in the content (e.g. summary)
+            //so we render and then re-parse it to get all properties
+            var html = this.renderEntry(entry);
+            entry = await microformat.getHEntry(html, entry.url);
+            await this.update(entry);
+            await this.publisher.commit('publish ' + entry.url);
+            return entry;
+        } finally {
+            release();
         }
-        entry.published = new Date();
-        if (m.category != null)
-            entry.category = m.category;
-        var slug = await this.getSlug(m.name, entry.published);
-        entry.url = this.config.url + slug;
-        if (m.replyTo != null)
-            entry.replyTo.push(await microformat.getHEntryFromUrl(m.replyTo));
-        if (m.likeOf != null)
-            entry.likeOf.push(await microformat.getHEntryFromUrl(m.likeOf));
-        if (m.repostOf != null)
-            entry.repostOf.push(await microformat.getHEntryFromUrl(m.repostOf));
-        if (m.syndication != null)
-            entry.syndication = m.syndication;
-        if (m.photo != null) {
-            entry.content.html = '<p><img class="u-photo" src="' + m.photo.filename + '"/></p>' + entry.content.html;
-            await this.publisher.put(path.join(path.dirname(slug), m.photo.filename),
-            fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
-        }
-        if (m.audio != null) {
-            entry.content.html = '<p><audio class="u-audio" src="' + m.audio.filename + '" controls>' +
-            'Your browser does not support the audio tag.</audio></p>' + entry.content.html;
-            await this.publisher.put(path.join(path.dirname(slug), m.audio.filename),
-            fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
-        }
-        for (let link of entry.allLinks()) {
-            let embed = await oembed(link);
-            if (embed !== null)
-                entry.content.html = entry.content.html + '<p>' + embed + '</p>';
-        }
-        //ISSUE: some properties may be embedded mf in the content (e.g. summary)
-        //so we render and then re-parse it to get all properties
-        var html = this.renderEntry(entry);
-        entry = await microformat.getHEntry(html, entry.url);
-        await this.update(entry);
-        return entry;
     }
 
     async get(u: string) {
