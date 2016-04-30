@@ -247,6 +247,15 @@ export class Entry {
         }
         return [];
     }
+    
+    getAudios(): string[] {
+        if (this.content != null && this.content.html != null) {
+            var $ = cheerio.load(this.content.html);
+            return $('audio.u-audio').toArray().map(audio => audio.attribs['src']);
+        }
+        return [];
+
+    }
 
     isArticle(): boolean {
         return !this.isReply() &&

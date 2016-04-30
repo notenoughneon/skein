@@ -213,13 +213,14 @@ class Site {
             if (m.syndication != null)
                 entry.syndication = m.syndication;
             if (m.photo != null) {
-                entry.content.html = '<p><img class="u-photo" src="' + m.photo.filename + '"/></p>' + entry.content.html;
+                entry.content.html = '<div class="thumbnail"><img class="u-photo" src="' + m.photo.filename + '"/>' +
+                '<div class="caption">' + entry.content.html + '</div></div>';
                 await this.publisher.put(path.join(path.dirname(slug), m.photo.filename),
                 fs.createReadStream(m.photo.tmpfile), m.photo.mimetype);
             }
             if (m.audio != null) {
-                entry.content.html = '<p><audio class="u-audio" src="' + m.audio.filename + '" controls>' +
-                'Your browser does not support the audio tag.</audio></p>' + entry.content.html;
+                entry.content.html = '<div class="thumbnail"><audio class="u-audio" src="' + m.audio.filename + '" controls></audio>' +
+                '<div class="caption">' + entry.content.html + '</div></div>';
                 await this.publisher.put(path.join(path.dirname(slug), m.audio.filename),
                 fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
             }

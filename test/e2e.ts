@@ -533,7 +533,9 @@ describe('e2e', function() {
                     filename: 'teacups.jpg',
                     contentType: 'image/jpg'
                 }
-            }
+            },
+            'category[]': ['tea'],
+            'syndication[]': ['https://instagram.com/p/12345']
         };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, formData: formData, headers: headers })
@@ -547,6 +549,36 @@ describe('e2e', function() {
             assert(e.content.value === formData.content);
             var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
             assert.deepEqual(e.getPhotos(),[config.url + photoSlug]);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    var testAudio;
+    it('post audio via micropub', function(done) {
+        var formData = {
+            h: 'entry',
+            content: 'Test audio',
+            audio: {
+                value: fs.createReadStream('test/test.ogg'),
+                options: {
+                    filename: 'test.ogg',
+                    contentType: 'audio/ogg'
+                }
+            }
+        };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, formData: formData, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            testAudio = e;
+            assert(e.name === formData.content);
+            assert(e.content.value === formData.content);
+            var audioSlug = path.join(path.dirname(e.getSlug()), 'test.ogg');
+            assert.deepEqual(e.getAudios(), [config.url + audioSlug]);
         })
         .then(done)
         .catch(done);
