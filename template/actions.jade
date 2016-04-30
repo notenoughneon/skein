@@ -4,7 +4,7 @@ div(class="blog-post-bottom")
         each category in entry.category
             span
                 | #
-                a(class="p-category" href=utils.getPathForCategory(category))= category
+                a(class="p-category" href=site.getPathForTag(category))= category
         each s in entry.syndication
             -
                 var icon;

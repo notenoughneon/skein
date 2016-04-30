@@ -20,33 +20,6 @@ var _renderEntry = jade.compileFile('template/entrypage.jade', {pretty:true});
 var _renderStream = jade.compileFile('template/streampage.jade', {pretty:true});
 var _renderIndex = jade.compileFile('template/indexpage.jade', {pretty:true});
 
-
-function getPathForIndex(page) {
-    return '/index' + (page == 1 ? '' : page);
-}
-
-function getPathForTag(category) {
-    return '/tags/' + category;
-}
-
-function formatDate(date) {
-    var month = ["Jan","Feb","Mar","Apr","May","Jun",
-        "Jul","Aug","Sep","Oct","Nov","Dec"];
-    var minutes = date.getMinutes();
-    return date.getDate() + ' ' +
-        month[date.getMonth()] + ' ' +
-        date.getFullYear() + ' ' +
-        date.getHours() + ':' +
-        ((minutes < 10) ? '0' + minutes : minutes);
-}
-
-var templateUtils = {
-    formatDate: formatDate,
-    getPathForIndex: getPathForIndex,
-    getPathForCategory: getPathForTag,
-    truncate: util.truncate
-};
-
 interface SiteConfig {
     title: string;
     url: string;
@@ -140,6 +113,25 @@ class Site {
             debug(err);
         }
     }
+    
+    getPathForIndex(page) {
+        return '/index' + (page == 1 ? '' : page);
+    }
+
+    getPathForTag(category) {
+        return '/tags/' + category;
+    }
+
+    formatDate(date) {
+        var month = ["Jan","Feb","Mar","Apr","May","Jun",
+            "Jul","Aug","Sep","Oct","Nov","Dec"];
+        var minutes = date.getMinutes();
+        return date.getDate() + ' ' +
+            month[date.getMonth()] + ' ' +
+            date.getFullYear() + ' ' +
+            date.getHours() + ':' +
+            ((minutes < 10) ? '0' + minutes : minutes);
+    }
 
     async getNextAvailable(n, prefix) {
         while (await this.publisher.exists(prefix + n)) {
@@ -159,29 +151,28 @@ class Site {
     renderEntry(entry: microformat.Entry) {
         entry.children.sort(microformat.Entry.byType);
         return _renderEntry({
-            site: this.config,
+            site: this,
             entry: entry,
-            utils: templateUtils
+            util: util
         });
     }
 
-    renderStreamPage(entries: microformat.Entry[], allEntries: microformat.Entry[], page: number, totalPages: number) {
+    renderStreamPage(entries: microformat.Entry[], page: number, totalPages: number) {
         return _renderStream({
-            site: this.config,
+            site: this,
             entries: entries,
-            allEntries: allEntries,
             page: page,
             totalPages: totalPages,
-            utils: templateUtils
+            util: util
         });
     }
 
     renderIndexPage(entries: microformat.Entry[], category: string) {
         return _renderIndex({
-            site: this.config,
+            site: this,
             category: category,
             entries: entries,
-            utils: templateUtils
+            util: util
         });
     }
 
@@ -298,10 +289,10 @@ class Site {
         await this.generateFor(entry);
     }
 
-    async _generateStream(entries: microformat.Entry[], allEntries: microformat.Entry[], page: number, total: number) {
-        let html = this.renderStreamPage(entries, allEntries, page, total);
-        await this.publisher.put(getPathForIndex(page), html, 'text/html');
-        debug('Published ' + getPathForIndex(page));
+    async _generateStream(entries: microformat.Entry[], page: number, total: number) {
+        let html = this.renderStreamPage(entries, page, total);
+        await this.publisher.put(this.getPathForIndex(page), html, 'text/html');
+        debug('Published ' + this.getPathForIndex(page));
     }
 
     async _generateIndex(entries: microformat.Entry[], category: string, path: string) {
@@ -319,22 +310,29 @@ class Site {
         }
     }
     
-    static streamFilter = e => !e.isReply() && !e.isLike() && !e.category.some(c => c === 'hidden');
+    streamFilter = e => !e.isReply() && !e.isLike() && !e.category.some(c => c === 'hidden');
+    articleFilter = e => e.isArticle() && !e.category.some(c => c === 'hidden');
+    
+    getArticles() {
+        var entries = this.getAll().filter(this.articleFilter);
+        entries.sort(microformat.Entry.byDateDesc);
+        return entries;
+    }
     
     async generateFor(entry: microformat.Entry) {
         var entries = this.getAll();
         entries.sort(microformat.Entry.byDateDesc);
         // feed
         var limit = this.config.entriesPerPage;
-        var chunks = util.chunk(limit, entries.filter(Site.streamFilter));
+        var chunks = util.chunk(limit, entries.filter(this.streamFilter));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
-            await this._generateStream(chunk, entries, index + 1, chunks.length);
+            await this._generateStream(chunk, index + 1, chunks.length);
         });
         // tags
         await util.map(entry.category, async (tag) => {
             await this._generateIndex(entries.filter(e => e.category.indexOf(tag) > -1),
-            'Posts tagged ' + tag, getPathForTag(tag));
+            'Posts tagged ' + tag, this.getPathForTag(tag));
         });
         // articles
         if (entry.isArticle())
@@ -353,16 +351,16 @@ class Site {
         });
         // feed
         var limit = this.config.entriesPerPage;
-        var chunks = util.chunk(limit, entries.filter(Site.streamFilter));
+        var chunks = util.chunk(limit, entries.filter(this.streamFilter));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
-            await this._generateStream(chunk, entries, index + 1, chunks.length);
+            await this._generateStream(chunk, index + 1, chunks.length);
         });
         // tags
         var tags = util.unique(util.flatten(entries.map(e => e.category)));
         await util.map(tags, async (tag) => {
             await this._generateIndex(entries.filter(e => e.category.indexOf(tag) > -1),
-            'Posts tagged ' + tag, getPathForTag(tag));
+            'Posts tagged ' + tag, this.getPathForTag(tag));
         });
         // articles
         await this._generateIndex(entries.filter(e => e.isArticle()), 'Articles', '/articles');

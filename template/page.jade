@@ -10,19 +10,19 @@ html(lang="en")
         link(rel="stylesheet" href="/css/bootstrap.min.css")
         link(rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css")
         link(rel="stylesheet" href="/css/blog.css")
-        if site.authUrl != null
-            link(rel="authorization_endpoint" href=site.authUrl)
-        if site.tokenUrl != null
-            link(rel="token_endpoint" href=site.tokenUrl)
-        if site.micropubUrl != null
-            link(rel="micropub" href=site.micropubUrl)
-        if site.webmentionUrl != null
-            link(rel="webmention" href=site.webmentionUrl)
+        if site.config.authUrl != null
+            link(rel="authorization_endpoint" href=site.config.authUrl)
+        if site.config.tokenUrl != null
+            link(rel="token_endpoint" href=site.config.tokenUrl)
+        if site.config.micropubUrl != null
+            link(rel="micropub" href=site.config.micropubUrl)
+        if site.config.webmentionUrl != null
+            link(rel="webmention" href=site.config.webmentionUrl)
 
     body
         div(class="navbar navbar-default" role="navigation")
             div(class="container")
-                a(class="navbar-brand" href="/")= site.title
+                a(class="navbar-brand" href="/")= site.config.title
                 div(class="navbar-header")
                     button(type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse")
                         span(class="icon-bar")
@@ -38,13 +38,13 @@ html(lang="en")
                         div(class="sidebar-module sidebar-module-inset")
                             h4 About
                             div(class="h-card")
-                                img(class="u-photo" src=site.author.photo)
-                                a(class="p-name u-url" rel="me" href=site.url)= site.author.name
-                                p(class="p-note")= site.author.note
+                                img(class="u-photo" src=site.config.author.photo)
+                                a(class="p-name u-url" rel="me" href=site.config.url)= site.config.author.name
+                                p(class="p-note")= site.config.author.note
                         div(class="sidebar-module")
                             h4 Elsewhere
                             ol(class="list-unstyled")
-                                each e in site.author.elsewhere
+                                each e in site.config.author.elsewhere
                                     li
                                         a(href=e.url rel="me")= e.name
 

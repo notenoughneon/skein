@@ -12,7 +12,7 @@ div(class="h-entry")
         |  liked this.
         a(class="u-url" href=entry.url)
             if entry.published != null
-                - var dateString = utils.formatDate(entry.published);
+                - var dateString = site.formatDate(entry.published);
                 time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
     if entry.repostOf.length > 0
@@ -22,7 +22,7 @@ div(class="h-entry")
         |  reposted this.
         a(class="u-url" href=entry.url)
             if entry.published != null
-                - var dateString = utils.formatDate(entry.published);
+                - var dateString = site.formatDate(entry.published);
                 time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
     if !entry.isLike() && !entry.isRepost()

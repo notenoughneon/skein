@@ -1,5 +1,5 @@
 extends ./page
 block title
-    = utils.truncate(entry.name, 32) + ' - ' + site.title
+    = util.truncate(entry.name, 32) + ' - ' + site.config.title
 block content
     include ./entry

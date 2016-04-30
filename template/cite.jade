@@ -14,7 +14,7 @@ mixin cite(entry, rootClass)
             |  liked this.
             a(class="u-url" href=entry.url)
                 if entry.published != null
-                    - var dateString = utils.formatDate(entry.published);
+                    - var dateString = site.formatDate(entry.published);
                     time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
         if entry.repostOf.length > 0
@@ -24,7 +24,7 @@ mixin cite(entry, rootClass)
             |  reposted this.
             a(class="u-url" href=entry.url)
                 if entry.published != null
-                    - var dateString = utils.formatDate(entry.published);
+                    - var dateString = site.formatDate(entry.published);
                     time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
         if !entry.isLike() && !entry.isRepost()
@@ -36,9 +36,9 @@ mixin cite(entry, rootClass)
                 if entry.content != null
                     div(class="e-content" + (entry.isArticle() ? '' : ' p-name'))
                         if entry.isReply()
-                            = utils.truncate(entry.content.value, 1440)
+                            = util.truncate(entry.content.value, 1440)
                         else
-                            = utils.truncate(entry.content.value, 180)
+                            = util.truncate(entry.content.value, 180)
                 else if entry.name != null
                     div(class="p-name")= entry.name
                 include ./actions

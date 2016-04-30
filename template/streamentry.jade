@@ -4,7 +4,7 @@ div(class="h-entry")
     each replyTo in entry.replyTo
         i(class="fa fa-reply")
         |  In reply to 
-        a(class="u-in-reply-to" href=replyTo.url)= utils.truncate(replyTo.name, 70)
+        a(class="u-in-reply-to" href=replyTo.url)= util.truncate(replyTo.name, 70)
 
     if entry.likeOf.length > 0
         i(class="fa fa-star")
@@ -13,7 +13,7 @@ div(class="h-entry")
         |  liked this.
         a(class="u-url" href=entry.url)
             if entry.published != null
-                - var dateString = utils.formatDate(entry.published);
+                - var dateString = site.formatDate(entry.published);
                 time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
     if entry.repostOf.length > 0
@@ -23,7 +23,7 @@ div(class="h-entry")
         |  reposted this.
         a(class="u-url" href=entry.url)
             if entry.published != null
-                - var dateString = utils.formatDate(entry.published);
+                - var dateString = site.formatDate(entry.published);
                 time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
     if !entry.isLike() && !entry.isRepost()
