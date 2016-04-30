@@ -104,6 +104,7 @@ class Site {
     config: SiteConfig;
     publisher: Publisher;
     mutex: util.Mutex;
+    entries: Map<string, microformat.Entry>;
 
     constructor(config: SiteConfig) {
         this.config = config;
@@ -121,6 +122,7 @@ class Site {
                 throw new Error('Unknown publisher type');
         }
         this.mutex = new util.Mutex();
+        this.entries = new Map();
     }
     
     async init() {
@@ -133,6 +135,7 @@ class Site {
                 });
                 await this.publisher.commit('Copy skel files');
             }
+            await this.scan();
         } catch (err) {
             debug(err);
         }
@@ -246,20 +249,25 @@ class Site {
         }
     }
 
-    async get(u: string) {
-        u = url.parse(u).pathname;
-        var obj = await this.publisher.get(u);
-        return await microformat.getHEntry(obj.Body, url.resolve(this.config.url, u));
+    get(u: string) {
+        var entry = this.entries.get(u);
+        if (entry === undefined)
+            throw new Error(u + ' not found');
+        return entry;
+    }
+    
+    getAll() {
+        return Array.from(this.entries.values());
     }
 
-    async getAll() {
+    async scan() {
         var keys = await this.publisher.list();
         var entries: Map<string, microformat.Entry> = new Map();
         var re = /^(index|js|css|tags|articles|\.git|log.txt)/;
         keys = keys.filter(k => !re.test(k));
         await Promise.all(keys.map( async (key) => {
             let obj = await this.publisher.get(key);
-            debug('got ' + key);
+            debug('Scanning ' + key);
             if (obj.ContentType === 'text/html') {
                 let u = url.resolve(this.config.url, key);
                 try {
@@ -267,25 +275,25 @@ class Site {
                     if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
                         entries.set(entry.url, entry);
                     }
-                } catch (err) {
-                    debug(err);
-                }
+                } catch (err) {}
             }
         }));
-        return Array.from(entries.values());
+        this.entries = entries;
     }
 
     async update(entry: microformat.Entry) {
         var html = this.renderEntry(entry);
         await this.publisher.put(entry.getSlug(), html, 'text/html');
+        this.entries.set(entry.url, entry);
         debug('Published ' + entry.getSlug());
         await this.generateFor(entry);
         return entry;
     }
 
     async delete(url: string) {
-        var entry = await this.get(url);
+        var entry = this.get(url);
         await this.publisher.delete(entry.getSlug(), 'text/html');
+        this.entries.delete(entry.url);
         debug('Deleted ' + entry.getSlug());
         await this.generateFor(entry);
     }
@@ -314,7 +322,7 @@ class Site {
     static streamFilter = e => !e.isReply() && !e.isLike() && !e.category.some(c => c === 'hidden');
     
     async generateFor(entry: microformat.Entry) {
-        var entries = await this.getAll();
+        var entries = this.getAll();
         entries.sort(microformat.Entry.byDateDesc);
         // feed
         var limit = this.config.entriesPerPage;
@@ -334,7 +342,7 @@ class Site {
     }
 
     async generateAll() {
-        var entries = await this.getAll();
+        var entries = this.getAll();
         entries.sort(microformat.Entry.byDateDesc);
         // entries
         await util.map(entries, async (entry) => {
@@ -410,7 +418,7 @@ class Site {
             if (!util.isMentionOf(sourceHtml, targetUrl)) {
                 throw new Error('Didn\'t find mention on source page');
             } else {
-                var targetEntry = await this.get(targetUrl);
+                var targetEntry = this.get(targetUrl);
                 var sourceEntry;
                 try {
                     sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl);

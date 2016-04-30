@@ -254,7 +254,7 @@ describe('e2e', function() {
         .catch(done);
     });
     
-    it.skip('posting stress test', function(done) {
+    it('posting stress test', function(done) {
         this.timeout(0);
         var headers = { Authorization: 'bearer ' + token };
         var elts = util.range(1, 10);
