@@ -9,26 +9,6 @@ body {
   color: #555;
 }
 
-.if-logged-in {
-    display: none;
-}
-.if-logged-inline {
-    display: none;
-}
-.if-logged-out {
-    display: block;
-}
-
-.logged-in .if-logged-in {
-    display: block;
-}
-.logged-in .if-logged-inline {
-    display: inline;
-}
-.logged-in .if-logged-out {
-    display: none;
-}
-
 h1, .h1,
 h2, .h2,
 h3, .h3,
