@@ -322,23 +322,7 @@ describe('e2e', function() {
     });
     
     it.skip('youtube.com oembed', function(done) {
-        var form = { h: 'entry', content: 'Youtube oembed. https://www.youtube.com/watch?v=sPasebVMIW4' };
-        var headers = { Authorization: 'bearer ' + token };
-        post({ url: config.micropubUrl, form: form, headers: headers })
-        .then(res => {
-            assert(res.statusCode === 201);
-            return site.get(res.headers.location);
-        })
-        .then(e => {
-            assert(e.name === form.content);
-            assert(e.content.value === form.content);
-        })
-        .then(done)
-        .catch(done);
-    });
-
-    it.skip('youtu.be oembed', function(done) {
-        var form = { h: 'entry', content: 'Youtube oembed (short link). https://youtu.be/bt_yCugXk8U' };
+        var form = { h: 'entry', content: 'Youtube oembed. https://www.youtube.com/watch?v=sPasebVMIW4 https://youtu.be/bt_yCugXk8U' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {

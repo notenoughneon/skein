@@ -227,7 +227,7 @@ class Site {
             for (let link of entry.allLinks()) {
                 let embed = await oembed(link);
                 if (embed !== null)
-                    entry.content.html = entry.content.html + '<p>' + embed + '</p>';
+                    entry.content.html = entry.content.html + '<div class="thumbnail">' + embed + '</div>';
             }
             //ISSUE: some properties may be embedded mf in the content (e.g. summary)
             //so we render and then re-parse it to get all properties
