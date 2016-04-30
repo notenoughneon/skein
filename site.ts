@@ -119,7 +119,7 @@ class Site {
     }
 
     getPathForTag(category) {
-        return '/tags/' + category;
+        return '/tags/' + util.kebabCase(category);
     }
 
     formatDate(date) {
