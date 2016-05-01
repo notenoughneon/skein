@@ -2,12 +2,19 @@
 var parser = require('microformat-node');
 import Request = require('request');
 import cheerio = require('cheerio');
-import util = require('./util');
 import url = require('url');
-import Debug = require('debug');
-var debug = Debug('microformat');
+var debug = require('debug')('microformat');
 
-export var request = util.promisify(Request);
+export var request = function(url: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+        Request.get(url, (err, result) => err !== null ? reject(err) : resolve(result));
+    });
+}
+
+function getLinks(html) {
+    var $ = cheerio.load(html);
+    return $('a').toArray().map(a => a.attribs['href']);
+}
 
 export async function getThreadFromUrl(seed: string) {
     var boundary: string[] = [];
@@ -104,7 +111,7 @@ export async function getEntry(html: string | Buffer, url: string, inclNonMf?: b
             var entry = new Entry(url);
             let $ = cheerio.load(html);
             entry.name = $('title').text();
-            entry.content = {html: null, value: util.collapseWhitespace($('body').text())};
+            entry.content = {html: null, value: $('body').text().replace(/\s+/g, ' ')};
             return entry;
         }
         else
@@ -232,7 +239,7 @@ export class Entry {
     allLinks(): string[] {
         var allLinks = this.references();
         if (this.content != null)
-            allLinks = allLinks.concat(util.getLinks(this.content.html));
+            allLinks = allLinks.concat(getLinks(this.content.html));
         return allLinks;
 
     }
