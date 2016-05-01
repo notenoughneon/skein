@@ -56,7 +56,7 @@ export async function getCardFromAuthorPage(url: string): Promise<Card> {
     var mf = await parser.getAsync({html: res.body, baseUrl: url});
     var cards = mf.items.
         filter(i => i.type.some(t => t == 'h-card')).
-        map(h => _buildCard(h));
+        map(h => buildCard(h));
     // 1. uid and url match author-page url
     var match = cards.filter(c =>
         c.url != null &&
@@ -92,7 +92,7 @@ export async function getHEntry(html: string | Buffer, url: string, inclNonMf?: 
             throw new Error('No h-entry found');
         else if (entries.length > 1)
             throw new Error('Multiple h-entries found');
-        var entry = _buildEntry(entries[0]);
+        var entry = buildEntry(entries[0]);
         if (entry.author === null) {
             if (mf.rels.author != null && mf.rels.author.length > 0) {
                 entry.author = new Card(mf.rels.author[0]);
@@ -130,7 +130,7 @@ function firstProp(mf, name, f?) {
     return null;
 }
 
-export function _buildCard(mf) {
+function buildCard(mf) {
     if (typeof(mf) === 'string')
         return new Card(mf);
     var card = new Card();
@@ -141,7 +141,7 @@ export function _buildCard(mf) {
     return card;
 }
 
-export function _buildEntry(mf) {
+function buildEntry(mf) {
     if (typeof(mf) === 'string')
         return new Entry(mf);
     var entry = new Entry();
@@ -152,16 +152,16 @@ export function _buildEntry(mf) {
     entry.content = firstProp(mf, 'content');
     entry.summary = firstProp(mf, 'summary');
     entry.url = firstProp(mf, 'url');
-    entry.author = firstProp(mf, 'author', a => _buildCard(a));
+    entry.author = firstProp(mf, 'author', a => buildCard(a));
     entry.category = prop(mf, 'category');
     entry.syndication = prop(mf, 'syndication');
-    entry.replyTo = firstProp(mf, 'in-reply-to', r => _buildEntry(r));
-    entry.likeOf = firstProp(mf, 'like-of', r => _buildEntry(r));
-    entry.repostOf = firstProp(mf, 'repost-of', r => _buildEntry(r));
+    entry.replyTo = firstProp(mf, 'in-reply-to', r => buildEntry(r));
+    entry.likeOf = firstProp(mf, 'like-of', r => buildEntry(r));
+    entry.repostOf = firstProp(mf, 'repost-of', r => buildEntry(r));
     entry.children = (mf.children || []).
         concat(mf.properties['comment'] || []).
         filter(i => i.type.some(t => t === 'h-cite')).
-        map(e => _buildEntry(e)).
+        map(e => buildEntry(e)).
         filter(e => e.url != null);
     return entry;
 }
