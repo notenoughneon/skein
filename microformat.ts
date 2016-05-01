@@ -134,6 +134,8 @@ function buildCard(mf) {
     if (typeof(mf) === 'string')
         return new Card(mf);
     var card = new Card();
+    if (!mf.type.some(t => t === 'h-card'))
+        throw new Error('Attempt to parse ' + mf.type + ' as Card');
     card.name = firstProp(mf, 'name');
     card.photo = firstProp(mf, 'photo');
     card.url = firstProp(mf, 'url');
