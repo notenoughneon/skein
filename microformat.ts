@@ -193,9 +193,21 @@ export class Entry {
             this.url = url;
         }
     }
+    
+    private _getTime() {
+        if (this.published != null)
+            return this.published.getTime();
+        return -1;
+    }
 
-    static byDate = (a: Entry, b: Entry) => a.published.getTime() - b.published.getTime();
-    static byDateDesc = (a: Entry, b: Entry) => b.published.getTime() - a.published.getTime();
+    private _getType(): number {
+        if (this.isLike() || this.isRepost())
+            return 1;
+        return 0;
+    }
+
+    static byDate = (a: Entry, b: Entry) => a._getTime() - b._getTime();
+    static byDateDesc = (a: Entry, b: Entry) => b._getTime() - a._getTime();
     static byType = (a: Entry, b: Entry) => a._getType() - b._getType();
     static byTypeDesc = (a: Entry, b: Entry) => b._getType() - a._getType();
 
@@ -233,12 +245,6 @@ export class Entry {
 
     isLike(): boolean {
         return this.likeOf != null;
-    }
-    
-    private _getType(): number {
-        if (this.isLike() || this.isRepost())
-            return 1;
-        return 0;
     }
     
     getSlug(): string {
