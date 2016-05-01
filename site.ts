@@ -18,6 +18,7 @@ import jade = require('jade');
 
 var _renderEntry = jade.compileFile('template/entrypage.jade', {pretty:true});
 var _renderStream = jade.compileFile('template/streampage.jade', {pretty:true});
+var _renderReplyStream = jade.compileFile('template/replystreampage.jade', {pretty: true});
 var _renderIndex = jade.compileFile('template/indexpage.jade', {pretty:true});
 
 interface SiteConfig {
@@ -167,6 +168,16 @@ class Site {
         });
     }
 
+    renderReplyStreamPage(entries: microformat.Entry[], page: number, totalPages: number) {
+        return _renderReplyStream({
+            site: this,
+            entries: entries,
+            page: page,
+            totalPages: totalPages,
+            util: util
+        });
+    }
+
     renderIndexPage(entries: microformat.Entry[], category: string) {
         return _renderIndex({
             site: this,
@@ -292,9 +303,16 @@ class Site {
         await this.generateStreams();
     }
 
-    async _generateStream(entries: microformat.Entry[], prefix: string, page: number, total: number) {
+    async _generateStream(entries: microformat.Entry[], page: number, total: number) {
         let html = this.renderStreamPage(entries, page, total);
-        var file = path.join(prefix, this.getPathForIndex(page));
+        var file = this.getPathForIndex(page);
+        await this.publisher.put(file, html, 'text/html');
+        debug('Published ' + file);
+    }
+
+    async _generateReplyStream(entries: microformat.Entry[], page: number, total: number) {
+        let html = this.renderReplyStreamPage(entries, page, total);
+        var file = path.join('replies', this.getPathForIndex(page));
         await this.publisher.put(file, html, 'text/html');
         debug('Published ' + file);
     }
@@ -333,13 +351,13 @@ class Site {
         var chunks = util.chunk(limit, entries.filter(this.mainFilter).filter(this.hiddenFilter));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
-            await this._generateStream(chunk, '', index + 1, chunks.length);
+            await this._generateStream(chunk, index + 1, chunks.length);
         });
         // reply stream
         var chunks = util.chunk(limit, entries.filter(this.replyFilter).filter(this.hiddenFilter));
         await util.map(util.range(0, chunks.length - 1), async (index) => {
             let chunk = chunks[index];
-            await this._generateStream(chunk, 'replies', index + 1, chunks.length);
+            await this._generateReplyStream(chunk, index + 1, chunks.length);
         });
         // tags
         var tags = util.unique(util.flatten(entries.map(e => e.category)));
