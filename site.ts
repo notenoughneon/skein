@@ -419,13 +419,7 @@ class Site {
                 throw new Error('Didn\'t find mention on source page');
             } else {
                 var targetEntry = this.get(targetUrl);
-                var sourceEntry;
-                try {
-                    sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl);
-                } catch (err) {
-                    // construct h-cite for non-mf2 mention
-                    sourceEntry = await microformat.constructHEntryForMention(sourceUrl);
-                }
+                var sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl, true);
                 targetEntry.children.push(sourceEntry);
                 targetEntry.deduplicate();
                 var targetHtml = this.renderEntry(targetEntry);

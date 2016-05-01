@@ -34,21 +34,12 @@ export async function crawlHEntryThread(seed: string) {
     return Array.from(entryDict.values());
 }
 
-export async function constructHEntryForMention(url: string) {
-    var res = await request(url);
-    if (res.statusCode != 200)
-        throw new Error('Server returned status ' + res.statusCode);
-    var entry = new Entry(url);
-    entry.content = {html: res.body, value: util.collapseWhitespace(util.stripHtml(res.body))};
-    return entry;
-}
-
-export async function getHEntryFromUrl(url: string): Promise<Entry> {
+export async function getHEntryFromUrl(url: string, inclNonMf?: boolean): Promise<Entry> {
     var res = await request(url);
     debug('Fetching ' + url);
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
-    var entry = await getHEntry(res.body, url);
+    var entry = await getHEntry(res.body, url, inclNonMf);
     if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
         try {
             var author = await getCardFromAuthorPage(entry.author.url);
@@ -97,20 +88,32 @@ export async function getCardFromAuthorPage(url: string): Promise<Card> {
     return null;
 }
 
-export async function getHEntry(html: string | Buffer, url: string): Promise<Entry> {
-    var mf = await parser.getAsync({html: html, baseUrl: url});
-    var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
-    if (entries.length == 0)
-        throw new Error('No h-entry found');
-    else if (entries.length > 1)
-        throw new Error('Multiple h-entries found');
-    var entry = _buildEntry(entries[0]);
-    if (entry.author === null) {
-        if (mf.rels.author != null && mf.rels.author.length > 0) {
-            entry.author = new Card(mf.rels.author[0]);
+export async function getHEntry(html: string | Buffer, url: string, inclNonMf?: boolean): Promise<Entry> {
+    try {
+        var mf = await parser.getAsync({html: html, baseUrl: url});
+        var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
+        if (entries.length == 0)
+            throw new Error('No h-entry found');
+        else if (entries.length > 1)
+            throw new Error('Multiple h-entries found');
+        var entry = _buildEntry(entries[0]);
+        if (entry.author === null) {
+            if (mf.rels.author != null && mf.rels.author.length > 0) {
+                entry.author = new Card(mf.rels.author[0]);
+            }
         }
+        return entry;
+    } catch (err) {
+        if (inclNonMf === true) {
+            var entry = new Entry(url);
+            let $ = cheerio.load(html);
+            entry.name = $('title').text();
+            entry.content = {html: null, value: util.collapseWhitespace($('body').text())};
+            return entry;
+        }
+        else
+            throw err;
     }
-    return entry;
 }
 
 function prop(mf, name, f?) {
