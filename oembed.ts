@@ -4,9 +4,9 @@ import nodefn = require('when/node');
 import request = require('request');
 
 var handlers = [
-    {pattern: /^https?:\/\/(www\.)?youtu\.be/i, handler: oembed('http://www.youtube.com/oembed', {maxheight: 300, maxwidth: 400})},
-    {pattern: /^https?:\/\/(www\.)?youtube\.com/i, handler: oembed('http://www.youtube.com/oembed', {maxheight: 300, maxwidth: 400})},
-    {pattern: /^https?:\/\/(www\.)?soundcloud\.com/i, handler: oembed('http://soundcloud.com/oembed', {maxheight: 150, maxwidth: 400})}
+    {pattern: /^https?:\/\/(www\.)?youtu\.be/i, handler: oembed('http://www.youtube.com/oembed')},
+    {pattern: /^https?:\/\/(www\.)?youtube\.com/i, handler: oembed('http://www.youtube.com/oembed')},
+    {pattern: /^https?:\/\/(www\.)?soundcloud\.com/i, handler: oembed('http://soundcloud.com/oembed')}
 ];
 
 function oembed(apiUrl: string, options?): (string) => when.Promise<string> {
