@@ -182,7 +182,6 @@ class Api {
         });
 
         this.router.post('/micropub', this.requireAuth('post'), (req, res) => {
-            var entry: microformat.Entry;
             if (req['post'].h != 'entry')
                 return res.sendStatus(400);
             site.publish({
@@ -196,9 +195,7 @@ class Api {
                 syndication: req['post'].syndication,
                 category: req['post'].category
             })
-            .then(e => entry = e)
-            .then(() => site.sendWebmentionsFor(entry))
-            .then(() => {
+            .then(entry => {
                 res.location(entry.url);
                 res.sendStatus(201);
             })

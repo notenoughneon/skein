@@ -235,6 +235,8 @@ class Site {
             entry = await microformat.getHEntry(html, entry.url);
             await this.update(entry);
             await this.publisher.commit('publish ' + entry.url);
+            release();
+            await this.sendWebmentionsFor(entry);
             return entry;
         } finally {
             release();
@@ -404,7 +406,7 @@ class Site {
             } catch (err) {
                 debug('Webmention to ' + link + ' failed: ' + err.message);
             }
-        }
+        });
     }
 
     async receiveWebmention(sourceUrl: string, targetUrl: string) {
