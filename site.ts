@@ -397,13 +397,12 @@ class Site {
     }
 
     async sendWebmentionsFor(entry: microformat.Entry) {
-        for (let link of entry.allLinks()) {
+        await util.map(entry.allLinks(), async (link) => {
             try {
                 await util.sendWebmention(entry.url, link);
                 debug('Sent webmention to ' + link);
             } catch (err) {
-                debug('Failed to send webmention to ' + link);
-                debug(err.stack);
+                debug('Webmention to ' + link + ' failed: ' + err.message);
             }
         }
     }
