@@ -18,12 +18,8 @@ export async function crawlHEntryThread(seed: string) {
         try {
             let entry = await getHEntryFromUrl(url);
             entryDict.set(url, entry);
-            let references = entry
-                .replyTo
-                .concat(entry.likeOf)
-                .concat(entry.repostOf)
-                .concat(entry.children)
-                .map(r => r.url)
+            let references = entry.children.map(c => c.url)
+                .concat(entry.references())
                 .filter(r => !entryDict.has(r));
             boundary = boundary.concat(references);
         } catch (err) {
@@ -159,9 +155,9 @@ export function _buildEntry(mf) {
     entry.author = firstProp(mf, 'author', a => _buildCard(a));
     entry.category = prop(mf, 'category');
     entry.syndication = prop(mf, 'syndication');
-    entry.replyTo = prop(mf, 'in-reply-to', r => _buildEntry(r));
-    entry.likeOf = prop(mf, 'like-of', r => _buildEntry(r));
-    entry.repostOf = prop(mf, 'repost-of', r => _buildEntry(r));
+    entry.replyTo = firstProp(mf, 'in-reply-to', r => _buildEntry(r));
+    entry.likeOf = firstProp(mf, 'like-of', r => _buildEntry(r));
+    entry.repostOf = firstProp(mf, 'repost-of', r => _buildEntry(r));
     entry.children = (mf.children || []).
         concat(mf.properties['comment'] || []).
         filter(i => i.type.some(t => t === 'h-cite')).
@@ -187,9 +183,9 @@ export class Entry {
     author: Card = null;
     category: string[] = [];
     syndication: string[] = [];
-    replyTo: Entry[] = [];
-    likeOf: Entry[] = [];
-    repostOf: Entry[] = [];
+    replyTo: Entry = null;
+    likeOf: Entry = null;
+    repostOf: Entry = null;
     children: Entry[] = [];
 
     constructor(url?: string) {
@@ -209,8 +205,14 @@ export class Entry {
     }
 
     references(): string[] {
-        return this.replyTo.concat(this.repostOf).concat(this.likeOf).
-            map(r => r.url);
+        var ref: Entry[] = [];
+        if (this.replyTo != null)
+            ref.push(this.replyTo);
+        if (this.likeOf != null)
+            ref.push(this.likeOf);
+        if (this.repostOf != null)
+            ref.push(this.repostOf);
+        return ref.map(r => r.url);
     }
 
     allLinks(): string[] {
@@ -222,15 +224,15 @@ export class Entry {
     }
 
     isReply(): boolean {
-        return this.replyTo.length > 0;
+        return this.replyTo != null;
     }
 
     isRepost(): boolean {
-        return this.repostOf.length > 0;
+        return this.repostOf != null;
     }
 
     isLike(): boolean {
-        return this.likeOf.length > 0;
+        return this.likeOf != null;
     }
     
     private _getType(): number {
@@ -269,14 +271,6 @@ export class Entry {
             this.content.value != '' &&
             this.name !== this.content.value;
     }
-
-    flatten(): Entry[] {
-        return [this].
-            concat(this.replyTo).
-            concat(this.repostOf).
-            concat(this.likeOf).
-            concat(this.children);
-    }
     
     deduplicate() {
         var seen = {};
@@ -292,7 +286,9 @@ export class Entry {
 
     serialize(): string {
         return JSON.stringify(this, (key,val) => {
-            if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf' || key === 'children')
+            if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf')
+                return val === null ? null : val.url;
+            if (key === 'children')
                 return val.map(r => r.url);
             return val;
         });
@@ -308,7 +304,9 @@ export class Entry {
                 author.url = val.url;
                 return author;
             }
-            if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf' || key === 'children')
+            if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf')
+                return val === null ? null : new Entry(val);
+            if (key === 'children')
                 return val.map(url => new Entry(url));
             if (key === '') {
                 var entry = new Entry();

@@ -1,13 +1,13 @@
 mixin cite(entry, rootClass)
     div(class="h-cite" + rootClass)
-        each replyTo in entry.replyTo
-            a(class="u-in-reply-to" href=replyTo.url)
-        each likeOf in entry.likeOf
-            a(class="u-like-of" href=likeOf.url)
-        each repostOf in entry.repostOf
-            a(class="u-repost-of" href=repostOf.url)
+        if entry.isReply()
+            a(class="u-in-reply-to" href=entry.replyTo.url)
+        if entry.isLike()
+            a(class="u-like-of" href=entry.likeOf.url)
+        if entry.isRepost()
+            a(class="u-repost-of" href=entry.repostOf.url)
 
-        if entry.likeOf.length > 0
+        if entry.isLike()
             i(class="fa fa-star")
             |  
             a(class="p-author h-card" href=entry.author.url)= entry.author.name
@@ -17,7 +17,7 @@ mixin cite(entry, rootClass)
                     - var dateString = site.formatDate(entry.published);
                     time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
-        if entry.repostOf.length > 0
+        if entry.isRepost()
             i(class="fa fa-retweet")
             |  
             a(class="p-author h-card" href=entry.author.url)= entry.author.name

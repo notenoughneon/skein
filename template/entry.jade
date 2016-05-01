@@ -1,11 +1,11 @@
 include ./cite
 div(class="h-entry")
-    each replyTo in entry.replyTo
+    if entry.isReply()
         i(class="fa fa-reply")
         |  In reply to:
-        +cite(replyTo, ' p-in-reply-to')
+        +cite(entry.replyTo, ' p-in-reply-to')
 
-    if entry.likeOf.length > 0
+    if entry.isLike()
         i(class="fa fa-star")
         |  
         a(class="p-author h-card" href=entry.author.url)= entry.author.name
@@ -15,7 +15,7 @@ div(class="h-entry")
                 - var dateString = site.formatDate(entry.published);
                 time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
-    if entry.repostOf.length > 0
+    if entry.isRepost()
         i(class="fa fa-retweet")
         |  
         a(class="p-author h-card" href=entry.author.url)= entry.author.name
@@ -38,11 +38,11 @@ div(class="h-entry")
                 div(class="p-name")= entry.name
             include ./actions
 
-    each likeOf in entry.likeOf
-        +cite(likeOf, ' p-like-of')
+    if entry.isLike()
+        +cite(entry.likeOf, ' p-like-of')
 
-    each repostOf in entry.repostOf
-        +cite(repostOf, ' p-repost-of')
+    if entry.isRepost()
+        +cite(entry.repostOf, ' p-repost-of')
 
     each child in entry.children
         +cite(child, '')

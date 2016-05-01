@@ -1,12 +1,12 @@
 include ./cite
 div(class="h-entry")
 
-    each replyTo in entry.replyTo
+    if entry.isReply()
         i(class="fa fa-reply")
         |  In reply to 
-        a(class="u-in-reply-to" href=replyTo.url)= util.truncate(replyTo.name, 70)
+        a(class="u-in-reply-to" href=entry.replyTo.url)= util.truncate(entry.replyTo.name, 70)
 
-    if entry.likeOf.length > 0
+    if entry.isLike()
         i(class="fa fa-star")
         |  
         a(class="p-author h-card" href=entry.author.url)= entry.author.name
@@ -16,7 +16,7 @@ div(class="h-entry")
                 - var dateString = site.formatDate(entry.published);
                 time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
-    if entry.repostOf.length > 0
+    if entry.isRepost()
         i(class="fa fa-retweet")
         |  
         a(class="p-author h-card" href=entry.author.url)= entry.author.name
@@ -41,10 +41,10 @@ div(class="h-entry")
                 div(class=contentClass)!= entry.content.html
             include ./actions
 
-    each likeOf in entry.likeOf
-        +cite(likeOf, ' p-like-of')
+    if entry.isLike()
+        +cite(entry.likeOf, ' p-like-of')
 
-    each repostOf in entry.repostOf
-        +cite(repostOf, ' p-repost-of')
+    if entry.isRepost()
+        +cite(entry.repostOf, ' p-repost-of')
 
 div(class="blog-post-spacer")

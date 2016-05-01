@@ -205,11 +205,11 @@ class Site {
             var slug = await this.getSlug(m.name, entry.published);
             entry.url = this.config.url + slug;
             if (m.replyTo != null)
-                entry.replyTo.push(await microformat.getHEntryFromUrl(m.replyTo));
+                entry.replyTo = await microformat.getHEntryFromUrl(m.replyTo);
             if (m.likeOf != null)
-                entry.likeOf.push(await microformat.getHEntryFromUrl(m.likeOf));
+                entry.likeOf = await microformat.getHEntryFromUrl(m.likeOf);
             if (m.repostOf != null)
-                entry.repostOf.push(await microformat.getHEntryFromUrl(m.repostOf));
+                entry.repostOf = await microformat.getHEntryFromUrl(m.repostOf);
             if (m.syndication != null)
                 entry.syndication = m.syndication;
             if (m.photo != null) {
