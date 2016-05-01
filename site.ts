@@ -158,35 +158,6 @@ class Site {
         });
     }
 
-    renderStreamPage(entries: microformat.Entry[], page: number, totalPages: number) {
-        return _renderStream({
-            site: this,
-            entries: entries,
-            page: page,
-            totalPages: totalPages,
-            util: util
-        });
-    }
-
-    renderReplyStreamPage(entries: microformat.Entry[], page: number, totalPages: number) {
-        return _renderReplyStream({
-            site: this,
-            entries: entries,
-            page: page,
-            totalPages: totalPages,
-            util: util
-        });
-    }
-
-    renderIndexPage(entries: microformat.Entry[], category: string) {
-        return _renderIndex({
-            site: this,
-            category: category,
-            entries: entries,
-            util: util
-        });
-    }
-
     async publish(m: Micropub) {
         try {
             var release = await this.mutex.lock();
@@ -305,21 +276,38 @@ class Site {
     }
 
     async _generateStream(entries: microformat.Entry[], page: number, total: number) {
-        let html = this.renderStreamPage(entries, page, total);
+        let html = _renderStream({
+            site: this,
+            entries: entries,
+            page: page,
+            totalPages: total,
+            util: util
+        });
         var file = this.getPathForIndex(page);
         await this.publisher.put(file, html, 'text/html');
         debug('Published ' + file);
     }
 
     async _generateReplyStream(entries: microformat.Entry[], page: number, total: number) {
-        let html = this.renderReplyStreamPage(entries, page, total);
+        let html = _renderReplyStream({
+            site: this,
+            entries: entries,
+            page: page,
+            totalPages: total,
+            util: util
+        });
         var file = path.join('replies', this.getPathForIndex(page));
         await this.publisher.put(file, html, 'text/html');
         debug('Published ' + file);
     }
 
     async _generateIndex(entries: microformat.Entry[], category: string, path: string) {
-        var html = this.renderIndexPage(entries, category);
+        var html = _renderIndex({
+            site: this,
+            category: category,
+            entries: entries,
+            util: util
+        });
         await this.publisher.put(path, html, 'text/html');
         debug('Published ' + path);
     }
