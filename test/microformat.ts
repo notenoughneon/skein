@@ -81,13 +81,13 @@ describe('entry', function() {
     });
 
     it('err for no entry', function(done) {
-       microformat.getHEntry('<html></html>', 'http://testsite')
+       microformat.getEntry('<html></html>', 'http://testsite')
        .then(() => assert(false))
        .catch(err => done(err.message == 'No h-entry found' ? null : err));
     });
 
     it('err for multiple entries', function(done) {
-       microformat.getHEntry('<html><div class="h-entry"></div><div class="h-entry"></div></html>', 'http://testsite')
+       microformat.getEntry('<html><div class="h-entry"></div><div class="h-entry"></div></html>', 'http://testsite')
        .then(() => assert(false))
        .catch(err => done(err.message === 'Multiple h-entries found' ? null : err));
     });
@@ -101,7 +101,7 @@ describe('entry', function() {
                 <span class="p-category">indieweb</span>\
                 <div class="p-name e-content">Hello <b>World!</b></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getEntry(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"Hello World!",
@@ -131,7 +131,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content">Here is a <i>reply</i></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getEntry(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"Here is a reply",
@@ -174,7 +174,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content"><div class="p-summary">Summary</div> Hello <b>World!</b></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getEntry(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"First Post",
@@ -203,7 +203,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content">Hello <b>World!</b><img class="u-photo" src="photo.jpg"/></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getEntry(html, 'http://testsite').
             then(function(entry){
                 assert.deepEqual(entry.getPhotos(), ['http://testsite/photo.jpg']);
             }).
@@ -219,7 +219,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content"><img class="u-photo" src="photo.jpg"/></div>\
             </div>';
-        microformat.getHEntry(html, 'http://testsite').
+        microformat.getEntry(html, 'http://testsite').
             then(function(entry){
                 assert.equal(entry.isArticle(), false);
             }).
@@ -243,12 +243,12 @@ describe('entry', function() {
         assert.deepEqual(entry.children, [c1,c2]);
     });
     
-    it('getHEntryFromUrl', function(done) {
+    it('getEntryFromUrl', function(done) {
         var pages = {
             'http://somesite/post': '<div class="h-entry">Test post</div>',
         };
         microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getHEntryFromUrl('http://somesite/post')
+        microformat.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.name === 'Test post');
         })
@@ -256,16 +256,16 @@ describe('entry', function() {
         .catch(done);
     });
     
-    it('getHEntryFromUrl 404', function(done) {
+    it('getEntryFromUrl 404', function(done) {
         microformat.request = url => Promise.resolve({statusCode: 404, body: ''});
-        microformat.getHEntryFromUrl('http://somesite/post')
+        microformat.getEntryFromUrl('http://somesite/post')
        .then(() => assert(false))
        .catch(err => done(err.message == 'Server returned status 404' ? null : err));
     });
 
     it('authorship author-page by url', function(done) {
         var html = '<div class="h-entry"><a class="u-author" href="/author"></a></div>';
-        microformat.getHEntry(html, 'http://somesite/post')
+        microformat.getEntry(html, 'http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.url === 'http://somesite/author');
@@ -276,7 +276,7 @@ describe('entry', function() {
         
     it('authorship author-page by rel-author', function(done) {
         var html = '<div class="h-entry"></div><a rel="author" href="/author"></a>';
-        microformat.getHEntry(html, 'http://somesite/post')
+        microformat.getEntry(html, 'http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.url === 'http://somesite/author');
@@ -291,7 +291,7 @@ describe('entry', function() {
             'http://somesite/': '<div class="h-card"><a class="u-uid" href="/"><img src="me.jpg">Test User</a></div>'
         };
         microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getHEntryFromUrl('http://somesite/post')
+        microformat.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === 'Test User');
@@ -307,7 +307,7 @@ describe('entry', function() {
             'http://somesite/': '<a class="h-card" rel="me" href="/"><img src="me.jpg">Test User</a>'
         };
         microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getHEntryFromUrl('http://somesite/post')
+        microformat.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === 'Test User');
@@ -323,7 +323,7 @@ describe('entry', function() {
             'http://somesite/': '<a class="h-card" href="/"><img src="me.jpg">Test User</a>'
         };
         microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getHEntryFromUrl('http://somesite/post')
+        microformat.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === 'Test User');
@@ -339,7 +339,7 @@ describe('entry', function() {
             'http://somesite/': '<a class="h-card" href="/notme"><img src="me.jpg">Test User</a>'
         };
         microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getHEntryFromUrl('http://somesite/post')
+        microformat.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === null);
@@ -354,7 +354,7 @@ describe('entry', function() {
             'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>'
         };
         microformat.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
-        microformat.getHEntryFromUrl('http://somesite/post')
+        microformat.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === null);
@@ -369,7 +369,7 @@ describe('entry', function() {
         <div class="h-cite"><a class="u-url" href="http://othersite/123"></a>a comment</div>\
         <div class="h-card"><a class="u-url" href="http://testsite"></a>a card</div>\
         </div>';
-        microformat.getHEntry(html, 'http://testsite')
+        microformat.getEntry(html, 'http://testsite')
         .then(e => {
             assert(e.children.length === 1);
             assert(e.children[0].name === 'a comment');

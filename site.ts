@@ -187,11 +187,11 @@ class Site {
             var slug = await this.getSlug(m.name, entry.published);
             entry.url = this.config.url + slug;
             if (m.replyTo != null)
-                entry.replyTo = await microformat.getHEntryFromUrl(m.replyTo);
+                entry.replyTo = await microformat.getEntryFromUrl(m.replyTo);
             if (m.likeOf != null)
-                entry.likeOf = await microformat.getHEntryFromUrl(m.likeOf);
+                entry.likeOf = await microformat.getEntryFromUrl(m.likeOf);
             if (m.repostOf != null)
-                entry.repostOf = await microformat.getHEntryFromUrl(m.repostOf);
+                entry.repostOf = await microformat.getEntryFromUrl(m.repostOf);
             if (m.syndication != null)
                 entry.syndication = m.syndication;
             if (m.photo != null) {
@@ -215,7 +215,7 @@ class Site {
             //ISSUE: some properties may be embedded mf in the content (e.g. summary)
             //so we render and then re-parse it to get all properties
             var html = this.renderEntry(entry);
-            entry = await microformat.getHEntry(html, entry.url);
+            entry = await microformat.getEntry(html, entry.url);
             await this.update(entry);
             await this.publisher.commit('publish ' + entry.url);
             release();
@@ -248,7 +248,7 @@ class Site {
             if (obj.ContentType === 'text/html') {
                 let u = url.resolve(this.config.url, key);
                 try {
-                    let entry = await microformat.getHEntry(obj.Body, u);
+                    let entry = await microformat.getEntry(obj.Body, u);
                     if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
                         entries.set(entry.url, entry);
                     }
@@ -381,12 +381,12 @@ class Site {
                 if (obj.ContentType == 'text/html') {
                     var isEntry = false;
                     try {                       
-                        var expected = await microformat.getHEntry(obj.Body, u);
+                        var expected = await microformat.getEntry(obj.Body, u);
                         isEntry = true;
                     } catch (e) {}
                     if (isEntry && (expected.url === u || expected.url + '.html' === u)) {
                         let html = this.renderEntry(expected);
-                        var actual = await microformat.getHEntry(html, expected.url);
+                        var actual = await microformat.getEntry(html, expected.url);
                         assert.deepEqual(actual, expected);
                         debug('pass ' + expected.url);
                     }
@@ -421,7 +421,7 @@ class Site {
                 throw new Error('Didn\'t find mention on source page');
             } else {
                 var targetEntry = this.get(targetUrl);
-                var sourceEntry = await microformat.getHEntry(sourceHtml, sourceUrl, true);
+                var sourceEntry = await microformat.getEntry(sourceHtml, sourceUrl, true);
                 targetEntry.children.push(sourceEntry);
                 targetEntry.deduplicate();
                 var targetHtml = this.renderEntry(targetEntry);

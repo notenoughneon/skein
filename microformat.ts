@@ -9,14 +9,14 @@ var debug = Debug('microformat');
 
 export var request = util.promisify(Request);
 
-export async function crawlHEntryThread(seed: string) {
+export async function getThreadFromUrl(seed: string) {
     var boundary: string[] = [];
     var entryDict: Map<string, Entry> = new Map();
     boundary.push(seed);
     while (boundary.length > 0) {
         let url = boundary.shift();
         try {
-            let entry = await getHEntryFromUrl(url);
+            let entry = await getEntryFromUrl(url);
             entryDict.set(url, entry);
             let references = entry.children.map(c => c.url)
                 .concat(entry.references())
@@ -30,15 +30,15 @@ export async function crawlHEntryThread(seed: string) {
     return Array.from(entryDict.values());
 }
 
-export async function getHEntryFromUrl(url: string, inclNonMf?: boolean): Promise<Entry> {
+export async function getEntryFromUrl(url: string, inclNonMf?: boolean): Promise<Entry> {
     var res = await request(url);
     debug('Fetching ' + url);
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
-    var entry = await getHEntry(res.body, url, inclNonMf);
+    var entry = await getEntry(res.body, url, inclNonMf);
     if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
         try {
-            var author = await getCardFromAuthorPage(entry.author.url);
+            var author = await getCardFromUrl(entry.author.url);
             if (author !== null)
                 entry.author = author;
         } catch (err) {
@@ -48,7 +48,7 @@ export async function getHEntryFromUrl(url: string, inclNonMf?: boolean): Promis
     return entry;
 }
 
-export async function getCardFromAuthorPage(url: string): Promise<Card> {
+export async function getCardFromUrl(url: string): Promise<Card> {
     var res = await request(url);
     debug('Fetching ' + url);
     if (res.statusCode != 200)
@@ -84,7 +84,7 @@ export async function getCardFromAuthorPage(url: string): Promise<Card> {
     return null;
 }
 
-export async function getHEntry(html: string | Buffer, url: string, inclNonMf?: boolean): Promise<Entry> {
+export async function getEntry(html: string | Buffer, url: string, inclNonMf?: boolean): Promise<Entry> {
     try {
         var mf = await parser.getAsync({html: html, baseUrl: url});
         var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
