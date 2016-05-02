@@ -1,6 +1,5 @@
 ///<reference path="../typings/main.d.ts"/>
 import assert = require('assert');
-import fs = require('fs');
 import microformat = require('../microformat');
 
 describe('entry', function() {

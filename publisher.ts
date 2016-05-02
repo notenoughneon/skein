@@ -1,5 +1,3 @@
-import when = require('when');
-
 interface Publisher {
     put(path: string, obj: string | NodeJS.ReadableStream, contentType?: string): Promise<void>;
     delete(path: string, contentType: string): Promise<void>;

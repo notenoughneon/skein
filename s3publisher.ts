@@ -1,9 +1,7 @@
 var AWS = require('aws-sdk');
-import when = require('when');
 import nodefn = require('when/node');
 var guard = require('when/guard');
-import Debug = require('debug');
-var debug = Debug('s3publisher');
+var debug = require('debug')('s3publisher');
 import util = require('./util');
 import Publisher = require('./publisher');
 

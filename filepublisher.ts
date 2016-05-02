@@ -1,6 +1,5 @@
 import fs = require('fs');
 import pathlib = require('path');
-var guard = require('when/guard');
 import util = require('./util');
 import Publisher = require('./publisher');
 

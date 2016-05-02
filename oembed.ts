@@ -8,7 +8,7 @@ var handlers = [
     {pattern: /^https?:\/\/(www\.)?soundcloud\.com/i, handler: oembed('http://soundcloud.com/oembed')}
 ];
 
-function oembed(apiUrl: string, options?): (string) => when.Promise<string> {
+function oembed(apiUrl: string, options?) {
     if (options === undefined)
         options = {};
     return url => {
@@ -26,7 +26,7 @@ function oembed(apiUrl: string, options?): (string) => when.Promise<string> {
     };
 }
 
-export = function resolve(url: string): when.Promise<string> {
+export = function resolve(url: string) {
     var match = handlers.filter(h => h.pattern.test(url));
     return match.length ? match[0].handler(url) : when.resolve(null);
 }
