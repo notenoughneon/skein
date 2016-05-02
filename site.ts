@@ -150,11 +150,11 @@ class Site {
     }
 
     renderEntry(entry: microformat.Entry) {
-        entry.children.sort(microformat.Entry.byType);
         return _renderEntry({
             site: this,
             entry: entry,
-            util: util
+            util: util,
+            microformat: microformat
         });
     }
 
@@ -422,8 +422,7 @@ class Site {
             } else {
                 var targetEntry = this.get(targetUrl);
                 var sourceEntry = await microformat.getEntry(sourceHtml, sourceUrl, true);
-                targetEntry.children.push(sourceEntry);
-                targetEntry.deduplicate();
+                targetEntry.addChild(sourceEntry);
                 var targetHtml = this.renderEntry(targetEntry);
                 await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
                 await this.publisher.commit('webmention from ' + sourceUrl + ' to ' + targetUrl);

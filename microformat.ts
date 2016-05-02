@@ -25,7 +25,7 @@ export async function getThreadFromUrl(seed: string) {
         try {
             let entry = await getEntryFromUrl(url);
             entryDict.set(url, entry);
-            let references = entry.children.map(c => c.url)
+            let references = entry.getChildren().map(c => c.url)
                 .concat(entry.getReferences())
                 .filter(r => !entryDict.has(r));
             boundary = boundary.concat(references);
@@ -167,11 +167,12 @@ function buildEntry(mf) {
     entry.replyTo = firstProp(mf, 'in-reply-to', r => buildEntry(r));
     entry.likeOf = firstProp(mf, 'like-of', r => buildEntry(r));
     entry.repostOf = firstProp(mf, 'repost-of', r => buildEntry(r));
-    entry.children = (mf.children || []).
-        concat(mf.properties['comment'] || []).
-        filter(i => i.type.some(t => t === 'h-cite')).
-        map(e => buildEntry(e)).
-        filter(e => e.url != null);
+    (mf.children || [])
+    .concat(mf.properties['comment'] || [])
+    .filter(i => i.type.some(t => t === 'h-cite'))
+    .map(e => buildEntry(e))
+    .filter(e => e.url != null)
+    .map(e => entry.addChild(e));
     return entry;
 }
 
@@ -195,7 +196,7 @@ export class Entry {
     replyTo: Entry = null;
     likeOf: Entry = null;
     repostOf: Entry = null;
-    children: Entry[] = [];
+    private children: Map<string, Entry> = new Map();
 
     constructor(url?: string) {
         if (typeof(url) === 'string') {
@@ -246,6 +247,23 @@ export class Entry {
             allLinks = allLinks.concat(getLinks(this.content.html));
         return allLinks;
     }
+    
+    getChildren(sortFunc?: (a: Entry, b: Entry) => number) {
+        var values = Array.from(this.children.values());
+        if (sortFunc != null)
+            values.sort(sortFunc);
+        return values;
+    }
+    
+    addChild(entry: Entry) {
+        if (entry.url == null)
+            throw new Error('Url must be set');
+        this.children.set(entry.url, entry);
+    }
+    
+    deleteChild(url: string) {
+        return this.children.delete(url);
+    }
 
     isReply(): boolean {
         return this.replyTo != null;
@@ -268,25 +286,13 @@ export class Entry {
             this.content.value != '' &&
             this.name !== this.content.value;
     }
-    
-    deduplicate() {
-        var seen = {};
-        var tmp = [];
-        this.children.forEach(c => {
-            if (!seen[c.url]) {
-                seen[c.url] = true;
-                tmp.push(c);
-            }
-        });
-        this.children = tmp;
-    }
 
     serialize(): string {
         return JSON.stringify(this, (key,val) => {
             if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf')
                 return val === null ? null : val.url;
             if (key === 'children')
-                return val.map(r => r.url);
+                return Array.from(val.values()).map(r => r.url);
             return val;
         });
     }
@@ -304,7 +310,7 @@ export class Entry {
             if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf')
                 return val === null ? null : new Entry(val);
             if (key === 'children')
-                return val.map(url => new Entry(url));
+                return new Map(val.map(url => [url, new Entry(url)]));
             if (key === '') {
                 var entry = new Entry();
                 entry.name = val.name;

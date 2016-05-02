@@ -18,7 +18,7 @@ describe('entry', function() {
         var entry = new microformat.Entry();
         assert.equal(entry.url, null);
         assert.equal(entry.replyTo, null);
-        assert.deepEqual(entry.children, []);
+        assert.deepEqual(entry.getChildren(), []);
     });
 
     it('can be constructed from url string', function() {
@@ -38,7 +38,7 @@ describe('entry', function() {
     serializeEntry.author.name = 'Test User';
     serializeEntry.author.url = 'http://testsite';
     serializeEntry.replyTo = new microformat.Entry('http://testsite/2015/8/28/2');
-    serializeEntry.children = [new microformat.Entry('http://testsite/2015/8/28/3')];
+    serializeEntry.addChild(new microformat.Entry('http://testsite/2015/8/28/3'));
 
     var serializeJson = '{"name":"Hello World!",\
 "published":"2015-08-28T08:00:00.000Z",\
@@ -220,11 +220,10 @@ describe('entry', function() {
         var entry = new microformat.Entry('http://testsite/2015/10/6/1');
         var c1 = new microformat.Entry('http://testsite/2015/10/6/2');
         var c2 = new microformat.Entry('http://testsite/2015/10/6/3');
-        entry.children.push(c1);
-        entry.children.push(c2);
-        entry.children.push(c1);
-        entry.deduplicate();
-        assert.deepEqual(entry.children, [c1,c2]);
+        entry.addChild(c1);
+        entry.addChild(c2);
+        entry.addChild(c1);
+        assert.deepEqual(entry.getChildren(), [c1,c2]);
     });
     
     it('getEntryFromUrl', function(done) {
@@ -355,8 +354,8 @@ describe('entry', function() {
         </div>';
         microformat.getEntry(html, 'http://testsite')
         .then(e => {
-            assert(e.children.length === 1);
-            assert(e.children[0].name === 'a comment');
+            assert(e.getChildren().length === 1);
+            assert(e.getChildren()[0].name === 'a comment');
         })
         .then(done)
         .catch(done);

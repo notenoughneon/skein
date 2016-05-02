@@ -372,8 +372,8 @@ describe('e2e', function() {
         })
         .then(e => {
             testNote = e;
-            assert(e.children[0].url === testReply.url);
-            assert(e.children[0].name === testReply.name);
+            assert(e.getChildren()[0].url === testReply.url);
+            assert(e.getChildren()[0].name === testReply.name);
         })
         .then(done)
         .catch(done);
@@ -396,7 +396,7 @@ describe('e2e', function() {
         })
         .then(e => {
             testNote = e;
-            assert(e.children[1].url === testLike.url);
+            assert(e.getChildren()[1].url === testLike.url);
         })
         .then(done)
         .catch(done);
@@ -419,7 +419,7 @@ describe('e2e', function() {
         })
         .then(e => {
             testNote = e;
-            assert(e.children[2].url === testRepost.url);
+            assert(e.getChildren()[2].url === testRepost.url);
         })
         .then(done)
         .catch(done);
@@ -437,7 +437,7 @@ describe('e2e', function() {
             return site.get(testNote.url);
         })
         .then(e => {
-            assert(e.children.length === 3);
+            assert(e.getChildren().length === 3);
         })
         .then(done)
         .catch(done);

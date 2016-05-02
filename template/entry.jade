@@ -44,5 +44,5 @@ div(class="h-entry")
     if entry.isRepost()
         +cite(entry.repostOf, ' p-repost-of')
 
-    each child in entry.children
+    each child in entry.getChildren(microformat.Entry.byType)
         +cite(child, '')

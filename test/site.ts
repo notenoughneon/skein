@@ -71,9 +71,9 @@ describe('site', function() {
         site.receiveWebmention(post2.url, post1.url).
             then(() => site.get(post1.url)).
             then(e => {
-                assert.equal(e.children.length, 1);
-                assert.equal(e.children[0].url, post2.url);
-                assert.equal(e.children[0].content.value, post2.content.value);
+                assert.equal(e.getChildren().length, 1);
+                assert.equal(e.getChildren()[0].url, post2.url);
+                assert.equal(e.getChildren()[0].content.value, post2.content.value);
             }).
             then(done).
             catch(done);
