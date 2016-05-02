@@ -1,4 +1,3 @@
-///<reference path="typings/main.d.ts"/>
 var parser = require('microformat-node');
 import Request = require('request');
 import cheerio = require('cheerio');

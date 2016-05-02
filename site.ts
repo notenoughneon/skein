@@ -1,4 +1,3 @@
-///<reference path="typings/main.d.ts"/>
 import fs = require('fs');
 import url = require('url');
 import path = require('path');

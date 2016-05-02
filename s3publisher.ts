@@ -1,4 +1,3 @@
-///<reference path="typings/main.d.ts"/>
 var AWS = require('aws-sdk');
 import when = require('when');
 import nodefn = require('when/node');

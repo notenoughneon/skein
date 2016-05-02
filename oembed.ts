@@ -1,4 +1,3 @@
-///<reference path="typings/main.d.ts"/>
 import when = require('when');
 import nodefn = require('when/node');
 import request = require('request');
