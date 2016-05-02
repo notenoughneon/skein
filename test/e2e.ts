@@ -4,6 +4,7 @@ import querystring = require('querystring');
 import fs = require('fs');
 import path = require('path');
 import express = require('express');
+import cheerio = require('cheerio');
 import Request = require('request');
 import Site = require('../site');
 import Api = require('../api');
@@ -532,7 +533,8 @@ describe('e2e', function() {
             assert(e.name === formData.content);
             assert(e.content.value === formData.content);
             var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
-            assert.deepEqual(e.getPhotos(),[config.url + photoSlug]);
+            var $ = cheerio.load(e.content.html);
+            assert.deepEqual($('img.u-photo').toArray().map(img => img.attribs['src']), [config.url + photoSlug]);
         })
         .then(done)
         .catch(done);
@@ -562,7 +564,8 @@ describe('e2e', function() {
             assert(e.name === formData.content);
             assert(e.content.value === formData.content);
             var audioSlug = path.join(path.dirname(e.getSlug()), 'test.ogg');
-            assert.deepEqual(e.getAudios(), [config.url + audioSlug]);
+            var $ = cheerio.load(e.content.html);
+            assert.deepEqual($('audio.u-audio').toArray().map(audio => audio.attribs['src']), [config.url + audioSlug]);
         })
         .then(done)
         .catch(done);

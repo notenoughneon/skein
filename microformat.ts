@@ -260,23 +260,6 @@ export class Entry {
         return url.parse(this.url).path;
     }
 
-    getPhotos(): string[] {
-        if (this.content != null && this.content.html != null) {
-            var $ = cheerio.load(this.content.html);
-            return $('img.u-photo').toArray().map(img => img.attribs['src']);
-        }
-        return [];
-    }
-    
-    getAudios(): string[] {
-        if (this.content != null && this.content.html != null) {
-            var $ = cheerio.load(this.content.html);
-            return $('audio.u-audio').toArray().map(audio => audio.attribs['src']);
-        }
-        return [];
-
-    }
-
     isArticle(): boolean {
         return !this.isReply() &&
             !this.isRepost() &&

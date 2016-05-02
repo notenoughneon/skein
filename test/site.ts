@@ -79,27 +79,6 @@ describe('site', function() {
             catch(done);
     });
     
-    it('can post a photo', function(done) {
-        var m = {content: 'This is a photo', photo: {
-            filename: 'teacups.jpg',
-            tmpfile: 'test/teacups.jpg',
-            mimetype: 'image/jpeg'
-        }};
-        site.publish(m).
-            then(entry => {
-                post3 = entry;
-                return site.get(entry.url);
-            }).
-            then(e => {
-                assert.equal(e.content.value, m.content);
-                var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
-                assert.deepEqual(e.getPhotos(),[config.url + photoSlug]);
-                assert(fs.existsSync(path.join(config.publisher.root, photoSlug)));
-            }).
-            then(done).
-            catch(done);
-    });
-    
     it('can post a note with a tag', function(done) {
         var category = ['indieweb', 'test'];
         var m = {content: 'A post with tags', category: category};
