@@ -26,7 +26,7 @@ export async function getThreadFromUrl(seed: string) {
             let entry = await getEntryFromUrl(url);
             entryDict.set(url, entry);
             let references = entry.children.map(c => c.url)
-                .concat(entry.references())
+                .concat(entry.getReferences())
                 .filter(r => !entryDict.has(r));
             boundary = boundary.concat(references);
         } catch (err) {
@@ -220,12 +220,16 @@ export class Entry {
     static byType = (a: Entry, b: Entry) => a._getType() - b._getType();
     static byTypeDesc = (a: Entry, b: Entry) => b._getType() - a._getType();
 
-    domain(): string {
+    getDomain(): string {
         var p = url.parse(this.url);
         return p.protocol + '//' + p.host;
     }
+    
+    getPath(): string {
+        return url.parse(this.url).path;
+    }
 
-    references(): string[] {
+    getReferences(): string[] {
         var ref: Entry[] = [];
         if (this.replyTo != null)
             ref.push(this.replyTo);
@@ -236,12 +240,11 @@ export class Entry {
         return ref.map(r => r.url);
     }
 
-    allLinks(): string[] {
-        var allLinks = this.references();
+    getMentions(): string[] {
+        var allLinks = this.getReferences();
         if (this.content != null)
             allLinks = allLinks.concat(getLinks(this.content.html));
         return allLinks;
-
     }
 
     isReply(): boolean {
@@ -254,10 +257,6 @@ export class Entry {
 
     isLike(): boolean {
         return this.likeOf != null;
-    }
-    
-    getSlug(): string {
-        return url.parse(this.url).path;
     }
 
     isArticle(): boolean {

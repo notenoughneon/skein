@@ -532,7 +532,7 @@ describe('e2e', function() {
             testPhoto = e;
             assert(e.name === formData.content);
             assert(e.content.value === formData.content);
-            var photoSlug = path.join(path.dirname(e.getSlug()), 'teacups.jpg');
+            var photoSlug = path.join(path.dirname(e.getPath()), 'teacups.jpg');
             var $ = cheerio.load(e.content.html);
             assert.deepEqual($('img.u-photo').toArray().map(img => img.attribs['src']), [config.url + photoSlug]);
         })
@@ -563,7 +563,7 @@ describe('e2e', function() {
             testAudio = e;
             assert(e.name === formData.content);
             assert(e.content.value === formData.content);
-            var audioSlug = path.join(path.dirname(e.getSlug()), 'test.ogg');
+            var audioSlug = path.join(path.dirname(e.getPath()), 'test.ogg');
             var $ = cheerio.load(e.content.html);
             assert.deepEqual($('audio.u-audio').toArray().map(audio => audio.attribs['src']), [config.url + audioSlug]);
         })

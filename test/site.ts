@@ -114,7 +114,7 @@ describe('site', function() {
     it('generateAll works', function(done) {
         var indexfile = config.publisher.root + '/index.html';
         var tagfile = config.publisher.root + '/tags/indieweb.html';
-        var postfile = config.publisher.root + post1.getSlug() + '.html';
+        var postfile = config.publisher.root + post1.getPath() + '.html';
         site.config.title = "New Blog Title";
         site.generateAll().
             then(() => {

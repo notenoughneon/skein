@@ -212,8 +212,8 @@ describe('entry', function() {
     });
     
     it('domain works', function() {
-        assert.equal((new microformat.Entry('http://somesite.com/2015/1/2/3')).domain(), 'http://somesite.com');
-        assert.equal((new microformat.Entry('https://somesite.com:8080/2015/1/2/3')).domain(), 'https://somesite.com:8080');
+        assert.equal((new microformat.Entry('http://somesite.com/2015/1/2/3')).getDomain(), 'http://somesite.com');
+        assert.equal((new microformat.Entry('https://somesite.com:8080/2015/1/2/3')).getDomain(), 'https://somesite.com:8080');
     });
     
     it('deduplicate works', function() {

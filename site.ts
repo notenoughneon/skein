@@ -206,7 +206,7 @@ class Site {
                 await this.publisher.put(path.join(path.dirname(slug), m.audio.filename),
                 fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
             }
-            for (let link of entry.allLinks()) {
+            for (let link of entry.getMentions()) {
                 let embed = await oembed(link);
                 if (embed !== null) {
                     entry.content.html = entry.content.html + '<div class="thumbnail embed-responsive embed-responsive-16by9">' + embed + '</div>';
@@ -260,18 +260,18 @@ class Site {
 
     async update(entry: microformat.Entry) {
         var html = this.renderEntry(entry);
-        await this.publisher.put(entry.getSlug(), html, 'text/html');
+        await this.publisher.put(entry.getPath(), html, 'text/html');
         this.entries.set(entry.url, entry);
-        debug('Published ' + entry.getSlug());
+        debug('Published ' + entry.getPath());
         await this.generateStreams();
         return entry;
     }
 
     async delete(url: string) {
         var entry = this.get(url);
-        await this.publisher.delete(entry.getSlug(), 'text/html');
+        await this.publisher.delete(entry.getPath(), 'text/html');
         this.entries.delete(entry.url);
-        debug('Deleted ' + entry.getSlug());
+        debug('Deleted ' + entry.getPath());
         await this.generateStreams();
     }
 
@@ -401,7 +401,7 @@ class Site {
     }
 
     async sendWebmentionsFor(entry: microformat.Entry) {
-        await util.map(entry.allLinks(), async (link) => {
+        await util.map(entry.getMentions(), async (link) => {
             try {
                 await util.sendWebmention(entry.url, link);
                 debug('Sent webmention to ' + link);
