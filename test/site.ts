@@ -6,7 +6,7 @@ import path = require('path');
 import child_process = require('child_process');
 import express = require('express');
 var parser = require('microformat-node');
-import microformat = require('../microformat');
+import microformat = require('mf-obj');
 import Site = require('../site');
 import util = require('../util');
 

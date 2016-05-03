@@ -8,7 +8,6 @@ import crypto = require('crypto');
 import jwt = require('jsonwebtoken');
 import nodefn = require('when/node');
 var debug = require('debug')('api');
-import microformat = require('./microformat');
 import Site = require('./site');
 import util = require('./util');
 
