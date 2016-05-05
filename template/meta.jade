@@ -4,7 +4,7 @@ p(class="blog-post-meta")
             if entry.author.photo != null
                 img(src=entry.author.photo)
             = entry.author.name
-    if !hideAuthor && entry.published != null
+    if !hideAuthor
         |  - 
     a(class="u-url" href=entry.url)
         if entry.published != null

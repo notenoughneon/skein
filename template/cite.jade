@@ -35,10 +35,7 @@ mixin cite(entry, rootClass)
                 include ./meta
                 if entry.content != null
                     div(class="e-content" + (entry.isArticle() ? '' : ' p-name'))
-                        if entry.isReply()
-                            = util.truncate(entry.content.value, 1440)
-                        else
-                            = util.truncate(entry.content.value, 180)
+                        = util.truncate(entry.content.value, 1440)
                 else if entry.name != null
                     div(class="p-name")= entry.name
                 include ./actions
