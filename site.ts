@@ -64,10 +64,10 @@ interface Micropub {
     replyTo?: string,
     likeOf?: string,
     repostOf?: string,
-    syndication?: string[],
+    category?: string | string[],
+    syndication?: string | string[],
     photo?: {filename: string, tmpfile: string, mimetype: string},
-    audio?: {filename: string, tmpfile: string, mimetype: string},
-    category?: string[]
+    audio?: {filename: string, tmpfile: string, mimetype: string}
 }
 
 class Site {
@@ -178,8 +178,6 @@ class Site {
                 };
             }
             entry.published = new Date();
-            if (m.category != null)
-                entry.category = m.category;
             var slug = await this.getSlug(m.name, entry.published);
             entry.url = this.config.url + slug;
             if (m.replyTo != null)
@@ -188,8 +186,20 @@ class Site {
                 entry.likeOf = await microformat.getEntryFromUrl(m.likeOf);
             if (m.repostOf != null)
                 entry.repostOf = await microformat.getEntryFromUrl(m.repostOf);
-            if (m.syndication != null)
-                entry.syndication = m.syndication;
+            if (m.category != null) {
+                let category = m.category;
+                if (typeof category === 'string')
+                    entry.category = [category];
+                else if (typeof category === 'object')
+                    entry.category = category;
+            }
+            if (m.syndication != null) {
+                let syndication = m.syndication;
+                if (typeof syndication === 'string')
+                entry.syndication = [syndication];
+                else if (typeof syndication === 'object')
+                    entry.syndication = syndication;
+            }
             if (m.photo != null) {
                 entry.content.html = '<div class="thumbnail"><img class="u-photo" src="' + m.photo.filename + '"/>' +
                 '<div class="caption">' + entry.content.html + '</div></div>';

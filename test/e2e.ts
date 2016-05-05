@@ -466,6 +466,25 @@ describe('e2e', function() {
         .catch(done);
     });
 
+    it('post note with syndication (single string)', function(done) {
+        var form = { h: 'entry', content: 'Test syndication (single string)', 
+        syndication: 'https://twitter.com/testuser/status/12345' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert(e.name === form.content);
+            assert(e.content.value === form.content);
+            assert.deepEqual(e.syndication, [form.syndication]);
+        })
+        .then(done)
+        .catch(done);
+    });
+
+
     var testCategories;
     it('post note with categories', function(done) {
         var form = { h: 'entry', content: 'Test categories', category: ['indieweb', 'micropub'] };
@@ -484,6 +503,24 @@ describe('e2e', function() {
         .then(done)
         .catch(done);
     });
+    
+    it('post note with category (single string)', function(done) {
+        var form = { h: 'entry', content: 'Test category (single string)', category: 'test' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert(e.name === form.content);
+            assert(e.content.value === form.content);
+            assert.deepEqual(e.category, [form.category]);
+        })
+        .then(done)
+        .catch(done);
+    });
+
     
     var testPhoto;
     it('post photo via micropub', function(done) {
