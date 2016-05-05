@@ -442,29 +442,7 @@ describe('e2e', function() {
         .then(done)
         .catch(done);
     });
-    
-    it('webmention from non-mf2 source', function(done) {
-        var html = '<html>\
-        <head><title>Some page title</title></head>\
-        <body>\
-        Here is a non-mf2 <a href="' + testNote.url + '">mention</a>.\
-        Here is some more text:\
-        <ul>\
-        <li>one\
-        <li>two\
-        <li>three\
-        </ul>\
-        Aasdf asdf asd fasdf asd fas dfasd fasd fasd fasdf asdf asdf as dfsadf asdf\
-        asdf asdfasd fas dfasd fasd fasd fasd fasd fasd fasd fasd fasd sadf ad fasd\
-        </body>\
-        </html>';
-        site.publisher.put('non-mf2-mention.html', html)
-        .then(() => util.sendWebmention('http://localhost:8000/non-mf2-mention', testNote.url))
-        .then(done)
-        .catch(done);
-
-    });
-    
+        
     var testSyndication;
     it('post note with syndication', function(done) {
         var form = { h: 'entry', content: 'Test syndication', category: ['test'], syndication: [

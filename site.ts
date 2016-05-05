@@ -417,7 +417,7 @@ class Site {
                 throw new Error('Didn\'t find mention on source page');
             } else {
                 var targetEntry = this.get(targetUrl);
-                var sourceEntry = await microformat.getEntry(sourceHtml, sourceUrl, true);
+                var sourceEntry = await microformat.getEntry(sourceHtml, sourceUrl);
                 targetEntry.addChild(sourceEntry);
                 var targetHtml = this.renderEntry(targetEntry);
                 await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
