@@ -425,6 +425,39 @@ describe('e2e', function() {
         .catch(done);
     });
     
+    it('post rsvp via micropub', function(done) {
+        var html = '<html>\
+            <body>\
+            <div class="h-event">\
+            <h1 class="p-name">Indieweb Summit</h1>\
+            <time class="dt-start" datetime="2016-06-03">June 3</time>\
+            <time class="dt-end" datetime="2016-06-05">5</time>\
+            <span class="h-card p-location">\
+                <span class="p-name">Vadio</span>, \
+                <span class="p-street-address">919 SW Taylor St, Ste 300</span>, \
+                <span class="p-locality">Portland</span>, <span class="p-region">Oregon</span>\
+            </span>\
+            </div>\
+            </body>\
+        </html>';
+        site.publisher.put('event.html', html)
+        .then(() => {
+            var form = { h: 'entry', 'content[html]': 'RSVP <span class="p-rsvp">yes</span>', 'in-reply-to': 'http://localhost:8000/event.html' };
+            var headers = { Authorization: 'bearer ' + token };
+            return post({ url: config.micropubUrl, form: form, headers: headers });
+        })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert.equal(e.replyTo.url, 'http://localhost:8000/event.html');
+            assert.equal(e.replyTo.name, 'Indieweb Summit');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     it('webmention send to nonexistent target', function(done) {
         util.sendWebmention('http://localhost:8000/12345', 'http://localhost:8000/nonexist')
         .then(() => assert(false))
