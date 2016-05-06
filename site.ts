@@ -213,9 +213,11 @@ class Site {
                 fs.createReadStream(m.audio.tmpfile), m.audio.mimetype);
             }
             for (let link of entry.getMentions()) {
-                let embed = await oembed(link);
-                if (embed !== null) {
-                    entry.content.html = entry.content.html + '<div class="thumbnail embed-responsive embed-responsive-16by9">' + embed + '</div>';
+                try {
+                    let embed = await oembed(link);
+                    entry.content.html = entry.content.html + embed;
+                } catch (err) {
+                    //debug(err.message);
                 }
             }
             //ISSUE: some properties may be embedded mf in the content (e.g. summary)

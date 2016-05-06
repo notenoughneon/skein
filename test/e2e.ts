@@ -354,6 +354,38 @@ describe('e2e', function() {
         .catch(done);
     });
     
+    it.skip('twitter oembed', function(done) {
+        var form = { h: 'entry', content: 'Twitter oembed. https://twitter.com/jennschiffer/status/708888255828250625' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert.equal(e.name, form.content);
+            assert.equal(e.content.value, form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it.skip('wordpress oembed', function(done) {
+        var form = { h: 'entry', content: 'Wordpress oembed. http://abstractscience.net/radio-shows/absci-radio-show-as0946' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert.equal(e.name, form.content);
+            assert.equal(e.content.value, form.content);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     var testReply;
     it('post reply via micropub', function(done) {
         var form = { h: 'entry', content: 'Test reply', 'in-reply-to': testNote.url };
