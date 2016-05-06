@@ -17,7 +17,7 @@
     "express": "^4.13.4",
     "jade": "^1.11.0",
     "jsonwebtoken": "^5.7.0",
-    "mf-obj": "^1.0.0",
+    "mf-obj": "^1.1.0",
     "microformat-node": "^1.2.0",
     "request": "^2.71.0",
     "when": "^3.7.7"
