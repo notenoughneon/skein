@@ -370,6 +370,20 @@ describe('e2e', function() {
         .catch(done);
     });
     
+    it.skip('twitter oembed (repost)', function(done) {
+        var form = { h: 'entry', content: '', 'repost-of': 'https://twitter.com/shanselman/status/728686891122319360' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert(res.statusCode === 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     it.skip('wordpress oembed', function(done) {
         var form = { h: 'entry', content: 'Wordpress oembed. http://abstractscience.net/radio-shows/absci-radio-show-as0946' };
         var headers = { Authorization: 'bearer ' + token };
