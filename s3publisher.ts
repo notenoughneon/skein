@@ -30,7 +30,7 @@ class S3Publisher implements Publisher {
         this.listObjects = guard(guard.n(1), nodefn.lift(s3.listObjects.bind(s3)));
     }
 
-    put(path, obj, contentType): Promise<void> {
+    async put(path, obj, contentType): Promise<void> {
         debug('put ' + path);
         var params = {
             Bucket: this.bucket,
@@ -38,25 +38,20 @@ class S3Publisher implements Publisher {
             Body: obj,
             ContentType: contentType !== undefined ? contentType : util.inferMimetype(path)
         };
-        return this.putObject(params).
-            then(function () {
-                // S3 doesn't infer '.html' on filenames,
-                // so we have to put both 'path' and 'path.html'
-                if (params.ContentType === 'text/html' && !/\.html$/.test(params.Key)) {
-                    params.Key = params.Key + '.html';
-                    return this.putObject(params);
-                }
-            });
+        await this.putObject(params);
+        // S3 doesn't infer '.html' on filenames,
+        // so we have to put both 'path' and 'path.html'
+        if (params.ContentType === 'text/html' && !/\.html$/.test(params.Key)) {
+            params.Key = params.Key + '.html';
+            await this.putObject(params);
+        }
     }
     
-    delete(path, contentType): Promise<void> {
+    async delete(path, contentType): Promise<void> {
         debug('delete ' + path);
-        return this.deleteObject({Bucket: this.bucket, Key: path}).
-            then(() => {
-                if (contentType == 'text/html' && !/\.html$/.test(path))
-                    return this.deleteObject({Bucket: this.bucket, Key: path + '.html'});
-            }).
-            then(() => null);
+        await this.deleteObject({Bucket: this.bucket, Key: path});
+        if (contentType == 'text/html' && !/\.html$/.test(path))
+            await this.deleteObject({Bucket: this.bucket, Key: path + '.html'});
     }
 
     get(path): Promise<{Body: Buffer, ContentType: string}> {
