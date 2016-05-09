@@ -31,7 +31,6 @@ class S3Publisher implements Publisher {
     }
 
     async put(path, obj, contentType): Promise<void> {
-        debug('put ' + path);
         var params = {
             Bucket: this.bucket,
             Key: normalizePath(path),
@@ -39,42 +38,53 @@ class S3Publisher implements Publisher {
             ContentType: contentType !== undefined ? contentType : util.inferMimetype(path)
         };
         await this.putObject(params);
+        debug('put ' + params.Key);
         // S3 doesn't infer '.html' on filenames,
         // so we have to put both 'path' and 'path.html'
         if (params.ContentType === 'text/html' && !/\.html$/.test(params.Key)) {
             params.Key = params.Key + '.html';
             await this.putObject(params);
+            debug('put ' + params.Key);
         }
     }
     
     async delete(path, contentType): Promise<void> {
-        debug('delete ' + path);
         await this.deleteObject({Bucket: this.bucket, Key: path});
-        if (contentType == 'text/html' && !/\.html$/.test(path))
+        debug('delete ' + path);
+        if (contentType == 'text/html' && !/\.html$/.test(path)) {
             await this.deleteObject({Bucket: this.bucket, Key: path + '.html'});
+            debug('delete ' + path + '.html');
+        }
     }
 
-    get(path): Promise<{Body: Buffer, ContentType: string}> {
+    async get(path): Promise<{Body: Buffer, ContentType: string}> {
+        var res = await this.getObject({Bucket: this.bucket, Key: normalizePath(path)});
         debug('get ' + path);
-        return this.getObject({Bucket: this.bucket, Key: normalizePath(path)});
+        return res;
     }
 
-    exists(path): Promise<boolean> {
+    async exists(path): Promise<boolean> {
         debug('exists ' + path);
-        return this.headObject({Bucket: this.bucket, Key: normalizePath(path)}).
-            then(function () {
-                return true;
-            }).
-            catch(function () {
-                return false;
-            });
+        try {
+            await this.headObject({Bucket: this.bucket, Key: normalizePath(path)});
+            return true;
+        } catch (err) {
+            return false;
+        }
     }
 
     async list(): Promise<string[]> {
+        var keys = [];
+        var parms: {Bucket: string, MaxKeys?: number, Marker?: string} = {Bucket: this.bucket};
         debug('list');
-        // FIXME: handle truncated results
-        var data = await this.listObjects({Bucket: this.bucket});
-        return data.Contents.map(o => o.Key);
+        do {
+            if (keys.length > 0)
+                parms.Marker = keys[keys.length - 1];
+            var data = await this.listObjects(parms);
+            debug('Got ' + data.Contents.length + ' entries');
+            keys = keys.concat(data.Contents.map(o => o.Key));
+        } while (data.IsTruncated);
+        return keys;
     }
 
     rollback(): Promise<void> {
