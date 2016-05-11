@@ -26,8 +26,8 @@ div(class="h-entry")
                 - var dateString = site.formatDate(entry.published);
                 time(class="dt-published" datetime=entry.published.toISOString() title=dateString)
 
-    if !entry.isLike() && !entry.isRepost()
-        div(class="blog-post")
+    div(class="blog-post")
+        if !entry.isLike() && !entry.isRepost()
             if entry.isArticle()
                 h2(class="blog-post-title p-name")
                     a(href=entry.url)= entry.name
@@ -39,15 +39,12 @@ div(class="h-entry")
             else
                 - var contentClass = "e-content" + (entry.isArticle() ? '' : ' p-name');
                 div(class=contentClass)!= entry.content.html
-            include ./actions
-
-    if entry.isLike()
-        +cite(entry.likeOf, ' p-like-of')
-
-    if entry.isRepost()
-        +cite(entry.repostOf, ' p-repost-of')
-
-    if entry.embed != null
-        div(class="e-x-embed")!= entry.embed.html
+        if entry.isLike()
+            +cite(entry.likeOf, ' p-like-of')
+        if entry.isRepost()
+            +cite(entry.repostOf, ' p-repost-of')
+        if entry.embed != null
+            div(class="e-x-embed")!= entry.embed.html
+        include ./actions
 
 div(class="blog-post-spacer")
