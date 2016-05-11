@@ -47,4 +47,7 @@ div(class="h-entry")
     if entry.isRepost()
         +cite(entry.repostOf, ' p-repost-of')
 
+    if entry.embed != null
+        div(class="e-x-embed")!= entry.embed.html
+
 div(class="blog-post-spacer")

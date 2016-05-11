@@ -180,12 +180,13 @@ class Site {
             entry.published = new Date();
             var slug = await this.getSlug(m.name, entry.published);
             entry.url = this.config.url + slug;
+            var options: microformat.Options = {strategies: ['entry', 'event', 'oembed']};
             if (m.replyTo != null)
-                entry.replyTo = await microformat.getEntryFromUrl(m.replyTo);
+                entry.replyTo = await microformat.getEntryFromUrl(m.replyTo, options);
             if (m.likeOf != null)
-                entry.likeOf = await microformat.getEntryFromUrl(m.likeOf);
+                entry.likeOf = await microformat.getEntryFromUrl(m.likeOf, options);
             if (m.repostOf != null)
-                entry.repostOf = await microformat.getEntryFromUrl(m.repostOf);
+                entry.repostOf = await microformat.getEntryFromUrl(m.repostOf, options);
             if (m.category != null) {
                 let category = m.category;
                 if (typeof category === 'string')
@@ -215,7 +216,9 @@ class Site {
             for (let link of entry.getMentions()) {
                 try {
                     let embed = await oembed(link);
-                    entry.content.html = entry.content.html + embed;
+                    if (entry.embed == null)
+                        entry.embed = {html: '', value: ''};
+                    entry.embed.html += embed;
                 } catch (err) {
                     //debug(err.message);
                 }
