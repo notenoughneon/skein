@@ -149,6 +149,8 @@ export function inferMimetype(filename) {
             return 'text/html';
         case '.css':
             return 'text/css';
+        case '.txt':
+            return 'text/plain';
         case '.js':
             return 'application/javascript';
         case '.jpg':
@@ -162,7 +164,6 @@ export function inferMimetype(filename) {
             return 'audio/mpeg';
         case '.ogg':
             return 'audio/ogg';
-
         default:
             return 'application/octet-stream';
     }

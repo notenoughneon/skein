@@ -22,6 +22,11 @@ class GitPublisher extends FilePublisher {
         });
     }
     
+    list() {
+        return super.list()
+        .then(paths => paths.filter(p => !p.startsWith('.git')));
+    }
+    
     async rollback(): Promise<void> {
         debug('rollback');
         await this.exec('git', ['checkout', '.']);
