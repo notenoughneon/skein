@@ -5,9 +5,6 @@ var debug = require('debug')('site');
 import util = require('./util');
 import microformat = require('mf-obj');
 import Publisher = require('./publisher');
-import S3Publisher = require('./s3publisher');
-import FilePublisher = require('./filepublisher');
-import GitPublisher = require('./gitpublisher');
 import oembed = require('./oembed');
 import assert = require('assert');
 import jade = require('jade');
@@ -78,19 +75,7 @@ class Site {
 
     constructor(config: SiteConfig) {
         this.config = config;
-        switch(config.publisher.type) {
-            case 's3':
-                this.publisher = new S3Publisher(config.publisher);
-                break;
-            case 'file':
-                this.publisher = new FilePublisher(config.publisher);
-                break;
-            case 'git':
-                this.publisher = new GitPublisher(config.publisher);
-                break;
-            default:
-                throw new Error('Unknown publisher type');
-        }
+        this.publisher = Publisher.getInstance(config.publisher);
         this.mutex = new util.Mutex();
         this.entries = new Map();
     }
