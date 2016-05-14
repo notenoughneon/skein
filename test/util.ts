@@ -61,10 +61,7 @@ describe('util', function() {
                 assert.deepEqual(elts, [
                     'skel/author.png',
                     'skel/css/blog.css',
-                    'skel/css/bootstrap.min.css',
-                    'skel/js/blog.js',
-                    'skel/js/bootstrap.min.js',
-                    'skel/js/jquery.min.js'
+                    'skel/js/blog.js'
                 ]);
             }).
             then(done).
