@@ -4,7 +4,7 @@ import path = require('path');
 var debug = require('debug')('site');
 import util = require('./util');
 import microformat = require('mf-obj');
-import Publisher = require('./publisher');
+import Publisher from './publisher';
 import oembed = require('./oembed');
 import assert = require('assert');
 import jade = require('jade');

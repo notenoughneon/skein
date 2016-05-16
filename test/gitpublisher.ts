@@ -1,6 +1,5 @@
 import assert = require('assert');
 import child_process = require('child_process');
-import Publisher = require('../Publisher');
 import GitPublisher = require('../gitpublisher');
 import util = require('../util');
 

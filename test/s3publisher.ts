@@ -1,5 +1,4 @@
 import assert = require('assert');
-import Publisher = require('../Publisher');
 import S3Publisher = require('../s3publisher');
 import util = require('../util');
 

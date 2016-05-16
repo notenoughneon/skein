@@ -1,14 +1,10 @@
-import util = require('./util');
-import Publisher = require('./publisher');
-import S3Publisher = require('./s3publisher');
-import FilePublisher = require('./filepublisher');
-import GitPublisher = require('./gitpublisher');
-var debug = require('debug')('mirroredpublisher');
+import Publisher from './publisher';
 
 class MirrorPublisher implements Publisher {    
     publishers: Publisher[];
     
-    constructor() {
+    constructor(config: {primary: any, secondary: any}) {
+        this.publishers = [config.primary, config.secondary].map(c => Publisher.getInstance(c));
     }
     
     async put(path: string, obj: string | NodeJS.ReadableStream, contentType?: string) {

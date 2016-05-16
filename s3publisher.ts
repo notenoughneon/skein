@@ -3,7 +3,7 @@ import nodefn = require('when/node');
 var guard = require('when/guard');
 var debug = require('debug')('s3publisher');
 import util = require('./util');
-import Publisher = require('./publisher');
+import Publisher from './publisher';
 
 // S3 doesn't like leading slashes
 function normalizePath(p) {

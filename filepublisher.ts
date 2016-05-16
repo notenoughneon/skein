@@ -1,7 +1,7 @@
 import fs = require('fs');
 import pathlib = require('path');
 import util = require('./util');
-import Publisher = require('./publisher');
+import Publisher from './publisher';
 
 var readFile = util.promisify(fs.readFile);
 var stat = util.promisify(fs.stat);
