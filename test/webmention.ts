@@ -1,9 +1,85 @@
 ///<reference path="../typings/main.d.ts"/>
 import assert = require('assert');
+import Request = require('request');
 import util = require('../util');
 
-describe.skip('webmention', function() {
-    describe('discovery', function() {        
+describe('webmention', function() {
+    describe('mock tests', function() {
+        var orig_get;
+        var orig_post;
+    
+        before(function() {
+            orig_get = util.get;
+            orig_post = util.post;
+        });
+        
+        after(function() {
+            util.get = orig_get;
+            util.post = orig_post;
+        });
+        
+        it('getWebmentionEndpoint', async function(done) {
+            try {
+                var get_res = {
+                    'http://brid.gy/publish/twitter': '<html><head><link rel="webmention" href="http://brid.gy/publish/webmention"></head></html>'
+                };
+                util.get = (url: string) => Promise.resolve(get_res[url] ?
+                    {statusCode: 200, body: get_res[url], headers: {}} : {statusCode: 404, body: ''});
+                var endpoint = await util.getWebmentionEndpoint('http://brid.gy/publish/twitter');
+                assert.equal(endpoint, 'http://brid.gy/publish/webmention');
+                done();
+            } catch (err) {
+                done(err);
+            }
+        });
+
+        it('sendWebmention arguments', async function(done) {
+            try {
+                var get_res = {
+                    'http://brid.gy/publish/twitter': '<html><head><link rel="webmention" href="http://brid.gy/publish/webmention"></head></html>'
+                };
+                var post_res = {
+                    'http://brid.gy/publish/webmention': '{"url": "http://twitter.com/12345"}'
+                };
+                var args;
+                util.get = (url: string) => Promise.resolve(get_res[url] ?
+                    {statusCode: 200, body: get_res[url], headers: {}} : {statusCode: 404, body: ''});
+                util.post = (opts: Request.Options) => {
+                    args = opts.form;
+                    return Promise.resolve(post_res[opts.uri] ?
+                    {statusCode: 201, body: post_res[opts.uri]} : {statusCode: 404, body: ''});
+                };
+                var res = JSON.parse(await util.sendWebmention('http://somesite/somepost', 'http://brid.gy/publish/twitter'));
+                assert.deepEqual(args, {source: 'http://somesite/somepost', target: 'http://brid.gy/publish/twitter'});
+                done();
+            } catch (err) {
+                done(err);
+            }
+        });
+        
+        it('sendWebmention result', async function(done) {
+            try {
+                var get_res = {
+                    'http://brid.gy/publish/twitter': '<html><head><link rel="webmention" href="http://brid.gy/publish/webmention"></head></html>'
+                };
+                var post_res = {
+                    'http://brid.gy/publish/webmention': '{"url": "http://twitter.com/12345"}'
+                };
+                util.get = (url: string) => Promise.resolve(get_res[url] ?
+                    {statusCode: 200, body: get_res[url], headers: {}} : {statusCode: 404, body: ''});
+                util.post = (opts: Request.Options) => Promise.resolve(post_res[opts.uri] ?
+                    {statusCode: 201, body: post_res[opts.uri]} : {statusCode: 404, body: ''});
+                var res = JSON.parse(await util.sendWebmention('http://somesite/somepost', 'http://brid.gy/publish/twitter'));
+                assert.equal(res.url, 'http://twitter.com/12345');
+                done();
+            } catch (err) {
+                done(err);
+            }
+        });
+        
+    });
+    
+    describe.skip('webmention.rocks discovery', function() {
         it('Test 1', function(done) {
             util.getWebmentionEndpoint('https://webmention.rocks/test/1')
             .then(res => assert.equal(res, 'https://webmention.rocks/test/1/webmention'))
