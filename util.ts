@@ -51,8 +51,8 @@ var stat = promisify(fs.stat);
 var readdir = promisify(fs.readdir);
 var _writeFile = promisify(fs.writeFile);
 
-var get = promisify(Request.get);
-var post = promisify(Request.post);
+export var get = promisify(Request.get);
+export var post = promisify(Request.post);
 
 export function tryDelete(p) {
     try {
@@ -241,7 +241,7 @@ export async function sendWebmention(source, target): Promise<string> {
     var endpoint = await getWebmentionEndpoint(target);
     var res = await post({uri:endpoint, form:{source:source, target:target}});
     var status = res.statusCode;
-    if (status !== 200 && status !== 202)
+    if (!(status >= 200 && status <= 299))
         throw new Error(endpoint + ' returned status ' + status);
     return res.body;
 }
