@@ -237,12 +237,13 @@ export async function getWebmentionEndpoint(target) {
         throw new Error('No webmention endpoint');
 }
 
-export async function sendWebmention(source, target) {
+export async function sendWebmention(source, target): Promise<string> {
     var endpoint = await getWebmentionEndpoint(target);
     var res = await post({uri:endpoint, form:{source:source, target:target}});
     var status = res.statusCode;
     if (status !== 200 && status !== 202)
         throw new Error(endpoint + ' returned status ' + status);
+    return res.body;
 }
 
 export function getPage(permalink) {
