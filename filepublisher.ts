@@ -35,13 +35,13 @@ class FilePublisher implements Publisher {
     }
 
     put(path, obj, contentType): Promise<void> {
-        if (contentType === 'text/html')
+        if (contentType === 'text/html' && !path.endsWith('.html'))
             path = path + '.html';
         return util.writeFile(pathlib.join(this.root, path), obj);
     }
     
     async delete(path, contentType) {
-        if (contentType === 'text/html')
+        if (contentType === 'text/html' && !path.endsWith('.html'))
             path = path + '.html';
         await unlink(pathlib.join(this.root, path));
     }
