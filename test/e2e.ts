@@ -322,6 +322,40 @@ describe('e2e', function() {
         .catch(done);
     });
     
+    it('posse failure (string)', function(done) {
+        var form = { h: 'entry', content: 'Note with invalid posse target (string).', 'mp-syndicate-to': 'bogus.com' };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers })
+        .then(res => {
+            assert.equal(res.statusCode, 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert.equal(e.name, form.content);
+            assert.equal(e.content.value, form.content);
+            assert.deepEqual(e.syndication, []);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('posse failure (array)', function(done) {
+        var form = { h: 'entry', content: 'Note with invalid posse target (array).', 'mp-syndicate-to': ['bogus.com', 'example.com'] };
+        var headers = { Authorization: 'bearer ' + token };
+        post({ url: config.micropubUrl, form: form, headers: headers, qsStringifyOptions: { arrayFormat: 'brackets' } })
+        .then(res => {
+            assert.equal(res.statusCode, 201);
+            return site.get(res.headers.location);
+        })
+        .then(e => {
+            assert.equal(e.name, form.content);
+            assert.equal(e.content.value, form.content);
+            assert.deepEqual(e.syndication, []);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
     it.skip('youtube.com oembed', function(done) {
         var form = { h: 'entry', content: 'Youtube oembed. https://www.youtube.com/watch?v=sPasebVMIW4 https://youtu.be/bt_yCugXk8U' };
         var headers = { Authorization: 'bearer ' + token };

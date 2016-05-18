@@ -25,4 +25,5 @@ export = async function posse(entry: mfo.Entry, to: string[]) {
             return null;
         }
     }));
+    return syndications.filter(s => s !== null);
 }

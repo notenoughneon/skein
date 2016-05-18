@@ -6,6 +6,7 @@ import util = require('./util');
 import microformat = require('mf-obj');
 import Publisher from './publisher';
 import oembed = require('./oembed');
+import posse = require('./posse');
 import assert = require('assert');
 import jade = require('jade');
 
@@ -64,7 +65,8 @@ interface Micropub {
     category?: string | string[],
     syndication?: string | string[],
     photo?: {filename: string, tmpfile: string, mimetype: string},
-    audio?: {filename: string, tmpfile: string, mimetype: string}
+    audio?: {filename: string, tmpfile: string, mimetype: string},
+    syndicateTo?: string | string[]
 }
 
 class Site {
@@ -186,6 +188,13 @@ class Site {
                 else if (typeof syndication === 'object')
                     entry.syndication = syndication;
             }
+            if (m.syndicateTo != null) {
+                var s = m.syndicateTo;
+                if (typeof s === 'string')
+                    var syndicateTo = [s];
+                else if (typeof s === 'object')
+                    var syndicateTo = s;
+            }
             if (m.photo != null) {
                 entry.content.html = '<div class="thumbnail"><img class="u-photo" src="' + m.photo.filename + '"/>' +
                 '<div class="caption">' + entry.content.html + '</div></div>';
@@ -213,6 +222,11 @@ class Site {
             var html = this.renderEntry(entry);
             entry = await microformat.getEntry(html, entry.url);
             await this.update(entry);
+            if (syndicateTo) {
+                var syndications = await posse(entry, syndicateTo);
+                entry.syndication = entry.syndication.concat(syndications);
+                await this.update(entry);
+            }
             await this.publisher.commit('publish ' + entry.url);
             release();
             await this.sendWebmentionsFor(entry);
