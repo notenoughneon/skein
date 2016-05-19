@@ -83,6 +83,34 @@ describe.skip('gitpublisher', function() {
         .catch(done);
     });
     
+    it('commit msg opt injection', function(done) {
+        publisher.put('hello3.txt', 'hello world', 'text/plain')
+        .then(() => publisher.commit('test --dry-run'))
+        .then(done)
+        .catch(done);
+    });
+    
+    it('commit msg quote escape', function(done) {
+        publisher.put('hello4.txt', 'hello world', 'text/plain')
+        .then(() => publisher.commit('test" --dry-run "'))
+        .then(done)
+        .catch(done);
+    });    
+
+    it('commit msg shell escape', function(done) {
+        publisher.put('hello5.txt', 'hello world', 'text/plain')
+        .then(() => publisher.commit('test; touch foo.txt'))
+        .then(done)
+        .catch(done);
+    });
+
+    it('commit msg multiline', function(done) {
+        publisher.put('hello6.txt', 'hello world', 'text/plain')
+        .then(() => publisher.commit('test\nmulti line'))
+        .then(done)
+        .catch(done);
+    });
+    
     it('delete', async function(done) {
         try {
             await publisher.delete('hello.txt', 'text/plain');
@@ -102,7 +130,7 @@ describe.skip('gitpublisher', function() {
         }
     });
     
-    describe('stress tests', function() {
+    describe.skip('stress tests', function() {
         var objects: string[];
         it('put', function(done) {
             this.timeout(0);
