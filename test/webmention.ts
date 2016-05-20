@@ -57,6 +57,30 @@ describe('webmention', function() {
             }
         });
         
+        it('sendWebmention optional arguments', async function(done) {
+            try {
+                var get_res = {
+                    'http://brid.gy/publish/twitter': '<html><head><link rel="webmention" href="http://brid.gy/publish/webmention"></head></html>'
+                };
+                var post_res = {
+                    'http://brid.gy/publish/webmention': '{"url": "http://twitter.com/12345"}'
+                };
+                var args;
+                util.get = (url: string) => Promise.resolve(get_res[url] ?
+                    {statusCode: 200, body: get_res[url], headers: {}} : {statusCode: 404, body: ''});
+                util.post = (opts: Request.Options) => {
+                    args = opts.form;
+                    return Promise.resolve(post_res[opts.uri] ?
+                    {statusCode: 201, body: post_res[opts.uri]} : {statusCode: 404, body: ''});
+                };
+                var res = JSON.parse(await util.sendWebmention('http://somesite/somepost', 'http://brid.gy/publish/twitter', {'bridgy_omit_link': 'maybe'}));
+                assert.deepEqual(args, {source: 'http://somesite/somepost', target: 'http://brid.gy/publish/twitter', 'bridgy_omit_link': 'maybe'});
+                done();
+            } catch (err) {
+                done(err);
+            }
+        });
+        
         it('sendWebmention result', async function(done) {
             try {
                 var get_res = {

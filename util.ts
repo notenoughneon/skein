@@ -237,9 +237,15 @@ export async function getWebmentionEndpoint(target) {
         throw new Error('No webmention endpoint');
 }
 
-export async function sendWebmention(source, target): Promise<string> {
+export async function sendWebmention(source, target, opts?): Promise<string> {
     var endpoint = await getWebmentionEndpoint(target);
-    var res = await post({uri:endpoint, form:{source:source, target:target}});
+    var form = {source:source, target:target};
+    if (opts) {
+        for (let key of Object.keys(opts)) {
+            form[key] = opts[key];
+        }
+    }
+    var res = await post({uri:endpoint, form:form});
     var status = res.statusCode;
     if (!(status >= 200 && status <= 299))
         throw new Error(endpoint + ' returned status ' + status);
