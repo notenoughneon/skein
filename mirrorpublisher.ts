@@ -1,3 +1,4 @@
+import stream = require('stream');
 import Publisher from './publisher';
 
 class MirrorPublisher implements Publisher {    
@@ -8,7 +9,19 @@ class MirrorPublisher implements Publisher {
     }
     
     async put(path: string, obj: string | NodeJS.ReadableStream, contentType?: string) {
-        await Promise.all(this.publishers.map(p => p.put(path, obj, contentType)));
+        await Promise.all(this.publishers.map(p => {
+            if (typeof obj === 'string') {
+                return p.put(path, obj, contentType);
+            } else {
+                let clone = new stream.PassThrough();
+                obj.pipe(clone);
+                // work around aws-sdk kludge
+                if (typeof obj.path === 'string') {
+                    clone.path = obj.path;
+                }
+                return p.put(path, clone, contentType);
+            }
+        }));
     }
     
     async delete(path: string, contentType: string) {
