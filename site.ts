@@ -227,7 +227,8 @@ class Site {
                 entry.syndication = entry.syndication.concat(syndications);
                 await this.update(entry);
             }
-            await this.publisher.commit('publish ' + entry.url);
+            await this.publisher.commit(util.truncate('[' + entry.author.name + '] ' + util.collapse(entry.name), 50) +
+            '\n' + entry.url);
             release();
             await this.sendWebmentionsFor(entry);
             return entry;
@@ -435,7 +436,8 @@ class Site {
                 targetEntry.addChild(sourceEntry);
                 var targetHtml = this.renderEntry(targetEntry);
                 await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');
-                await this.publisher.commit('webmention from ' + sourceUrl + ' to ' + targetUrl);
+                await this.publisher.commit(util.truncate('[' + sourceEntry.author.name + '] ' + util.collapse(sourceEntry.name), 50) +
+                '\n' + sourceUrl + ' -> ' + targetUrl);
                 debug('Received webmention from ' + sourceUrl);
             }
         } finally {

@@ -175,6 +175,10 @@ export function truncate(s, len) {
     return s;
 }
 
+export function collapse(s) {
+    return s.replace(/\s+/g, ' ');
+}
+
 export function kebabCase(str) {
     str = str.toLowerCase();
     str = str.replace(/[^a-z0-9 ]/g, ' ');
