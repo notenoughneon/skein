@@ -9,6 +9,7 @@ import jwt = require('jsonwebtoken');
 import nodefn = require('when/node');
 var debug = require('debug')('api');
 import Site = require('./site');
+import posse = require('./posse');
 import util = require('./util');
 
 function parsePost(req, res, next) {
@@ -173,6 +174,13 @@ class Api {
                 debug('Failed token request from ' + req.ip);
                 res.sendStatus(401);
             }
+        });
+        
+        this.router.get('/micropub', this.requireAuth('post'), (req, res) => {
+            if (req['post'].q != 'syndicate-to')
+                return res.sendStatus(400);
+            res.type('application/json');
+            res.send(JSON.stringify({'syndicate-to': posse.targets}));
         });
 
         this.router.post('/micropub', this.requireAuth('post'), (req, res) => {

@@ -3,9 +3,13 @@ import util = require('./util');
 var debug = require('debug')('posse');
 
 var handlers: Map<string, (e: mfo.Entry) => Promise<string>> = new Map();
-    
-handlers.set('twitter.com', bridgyPosseTo('http://brid.gy/publish/twitter'));
-handlers.set('facebook.com', bridgyPosseTo('http://brid.gy/publish/facebook'));
+export var targets = [
+    {uid: 'http://brid.gy/publish/twitter', name: 'twitter (bridgy)'},
+    {uid: 'http://brid.gy/publish/facebook', name: 'facebook (bridgy)'}
+];
+
+handlers.set('http://brid.gy/publish/twitter', bridgyPosseTo('http://brid.gy/publish/twitter'));
+handlers.set('http://brid.gy/publish/facebook', bridgyPosseTo('http://brid.gy/publish/facebook'));
 
 function bridgyPosseTo(publishUrl: string) {
     return async function(entry: mfo.Entry) {
@@ -16,7 +20,7 @@ function bridgyPosseTo(publishUrl: string) {
     }
 }
 
-export = async function posse(entry: mfo.Entry, to: string[]) {
+export async function syndicate(entry: mfo.Entry, to: string[]) {
     var syndications =  await util.map(to, (async (silo) => {
         try {
             return await handlers.get(silo)(entry);

@@ -223,7 +223,7 @@ class Site {
             entry = await microformat.getEntry(html, entry.url);
             await this.update(entry);
             if (syndicateTo) {
-                var syndications = await posse(entry, syndicateTo);
+                var syndications = await posse.syndicate(entry, syndicateTo);
                 entry.syndication = entry.syndication.concat(syndications);
                 await this.update(entry);
             }
