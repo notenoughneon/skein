@@ -9,7 +9,7 @@ handlers.set('facebook.com', bridgyPosseTo('http://brid.gy/publish/facebook'));
 
 function bridgyPosseTo(publishUrl: string) {
     return async function(entry: mfo.Entry) {
-        let res = JSON.parse(await util.sendWebmention(entry.url, publishUrl));
+        let res = JSON.parse(await util.sendWebmention(entry.url, publishUrl, {'bridgy_omit_link': 'maybe'}));
         if (typeof res.url !== 'string')
             throw new Error('Couldnt decode response: ' + res);
         return res.url;
