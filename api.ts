@@ -188,7 +188,7 @@ class Api {
                 audio: req['files'].audio,
                 syndication: req['post'].syndication,
                 category: req['post'].category,
-                syndicateTo: req['post']['mp-syndicate-to']
+                syndicateTo: req['post']['mp-syndicate-to'] != null ? req['post']['mp-syndicate-to'] : req['post']['syndicate-to']
             })
             .then(entry => {
                 res.location(entry.url);
