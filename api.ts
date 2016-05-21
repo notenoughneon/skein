@@ -177,7 +177,7 @@ class Api {
         });
         
         this.router.get('/micropub', this.requireAuth('post'), (req, res) => {
-            if (req['post'].q != 'syndicate-to')
+            if (req.query.q != 'syndicate-to')
                 return res.sendStatus(400);
             res.type('application/json');
             res.send(JSON.stringify({'syndicate-to': posse.targets}));
