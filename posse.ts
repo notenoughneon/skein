@@ -4,12 +4,12 @@ var debug = require('debug')('posse');
 
 var handlers: Map<string, (e: mfo.Entry) => Promise<string>> = new Map();
 export var targets = [
-    {uid: 'http://brid.gy/publish/twitter', name: 'twitter (bridgy)'},
-    {uid: 'http://brid.gy/publish/facebook', name: 'facebook (bridgy)'}
+    {uid: 'https://brid.gy/publish/twitter', name: 'twitter (bridgy)'},
+    {uid: 'https://brid.gy/publish/facebook', name: 'facebook (bridgy)'}
 ];
 
-handlers.set('http://brid.gy/publish/twitter', bridgyPosseTo('http://brid.gy/publish/twitter'));
-handlers.set('http://brid.gy/publish/facebook', bridgyPosseTo('http://brid.gy/publish/facebook'));
+handlers.set('https://brid.gy/publish/twitter', bridgyPosseTo('https://brid.gy/publish/twitter'));
+handlers.set('https://brid.gy/publish/facebook', bridgyPosseTo('https://brid.gy/publish/facebook'));
 
 function bridgyPosseTo(publishUrl: string) {
     return async function(entry: mfo.Entry) {
