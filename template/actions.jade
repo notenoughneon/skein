@@ -1,6 +1,8 @@
 div(class="blog-post-bottom")
     span(class="blog-post-actions") &nbsp;
     span(class="blog-post-syndication")
+        each s in entry.syndicateTo
+            a(class="u-syndicate-to" href=s)
         each category in entry.category
             span
                 | #

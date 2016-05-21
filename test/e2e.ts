@@ -323,7 +323,7 @@ describe('e2e', function() {
     });
     
     it('posse failure (string)', function(done) {
-        var form = { h: 'entry', content: 'Note with invalid posse target (string).', 'mp-syndicate-to': 'bogus.com' };
+        var form = { h: 'entry', content: 'Note with invalid posse target (string).', 'mp-syndicate-to': 'http://bogus.com' };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers })
         .then(res => {
@@ -334,13 +334,14 @@ describe('e2e', function() {
             assert.equal(e.name, form.content);
             assert.equal(e.content.value, form.content);
             assert.deepEqual(e.syndication, []);
+            assert.deepEqual(e.syndicateTo, ['http://bogus.com'])
         })
         .then(done)
         .catch(done);
     });
     
     it('posse failure (array)', function(done) {
-        var form = { h: 'entry', content: 'Note with invalid posse target (array).', 'mp-syndicate-to': ['bogus.com', 'example.com'] };
+        var form = { h: 'entry', content: 'Note with invalid posse target (array).', 'mp-syndicate-to': ['http://bogus.com', 'http://example.com'] };
         var headers = { Authorization: 'bearer ' + token };
         post({ url: config.micropubUrl, form: form, headers: headers, qsStringifyOptions: { arrayFormat: 'brackets' } })
         .then(res => {
@@ -351,6 +352,7 @@ describe('e2e', function() {
             assert.equal(e.name, form.content);
             assert.equal(e.content.value, form.content);
             assert.deepEqual(e.syndication, []);
+            assert.deepEqual(e.syndicateTo, ['http://bogus.com', 'http://example.com'])
         })
         .then(done)
         .catch(done);

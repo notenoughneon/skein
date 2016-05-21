@@ -191,9 +191,9 @@ class Site {
             if (m.syndicateTo != null) {
                 var s = m.syndicateTo;
                 if (typeof s === 'string')
-                    var syndicateTo = [s];
+                    entry.syndicateTo = [s];
                 else if (typeof s === 'object')
-                    var syndicateTo = s;
+                    entry.syndicateTo = s;
             }
             if (m.photo != null) {
                 entry.content.html = '<div class="thumbnail"><img class="u-photo" src="' + m.photo.filename + '"/>' +
@@ -222,8 +222,8 @@ class Site {
             var html = this.renderEntry(entry);
             entry = await microformat.getEntry(html, entry.url);
             await this.update(entry);
-            if (syndicateTo) {
-                var syndications = await posse.syndicate(entry, syndicateTo);
+            if (entry.syndicateTo != null) {
+                var syndications = await posse.syndicate(entry);
                 entry.syndication = entry.syndication.concat(syndications);
                 await this.update(entry);
             }

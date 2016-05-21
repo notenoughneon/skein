@@ -20,8 +20,8 @@ function bridgyPosseTo(publishUrl: string) {
     }
 }
 
-export async function syndicate(entry: mfo.Entry, to: string[]) {
-    var syndications =  await util.map(to, (async (silo) => {
+export async function syndicate(entry: mfo.Entry) {
+    var syndications =  await util.map(entry.syndicateTo, (async (silo) => {
         try {
             return await handlers.get(silo)(entry);
         } catch (err) {
