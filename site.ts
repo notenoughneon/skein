@@ -334,7 +334,7 @@ class Site {
     
     hiddenFilter = e => !e.category.some(c => c === 'hidden');
     mainFilter = e => !e.isReply() && !e.isLike();
-    replyFilter = e => e.isReply();
+    replyFilter = e => e.isReply() || e.isLike();
     articleFilter = e => e.isArticle();
     
     getArticles() {
