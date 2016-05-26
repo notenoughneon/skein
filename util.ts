@@ -160,6 +160,8 @@ export function inferMimetype(filename) {
             return 'image/gif';
         case '.png':
             return 'image/png';
+        case '.svg':
+            return 'image/svg+xml';
         case '.mp3':
             return 'audio/mpeg';
         case '.ogg':
