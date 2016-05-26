@@ -5,6 +5,7 @@ import http = require('http');
 import https = require('https');
 import Site = require('./site');
 import Api = require('./api');
+import mfo = require('mf-obj');
 
 var app = express();
 var configFile = process.argv[2];
@@ -33,5 +34,8 @@ if (config.keyFile != null && config.certFile != null) {
 
 server.listen(config.port);
 
-if (process.argv[3] == '-i')
-    repl.start('> ').context.site = site;
+if (process.argv[3] == '-i') {
+    var replserver = repl.start('> ');
+    replserver.context.site = site;
+    replserver.context.mfo = mfo;
+}
