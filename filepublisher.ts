@@ -55,8 +55,9 @@ class FilePublisher implements Publisher {
     }
 
     list() {
-        return util.walkDir(this.root).
-            then(paths => paths.map(p => pathlib.relative(this.root, p)));
+        return util.walkDir(this.root)
+        .then(paths => paths.map(p => pathlib.relative(this.root, p)))
+        .then(paths => paths.filter(p => p !== 'log.txt'));
     }
 
     rollback(): Promise<void> {

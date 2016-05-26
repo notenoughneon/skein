@@ -251,7 +251,7 @@ class Site {
     async scan() {
         var keys = await this.publisher.list();
         var entries: Map<string, microformat.Entry> = new Map();
-        var re = /^(index|js|css|tags|articles|\.git|log.txt)/;
+        var re = /^(index|js|css|tags|articles|replies)/;
         keys = keys.filter(k => !re.test(k));
         await Promise.all(keys.map( async (key) => {
             let obj = await this.publisher.get(key);
@@ -266,6 +266,7 @@ class Site {
                 } catch (err) {}
             }
         }));
+        debug('Done scanning');
         this.entries = entries;
     }
 
