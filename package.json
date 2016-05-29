@@ -18,7 +18,7 @@
     "jade": "^1.11.0",
     "jsonwebtoken": "^5.7.0",
     "mf-obj": "^1.3.0",
-    "microformat-node": "^1.2.0",
+    "microformat-node": "^2.0.0",
     "request": "^2.71.0",
     "when": "^3.7.7"
   },
