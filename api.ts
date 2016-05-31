@@ -111,8 +111,12 @@ class Api {
         this.router.use(logger);
 
         this.router.get('/auth', (req, res) => {
-            if (req.query.response_type == null)
-                req.query.response_type = 'id';
+            if (req.query.response_type == null) {
+                if (req.query.scope != null)
+                    req.query.response_type = 'code';
+                else
+                    req.query.response_type = 'id';
+            }
             if (req.query.client_id == null || req.query.me == null ||
                 req.query.redirect_uri == null || req.query.state == null ||
                 (req.query.response_type !== 'id' && req.query.response_type !== 'code') ||
