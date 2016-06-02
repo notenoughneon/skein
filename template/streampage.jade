@@ -12,6 +12,7 @@ block navbar
 
 block content
     div(class="h-feed")
+        a(class="u-author" href="/")
         each entry in entries
             include ./streamentry
         ul(class="pager")
@@ -27,7 +28,7 @@ block sidebar
         h4 About
         div(class="h-card")
             img(class="u-photo" src=site.config.author.photo)
-            a(class="p-name u-url" rel="me" href=site.config.url)= site.config.author.name
+            a(class="p-name u-url u-uid" rel="me" href=site.config.url)= site.config.author.name
             p(class="p-note")= site.config.author.note
     div(class="sidebar-module")
         h4 Recent articles
