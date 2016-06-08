@@ -9,7 +9,7 @@
 
 Indieweb static site generator
 
-Skein is a static site generator that hosts [micropub](http://micropub.net/draft/) and [webmention](http://webmention.net/draft/) endpoints. It implements the [PURL](http://notenoughneon.com/2016/5/29/purl-a-portable-content-store) pattern to reuse the published HTML + microformats as its own content store. The back-end is modular, and can publish static content to Amazon S3, Github, or local filesystem (for serving with the built in web server).
+Skein is a static site generator that hosts [micropub](http://micropub.net/draft/) and [webmention](http://webmention.net/draft/) endpoints. It implements the [PURR](http://notenoughneon.com/2016/5/29/purl-a-portable-content-store) pattern to reuse the published HTML + microformats as its own content store. The back-end is modular, and can publish static content to Amazon S3, Github, or local filesystem (for serving with the built in web server).
 
 ## Usage
 
