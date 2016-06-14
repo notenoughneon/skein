@@ -91,7 +91,12 @@ function denyAccess(req, res) {
     res.sendStatus(401);
 }
 
-function handleError(res, error) {
+function badRequest(res, message) {
+    debug('Bad request: ' + message);
+    res.status(400).send('Bad request: ' + message);
+}
+
+function serverError(res, error) {
     debug('Server error: ' + error);
     res.sendStatus(500);
 }
@@ -160,7 +165,7 @@ class Api {
                     debug('Failed password authentication from ' + req.ip);
                     res.sendStatus(401);
                 }
-            } catch (e) {handleError(res, e)};
+            } catch (e) {serverError(res, e)};
 
         });
 
@@ -206,17 +211,17 @@ class Api {
                 res.location(entry.url);
                 res.sendStatus(201);
             })
-            .catch(e => handleError(res, e));
+            .catch(e => serverError(res, e));
         });
 
         this.router.post('/webmention', rateLimit(50, 1000 * 60 * 60), (req, res) => {
             var source = req['post'].source;
             var target = req['post'].target;
             if (source === undefined || target === undefined)
-                return res.status(400).send('"source" and "target" parameters are required');
+                return badRequest(res, '"source" and "target" parameters are required');
             site.receiveWebmention(source, target)
             .then(() => res.sendStatus(200))
-            .catch(e => handleError(res, e));
+            .catch(e => e instanceof util.BadRequest ? badRequest(res, e.message) :  serverError(res, e));
         });
 
     }

@@ -426,14 +426,19 @@ class Site {
     async receiveWebmention(sourceUrl: string, targetUrl: string) {
         try {
             var release = await this.mutex.lock();
-            if (url.parse(targetUrl).host != url.parse(this.config.url).host)
-                throw new Error("Target URL " + targetUrl + " doesn't match " + this.config.url);
-            var sourceHtml = await util.getPage(sourceUrl);
-            if (!util.isMentionOf(sourceHtml, targetUrl)) {
-                throw new Error('Didn\'t find mention on source page');
-            } else {
+            try {
                 var targetEntry = this.get(targetUrl);
-                var sourceEntry = await microformat.getEntry(sourceHtml, sourceUrl);
+            } catch (err) {
+                throw new util.BadRequest('Target ' + targetUrl + ' not found');
+            }
+            try {
+                var sourceEntry = await microformat.getEntryFromUrl(sourceUrl);
+            } catch (err) {
+                throw new util.BadRequest('Source ' + sourceUrl + ' not found');
+            }
+            if (!sourceEntry.getMentions().some(m => m === targetUrl)) {
+                throw new util.BadRequest('Link to target ' + targetUrl + ' not found');
+            } else {
                 targetEntry.addChild(sourceEntry);
                 var targetHtml = this.renderEntry(targetEntry);
                 await this.publisher.put(url.parse(targetEntry.url).pathname, targetHtml, 'text/html');

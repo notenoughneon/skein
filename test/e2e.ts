@@ -12,7 +12,6 @@ import child_process = require('child_process');
 import util = require('../util');
 import Debug = require('debug');
 var debug = Debug('e2e');
-import microformat = require('../microformat');
 
 var get = util.promisify(Request.get);
 var post = util.promisify(Request.post);
@@ -550,6 +549,30 @@ describe('e2e', function() {
             assert.equal(e.replyTo.url, 'http://localhost:8000/event.html');
             assert.equal(e.replyTo.name, 'Indieweb Summit');
         })
+        .then(done)
+        .catch(done);
+    });
+
+    it('webmention to invalid target returns 400', function(done) {
+        var form = {source: testNote.url, target: config.url};
+        post({url: config.webmentionUrl, form: form})
+        .then(res => assert.equal(res.statusCode, 400))
+        .then(done)
+        .catch(done);
+    });
+
+    it('webmention from nonexistent source returns 400', function(done) {
+        var form = {source: 'http://localhost:8000/nonexist', target: testNote.url};
+        post({url: config.webmentionUrl, form: form})
+        .then(res => assert.equal(res.statusCode, 400))
+        .then(done)
+        .catch(done);
+    });
+
+    it('webmention with no mention on source returns 400', function(done) {
+        var form = {source: testNote.url, target: testReply.url};
+        post({url: config.webmentionUrl, form: form})
+        .then(res => assert.equal(res.statusCode, 400))
         .then(done)
         .catch(done);
     });

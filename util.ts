@@ -310,3 +310,9 @@ export class Mutex extends Semaphore {
         super(1);
     }
 }
+
+export class BadRequest extends Error {
+    constructor(msg: string) {
+        super(msg);
+    }
+}
