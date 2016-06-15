@@ -98,14 +98,6 @@ class Site {
         }
     }
     
-    getPathForIndex(page) {
-        return '/index' + (page == 1 ? '' : page);
-    }
-
-    getPathForTag(category) {
-        return '/tags/' + util.kebabCase(category);
-    }
-
     formatDate(date) {
         var month = ["Jan","Feb","Mar","Apr","May","Jun",
             "Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -285,6 +277,14 @@ class Site {
         this.entries.delete(entry.url);
         debug('Deleted ' + entry.getPath());
         await this.generateStreams();
+    }
+
+    getPathForIndex(page) {
+        return 'index' + (page == 1 ? '' : page);
+    }
+
+    getPathForTag(category) {
+        return '/tags/' + util.kebabCase(category);
     }
 
     async _generateStream(entries: microformat.Entry[], page: number, total: number) {

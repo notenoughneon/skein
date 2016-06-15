@@ -473,7 +473,7 @@ describe('e2e', function() {
         .then(done)
         .catch(done);
     });
-    
+
     var testLike;
     it('post like via micropub', function(done) {
         var form = { h: 'entry', 'like-of': testNote.url };
@@ -517,6 +517,22 @@ describe('e2e', function() {
             assert(e.getChildren()[2].url === testRepost.url);
         })
         .then(done)
+        .catch(done);
+    });
+
+    it('reply stress test', function(done) {
+        this.timeout(0);
+        var headers = { Authorization: 'bearer ' + token };
+        var elts = util.range(1, 10);
+        Promise.all(elts.map(elt => {
+            let form = { h: 'entry', content: 'Reply stress test post ' + elt, 'in-reply-to': testNote.url };
+            return post({ url: config.micropubUrl, form: form, headers: headers })
+            .then(res => {
+                assert(res.statusCode === 201);
+                debug('Done ' + res.headers.location);
+            });
+        }))
+        .then(() => done())
         .catch(done);
     });
     
@@ -589,7 +605,7 @@ describe('e2e', function() {
             return site.get(testNote.url);
         })
         .then(e => {
-            assert(e.getChildren().length === 3);
+            assert(e.getChildren().length === 13);
         })
         .then(done)
         .catch(done);
