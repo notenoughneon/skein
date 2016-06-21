@@ -461,8 +461,8 @@ describe('e2e', function() {
         .then(e => {
             testReply = e;
             assert(e.name === form.content);
-            assert(e.replyTo.url === testNote.url);
-            assert(e.replyTo.name === testNote.name);
+            assert(e.replyTo[0].url === testNote.url);
+            assert(e.replyTo[0].name === testNote.name);
             return site.get(testNote.url);
         })
         .then(e => {
@@ -485,8 +485,8 @@ describe('e2e', function() {
         })
         .then(e => {
             testLike = e;
-            assert(e.likeOf.url === testNote.url);
-            assert(e.likeOf.name === testNote.name);
+            assert(e.likeOf[0].url === testNote.url);
+            assert(e.likeOf[0].name === testNote.name);
             return site.get(testNote.url);
         })
         .then(e => {
@@ -508,8 +508,8 @@ describe('e2e', function() {
         })
         .then(e => {
             testRepost = e;
-            assert(e.repostOf.url === testNote.url);
-            assert(e.repostOf.name === testNote.name);
+            assert(e.repostOf[0].url === testNote.url);
+            assert(e.repostOf[0].name === testNote.name);
             return site.get(testNote.url);
         })
         .then(e => {
@@ -562,8 +562,8 @@ describe('e2e', function() {
             return site.get(res.headers.location);
         })
         .then(e => {
-            assert.equal(e.replyTo.url, 'http://localhost:8000/event.html');
-            assert.equal(e.replyTo.name, 'Indieweb Summit');
+            assert.equal(e.replyTo[0].url, 'http://localhost:8000/event.html');
+            assert.equal(e.replyTo[0].name, 'Indieweb Summit');
         })
         .then(done)
         .catch(done);

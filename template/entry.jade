@@ -1,9 +1,9 @@
 include ./cite
 div(class="h-entry")
-    if entry.isReply()
+    each reply in entry.replyTo
         i(class="fa fa-reply")
         |  In reply to:
-        +cite(entry.replyTo, ' p-in-reply-to')
+        +cite(reply, ' p-in-reply-to')
 
     if entry.isLike()
         i(class="fa fa-star")

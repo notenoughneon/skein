@@ -3,7 +3,7 @@ import url = require('url');
 import path = require('path');
 var debug = require('debug')('site');
 import util = require('./util');
-import microformat = require('mf-obj');
+import mfo = require('mf-obj');
 import Publisher from './publisher';
 import oembed = require('./oembed');
 import posse = require('./posse');
@@ -73,7 +73,7 @@ class Site {
     config: SiteConfig;
     publisher: Publisher;
     mutex: util.Mutex;
-    entries: Map<string, microformat.Entry>;
+    entries: Map<string, mfo.Entry>;
 
     constructor(config: SiteConfig) {
         this.config = config;
@@ -117,26 +117,26 @@ class Site {
     }
 
     getAuthor() {
-        var card = new microformat.Card();
+        var card = new mfo.Card();
         card.url = this.config.url;
         card.name = this.config.author.name;
         card.photo = this.config.author.photo;
         return card;
     }
 
-    renderEntry(entry: microformat.Entry) {
+    renderEntry(entry: mfo.Entry) {
         return _renderEntry({
             site: this,
             entry: entry,
             util: util,
-            microformat: microformat
+            microformat: mfo
         });
     }
 
     async publish(m: Micropub) {
         try {
             var release = await this.mutex.lock();
-            var entry = new microformat.Entry();
+            var entry = new mfo.Entry();
             entry.author = this.getAuthor();
             // workaround: type guards dont work with properties
             // https://github.com/Microsoft/TypeScript/issues/3812
@@ -159,13 +159,13 @@ class Site {
             entry.published = new Date();
             var slug = await this.getSlug(m.name, entry.published);
             entry.url = this.config.url + slug;
-            var options: microformat.Options = {strategies: ['entry', 'event', 'oembed']};
+            var strategies: mfo.EntryStrategy[] = ['entry', 'event', 'oembed'];
             if (m.replyTo != null)
-                entry.replyTo = await microformat.getEntryFromUrl(m.replyTo, options);
+                entry.replyTo = [await mfo.getEntry(m.replyTo, strategies)];
             if (m.likeOf != null)
-                entry.likeOf = await microformat.getEntryFromUrl(m.likeOf, options);
+                entry.likeOf = [await mfo.getEntry(m.likeOf, strategies)];
             if (m.repostOf != null)
-                entry.repostOf = await microformat.getEntryFromUrl(m.repostOf, options);
+                entry.repostOf = [await mfo.getEntry(m.repostOf, strategies)];
             if (m.category != null) {
                 let category = m.category;
                 if (typeof category === 'string')
@@ -212,7 +212,7 @@ class Site {
             //ISSUE: some properties may be embedded mf in the content (e.g. summary)
             //so we render and then re-parse it to get all properties
             var html = this.renderEntry(entry);
-            entry = await microformat.getEntry(html, entry.url);
+            entry = await mfo.getEntryFromHtml(html, entry.url);
             await this.update(entry);
             if (entry.syndicateTo != null) {
                 var syndications = await posse.syndicate(entry);
@@ -242,7 +242,7 @@ class Site {
 
     async scan() {
         var keys = await this.publisher.list();
-        var entries: Map<string, microformat.Entry> = new Map();
+        var entries: Map<string, mfo.Entry> = new Map();
         var re = /^(index|js|css|tags|articles|replies)/;
         keys = keys.filter(k => !re.test(k));
         await Promise.all(keys.map( async (key) => {
@@ -251,7 +251,7 @@ class Site {
             if (obj.ContentType === 'text/html') {
                 let u = url.resolve(this.config.url, key);
                 try {
-                    let entry = await microformat.getEntry(obj.Body, u);
+                    let entry = await mfo.getEntryFromHtml(obj.Body, u);
                     if (entry != null && (entry.url === u || entry.url + '.html' === u)) {
                         entries.set(entry.url, entry);
                     }
@@ -262,7 +262,7 @@ class Site {
         this.entries = entries;
     }
 
-    async update(entry: microformat.Entry) {
+    async update(entry: mfo.Entry) {
         var html = this.renderEntry(entry);
         await this.publisher.put(entry.getPath(), html, 'text/html');
         this.entries.set(entry.url, entry);
@@ -287,7 +287,7 @@ class Site {
         return '/tags/' + util.kebabCase(category);
     }
 
-    async _generateStream(entries: microformat.Entry[], page: number, total: number) {
+    async _generateStream(entries: mfo.Entry[], page: number, total: number) {
         let html = _renderStream({
             site: this,
             entries: entries,
@@ -300,7 +300,7 @@ class Site {
         debug('Published ' + file);
     }
 
-    async _generateReplyStream(entries: microformat.Entry[], page: number, total: number) {
+    async _generateReplyStream(entries: mfo.Entry[], page: number, total: number) {
         let html = _renderReplyStream({
             site: this,
             entries: entries,
@@ -313,7 +313,7 @@ class Site {
         debug('Published ' + file);
     }
 
-    async _generateIndex(entries: microformat.Entry[], category: string, path: string) {
+    async _generateIndex(entries: mfo.Entry[], category: string, path: string) {
         var html = _renderIndex({
             site: this,
             category: category,
@@ -340,13 +340,13 @@ class Site {
     
     getArticles() {
         var entries = this.getAll().filter(this.articleFilter).filter(this.hiddenFilter);
-        entries.sort(microformat.Entry.byDateDesc);
+        entries.sort(mfo.Entry.byDateDesc);
         return entries;
     }
 
     async generateStreams() {
         var entries = this.getAll();
-        entries.sort(microformat.Entry.byDateDesc);
+        entries.sort(mfo.Entry.byDateDesc);
         // main stream
         var limit = this.config.entriesPerPage;
         var chunks = util.chunk(limit, entries.filter(this.mainFilter).filter(this.hiddenFilter));
@@ -372,7 +372,7 @@ class Site {
     
     async generateAll() {
         var entries = this.getAll();
-        entries.sort(microformat.Entry.byDateDesc);
+        entries.sort(mfo.Entry.byDateDesc);
         // entries
         await util.map(entries, async (entry) => {
             let html = this.renderEntry(entry);
@@ -384,7 +384,7 @@ class Site {
     }
 
     async validate() {
-        var failures: {key: string, expected: microformat.Entry, actual: microformat.Entry}[] = [];
+        var failures: {key: string, expected: mfo.Entry, actual: mfo.Entry}[] = [];
         var keys = await this.publisher.list();
         for (let key of keys) {
             try {
@@ -393,12 +393,12 @@ class Site {
                 if (obj.ContentType == 'text/html') {
                     var isEntry = false;
                     try {                       
-                        var expected = await microformat.getEntry(obj.Body, u);
+                        var expected = await mfo.getEntryFromHtml(obj.Body, u);
                         isEntry = true;
                     } catch (e) {}
                     if (isEntry && (expected.url === u || expected.url + '.html' === u)) {
                         let html = this.renderEntry(expected);
-                        var actual = await microformat.getEntry(html, expected.url);
+                        var actual = await mfo.getEntry(html, expected.url);
                         assert.deepEqual(actual, expected);
                         debug('pass ' + expected.url);
                     }
@@ -412,7 +412,7 @@ class Site {
         return failures;
     }
 
-    async sendWebmentionsFor(entry: microformat.Entry) {
+    async sendWebmentionsFor(entry: mfo.Entry) {
         await util.map(entry.getMentions(), async (link) => {
             try {
                 await util.sendWebmention(entry.url, link);
@@ -432,7 +432,7 @@ class Site {
                 throw new util.BadRequest('Target ' + targetUrl + ' not found');
             }
             try {
-                var sourceEntry = await microformat.getEntryFromUrl(sourceUrl);
+                var sourceEntry = await mfo.getEntry(sourceUrl);
             } catch (err) {
                 throw new util.BadRequest('Source ' + sourceUrl + ' not found');
             }
