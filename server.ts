@@ -36,6 +36,7 @@ server.listen(config.port);
 
 if (process.argv[3] == '-i') {
     var replserver = repl.start('> ');
+    replserver.context.api = api;
     replserver.context.site = site;
     replserver.context.mfo = mfo;
 }
