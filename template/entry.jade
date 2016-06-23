@@ -36,10 +36,10 @@ div(class="h-entry")
                 div(class=contentClass)!= entry.content.html
             else if entry.name != null
                 div(class="p-name")= entry.name
-        if entry.isLike()
-            +cite(entry.likeOf, ' p-like-of')
-        if entry.isRepost()
-            +cite(entry.repostOf, ' p-repost-of')
+        each like in entry.likeOf
+            +cite(like, ' p-like-of')
+        each repost in entry.repostOf
+            +cite(repost, ' p-repost-of')
         if entry.embed != null
             div(class="e-x-embed")!= entry.embed.html
         include ./actions

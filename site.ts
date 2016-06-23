@@ -398,7 +398,7 @@ class Site {
                     } catch (e) {}
                     if (isEntry && (expected.url === u || expected.url + '.html' === u)) {
                         let html = this.renderEntry(expected);
-                        var actual = await mfo.getEntry(html, expected.url);
+                        var actual = await mfo.getEntryFromHtml(html, expected.url);
                         assert.deepEqual(actual, expected);
                         debug('pass ' + expected.url);
                     }

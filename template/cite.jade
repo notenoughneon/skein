@@ -1,11 +1,11 @@
 mixin cite(entry, rootClass)
     div(class="h-cite" + rootClass)
-        if entry.isReply()
-            a(class="u-in-reply-to" href=entry.replyTo.url)
-        if entry.isLike()
-            a(class="u-like-of" href=entry.likeOf.url)
-        if entry.isRepost()
-            a(class="u-repost-of" href=entry.repostOf.url)
+        each reply in entry.replyTo
+            a(class="u-in-reply-to" href=reply.url)
+        each like in entry.likeOf
+            a(class="u-like-of" href=like.url)
+        each repost in entry.repostOf
+            a(class="u-repost-of" href=repost.url)
 
         if entry.isLike()
             i(class="fa fa-star")

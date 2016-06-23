@@ -1,10 +1,10 @@
 include ./cite
 div(class="h-entry")
 
-    if entry.isReply()
+    each reply in entry.replyTo
         i(class="fa fa-reply")
         |  In reply to 
-        a(class="u-in-reply-to" href=entry.replyTo.url)= util.truncate(entry.replyTo.name, 70)
+        a(class="u-in-reply-to" href=reply.url)= util.truncate(reply.name, 70)
 
     if entry.isLike()
         i(class="fa fa-star")
@@ -39,10 +39,10 @@ div(class="h-entry")
             else
                 - var contentClass = "e-content" + (entry.isArticle() ? '' : ' p-name');
                 div(class=contentClass)!= entry.content.html
-        if entry.isLike()
-            +cite(entry.likeOf, ' p-like-of')
-        if entry.isRepost()
-            +cite(entry.repostOf, ' p-repost-of')
+        each like in entry.likeOf
+            +cite(like, ' p-like-of')
+        each repost in entry.repostOf
+            +cite(repost, ' p-repost-of')
         if entry.embed != null
             div(class="e-x-embed")!= entry.embed.html
         include ./actions
