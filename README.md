@@ -29,14 +29,13 @@ Skein isn't production ready, but if you want to try it out, this will get you s
 git clone https://github.com/notenoughneon/skein.git
 cd skein
 npm install
-typings install
-tsc
+npm run build
 ```
 
 This will run the typescript compiler and build the javascript files. You can ignore the warnings. Next run the e2e test with:
 
 ```
-mocha build/test/e2e
+node_modules/.bin/mocha build/test/e2e
 ```
 
 This will populate an example site under build/test/static. You can run a server hosting these files with:
